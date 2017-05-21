@@ -20,12 +20,12 @@ static void ILI9341_SPI_Send(uint8_t data)
 
 void ILI9341_Init(void)
 {
-    ILI9341_DC_OUT;
-    ILI9341_RST_OUT;
-    ILI9341_LED_OUT;
+    OUT(ILI9341_DC);
+    OUT(ILI9341_RST);
+    OUT(ILI9341_LED);
 
-    ILI9341_CS_RESET;
-    ILI9341_LED_SET;
+    CLR(ILI9341_CS);
+    SET(ILI9341_LED);
 
     ILI9341_SPI_Init();
     ILI9341_InitLCD();
@@ -41,9 +41,9 @@ void ILI9341_Init(void)
 
 void ILI9341_SPI_Init(void)
 {
-    ILI9341_SDI_OUT;
-    ILI9341_SCK_OUT;
-    ILI9341_CS_OUT;
+    OUT(ILI9341_SDI);
+    OUT(ILI9341_SCK);
+    OUT(ILI9341_CS);
 
     // Configure Hardware SPI
     SPCR = (1 << SPE) | (1 << MSTR);
@@ -55,7 +55,7 @@ void ILI9341_SPI_Init(void)
 
 void ILI9341_SendCmd(uint8_t cmd)
 {
-    ILI9341_DC_RESET;
+    CLR(ILI9341_DC);
 
     ILI9341_SPI_Send(cmd);
 
@@ -64,7 +64,7 @@ void ILI9341_SendCmd(uint8_t cmd)
 
 void ILI9341_SendData(uint8_t data)
 {
-    ILI9341_DC_SET;
+    SET(ILI9341_DC);
 
     ILI9341_SPI_Send(data);
 
@@ -73,9 +73,9 @@ void ILI9341_SendData(uint8_t data)
 
 void ILI9341_InitLCD(void)
 {
-    ILI9341_RST_RESET;
+    CLR(ILI9341_RST);
     _delay_ms(10);
-    ILI9341_RST_SET;
+    SET(ILI9341_RST);
     _delay_ms(10);
 
     ILI9341_SendCmd(ILI9341_SWRESET);
