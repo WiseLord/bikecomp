@@ -2,24 +2,176 @@
 
 #include <util/delay.h>
 
-static uint16_t ili9341_x;
-static uint16_t ili9341_y;
-
 LCD_Options ILI9341_Opts;
 
-static void ILI9341_SPI_Send(uint8_t data)
+static void inline __attribute__((always_inline)) ili9341SendSPI(uint8_t data)
 {
     // Fill output buffer with data
     SPDR = data;
 
     // Wait for transmission to complete
     while (!(SPSR & (1 << SPIF)));
-
-    return;
 }
 
-void ILI9341_Init(void)
+static void ili9341WriteData(uint8_t data)
 {
+    SET(ILI9341_DC);
+    CLR(ILI9341_CS);
+    ili9341SendSPI(data);
+    SET(ILI9341_CS);
+}
+
+static void ili9341SendCmd(uint8_t cmd)
+{
+    CLR(ILI9341_DC);
+    CLR(ILI9341_CS);
+    ili9341SendSPI(cmd);
+    SET(ILI9341_CS);
+}
+
+static void ili9341SendData(uint16_t data)
+{
+    uint8_t dataH = data >> 8;
+    uint8_t dataL = data & 0xFF;
+
+    SET(ILI9341_DC);
+    CLR(ILI9341_CS);
+    ili9341SendSPI(dataH);
+    ili9341SendSPI(dataL);
+    SET(ILI9341_CS);
+}
+
+static void ili9341InitSeq(void)
+{
+    CLR(ILI9341_RST);
+    _delay_ms(10);
+    SET(ILI9341_RST);
+    _delay_ms(10);
+
+    ili9341SendCmd(ILI9341_SWRESET);
+    _delay_ms(10);
+
+    ili9341SendCmd(ILI9341_PWCTRLA);
+    ili9341WriteData(0x39);
+    ili9341WriteData(0x2C);
+    ili9341WriteData(0x00);
+    ili9341WriteData(0x34);
+    ili9341WriteData(0x02);
+
+    ili9341SendCmd(ILI9341_PWCTRLB);
+    ili9341WriteData(0x00);
+    ili9341WriteData(0xC1);
+    ili9341WriteData(0x30);
+
+    ili9341SendCmd(ILI9341_DRVTIMCTLA1);
+    ili9341WriteData(0x85);
+    ili9341WriteData(0x00);
+    ili9341WriteData(0x78);
+
+    ili9341SendCmd(ILI9341_DRVTIMB);
+    ili9341WriteData(0x00);
+    ili9341WriteData(0x00);
+
+    ili9341SendCmd(ILI9341_PWSEQCTL);
+    ili9341WriteData(0x64);
+    ili9341WriteData(0x03);
+    ili9341WriteData(0x12);
+    ili9341WriteData(0x81);
+
+    ili9341SendCmd(ILI9341_PUMPRTCTL);
+    ili9341WriteData(0x20);
+
+    ili9341SendCmd(ILI9341_PWCTRL1);
+    ili9341WriteData(0x23);
+
+    ili9341SendCmd(ILI9341_PWCTRL2);
+    ili9341WriteData(0x10);
+
+    ili9341SendCmd(ILI9341_VMCTRL1);
+    ili9341WriteData(0x3E);
+    ili9341WriteData(0x28);
+
+    ili9341SendCmd(ILI9341_VMCTRL2);
+    ili9341WriteData(0x86);
+
+    ili9341SendCmd(ILI9341_MADCTL);
+    ili9341WriteData(0x48);
+
+    ili9341SendCmd(ILI9341_PIXSET);
+    ili9341WriteData(0x55);
+
+    ili9341SendCmd(ILI9341_FRMCTR1);
+    ili9341WriteData(0x00);
+    ili9341WriteData(0x18);
+
+    ili9341SendCmd(ILI9341_DISCTRL);
+    ili9341WriteData(0x08);
+    ili9341WriteData(0x82);
+    ili9341WriteData(0x27);
+
+    ili9341SendCmd(ILI9341_EN3G);
+    ili9341WriteData(0x00);
+
+    ili9341SendCmd(ILI9341_GAMSET);
+    ili9341WriteData(0x01);
+
+    ili9341SendCmd(ILI9341_PGAMCTRL);
+    ili9341WriteData(0x0F);
+    ili9341WriteData(0x31);
+    ili9341WriteData(0x2B);
+    ili9341WriteData(0x0C);
+    ili9341WriteData(0x0E);
+    ili9341WriteData(0x08);
+    ili9341WriteData(0x4E);
+    ili9341WriteData(0xF1);
+    ili9341WriteData(0x37);
+    ili9341WriteData(0x07);
+    ili9341WriteData(0x10);
+    ili9341WriteData(0x03);
+    ili9341WriteData(0x0E);
+    ili9341WriteData(0x09);
+    ili9341WriteData(0x00);
+
+    ili9341SendCmd(ILI9341_NGAMCTRL);
+    ili9341WriteData(0x00);
+    ili9341WriteData(0x0E);
+    ili9341WriteData(0x14);
+    ili9341WriteData(0x03);
+    ili9341WriteData(0x11);
+    ili9341WriteData(0x07);
+    ili9341WriteData(0x31);
+    ili9341WriteData(0xC1);
+    ili9341WriteData(0x48);
+    ili9341WriteData(0x08);
+    ili9341WriteData(0x0F);
+    ili9341WriteData(0x0C);
+    ili9341WriteData(0x31);
+    ili9341WriteData(0x36);
+    ili9341WriteData(0x0F);
+
+    _delay_ms(150);
+    ili9341SendCmd(ILI9341_SLPOUT);
+    _delay_ms(10);
+
+    ili9341SendCmd(ILI9341_DISPON);
+}
+
+static void ili9341SetWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
+{
+    ili9341SendCmd(ILI9341_CASET);
+    ili9341SendData(x0);
+    ili9341SendData(x1);
+
+    ili9341SendCmd(ILI9341_PASET);
+    ili9341SendData(y0);
+    ili9341SendData(y1);
+
+    ili9341SendCmd(ILI9341_RAMWR);
+}
+
+void ili9341Init(void)
+{
+    // Non-SPI pins
     OUT(ILI9341_DC);
     OUT(ILI9341_RST);
     OUT(ILI9341_LED);
@@ -27,20 +179,7 @@ void ILI9341_Init(void)
     CLR(ILI9341_CS);
     SET(ILI9341_LED);
 
-    ILI9341_SPI_Init();
-    ILI9341_InitLCD();
-
-    ili9341_x = ili9341_y = 0;
-
-    ILI9341_Opts.width = ILI9341_WIDTH;
-    ILI9341_Opts.height = ILI9341_HEIGHT;
-    ILI9341_Opts.orientation = LCD_Orientation_Portrait_1;
-
-    return;
-}
-
-void ILI9341_SPI_Init(void)
-{
+    // SPI pins
     OUT(ILI9341_SDI);
     OUT(ILI9341_SCK);
     OUT(ILI9341_CS);
@@ -49,235 +188,52 @@ void ILI9341_SPI_Init(void)
     SPCR = (1 << SPE) | (1 << MSTR);
     SPSR = (1 << SPI2X);
 
-    return;
+    // Init magic
+    ili9341InitSeq();
+
+    // Set display orientation and size
+    ili9341Rotate(LCD_Orientation_Landscape_1);
 }
 
-
-void ILI9341_SendCmd(uint8_t cmd)
+void ili9341Rotate(LCD_Orientation orientation)
 {
-    CLR(ILI9341_DC);
-
-    ILI9341_SPI_Send(cmd);
-
-    return;
-}
-
-void ILI9341_SendData(uint8_t data)
-{
-    SET(ILI9341_DC);
-
-    ILI9341_SPI_Send(data);
-
-    return;
-}
-
-void ILI9341_InitLCD(void)
-{
-    CLR(ILI9341_RST);
-    _delay_ms(10);
-    SET(ILI9341_RST);
-    _delay_ms(10);
-
-    ILI9341_SendCmd(ILI9341_SWRESET);
-    _delay_ms(10);
-
-    ILI9341_SendCmd(ILI9341_PWCTRLA);
-    ILI9341_SendData(0x39);
-    ILI9341_SendData(0x2C);
-    ILI9341_SendData(0x00);
-    ILI9341_SendData(0x34);
-    ILI9341_SendData(0x02);
-
-    ILI9341_SendCmd(ILI9341_PWCTRLB);
-    ILI9341_SendData(0x00);
-    ILI9341_SendData(0xC1);
-    ILI9341_SendData(0x30);
-
-    ILI9341_SendCmd(ILI9341_DRVTIMCTLA1);
-    ILI9341_SendData(0x85);
-    ILI9341_SendData(0x00);
-    ILI9341_SendData(0x78);
-
-    ILI9341_SendCmd(ILI9341_DRVTIMB);
-    ILI9341_SendData(0x00);
-    ILI9341_SendData(0x00);
-
-    ILI9341_SendCmd(ILI9341_PWSEQCTL);
-    ILI9341_SendData(0x64);
-    ILI9341_SendData(0x03);
-    ILI9341_SendData(0x12);
-    ILI9341_SendData(0x81);
-
-    ILI9341_SendCmd(ILI9341_PUMPRTCTL);
-    ILI9341_SendData(0x20);
-
-    ILI9341_SendCmd(ILI9341_PWCTRL1);
-    ILI9341_SendData(0x23);
-
-    ILI9341_SendCmd(ILI9341_PWCTRL2);
-    ILI9341_SendData(0x10);
-
-    ILI9341_SendCmd(ILI9341_VMCTRL1);
-    ILI9341_SendData(0x3E);
-    ILI9341_SendData(0x28);
-
-    ILI9341_SendCmd(ILI9341_VMCTRL2);
-    ILI9341_SendData(0x86);
-
-    ILI9341_SendCmd(ILI9341_MADCTL);
-    ILI9341_SendData(0x48);
-
-    ILI9341_SendCmd(ILI9341_PIXSET);
-    ILI9341_SendData(0x55);
-
-    ILI9341_SendCmd(ILI9341_FRMCTR1);
-    ILI9341_SendData(0x00);
-    ILI9341_SendData(0x18);
-
-    ILI9341_SendCmd(ILI9341_DISCTRL);
-    ILI9341_SendData(0x08);
-    ILI9341_SendData(0x82);
-    ILI9341_SendData(0x27);
-
-    ILI9341_SendCmd(ILI9341_EN3G);
-    ILI9341_SendData(0x00);
-
-    ILI9341_SendCmd(ILI9341_CASET);
-    ILI9341_SendData(0x00);
-    ILI9341_SendData(0x00);
-    ILI9341_SendData(0x00);
-    ILI9341_SendData(0xEF);
-    ILI9341_SendCmd(ILI9341_PASET);
-    ILI9341_SendData(0x00);
-    ILI9341_SendData(0x00);
-    ILI9341_SendData(0x01);
-    ILI9341_SendData(0x3F);
-
-    ILI9341_SendCmd(ILI9341_GAMSET);
-    ILI9341_SendData(0x01);
-
-    ILI9341_SendCmd(ILI9341_PGAMCTRL);
-    ILI9341_SendData(0x0F);
-    ILI9341_SendData(0x31);
-    ILI9341_SendData(0x2B);
-    ILI9341_SendData(0x0C);
-    ILI9341_SendData(0x0E);
-    ILI9341_SendData(0x08);
-    ILI9341_SendData(0x4E);
-    ILI9341_SendData(0xF1);
-    ILI9341_SendData(0x37);
-    ILI9341_SendData(0x07);
-    ILI9341_SendData(0x10);
-    ILI9341_SendData(0x03);
-    ILI9341_SendData(0x0E);
-    ILI9341_SendData(0x09);
-    ILI9341_SendData(0x00);
-
-    ILI9341_SendCmd(ILI9341_NGAMCTRL);
-    ILI9341_SendData(0x00);
-    ILI9341_SendData(0x0E);
-    ILI9341_SendData(0x14);
-    ILI9341_SendData(0x03);
-    ILI9341_SendData(0x11);
-    ILI9341_SendData(0x07);
-    ILI9341_SendData(0x31);
-    ILI9341_SendData(0xC1);
-    ILI9341_SendData(0x48);
-    ILI9341_SendData(0x08);
-    ILI9341_SendData(0x0F);
-    ILI9341_SendData(0x0C);
-    ILI9341_SendData(0x31);
-    ILI9341_SendData(0x36);
-    ILI9341_SendData(0x0F);
-
-    _delay_ms(150);
-    ILI9341_SendCmd(ILI9341_SLPOUT);
-    _delay_ms(10);
-
-    ILI9341_SendCmd(ILI9341_DISPON);
-    ILI9341_SendCmd(ILI9341_RAMWR);
-
-    return;
-}
-
-void ILI9341_DrawPixel(uint16_t x, uint16_t y, uint16_t color)
-{
-    ILI9341_SetCursorPos(x, y, x, y);
-
-    ILI9341_SendCmd(ILI9341_RAMWR);
-    ILI9341_SendData(color >> 8);
-    ILI9341_SendData(color & 0xFF);
-
-    return;
-}
-
-void ILI9341_SetCursorPos(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
-{
-    ILI9341_SendCmd(ILI9341_CASET);
-    ILI9341_SendData(x1 >> 8);
-    ILI9341_SendData(x1 & 0xFF);
-    ILI9341_SendData(x2 >> 8);
-    ILI9341_SendData(x2 & 0xFF);
-
-    ILI9341_SendCmd(ILI9341_PASET);
-    ILI9341_SendData(y1 >> 8);
-    ILI9341_SendData(y1 & 0xFF);
-    ILI9341_SendData(y2 >> 8);
-    ILI9341_SendData(y2 & 0xFF);
-
-    return;
-}
-
-void ILI9341_Fill(uint16_t color)
-{
-    uint32_t i;
-
-    ILI9341_SetCursorPos(0, 0, ILI9341_Opts.width - 1, ILI9341_Opts.height - 1);
-    ILI9341_SendCmd(ILI9341_RAMWR);
-
-    for (i = 0; i < ILI9341_PIXEL; i++) {
-        ILI9341_SendData(color >> 8);
-        ILI9341_SendData(color & 0xFF);
-    }
-
-    return;
-}
-
-void ILI9341_Rotate(LCD_Orientation orientation)
-{
-    ILI9341_SendCmd(ILI9341_MADCTL);
+    ili9341SendCmd(ILI9341_MADCTL);
 
     switch (orientation) {
     case LCD_Orientation_Portrait_1:
-        ILI9341_SendData(0x58);
+        ili9341WriteData(0x58);
         ILI9341_Opts.width = ILI9341_WIDTH;
         ILI9341_Opts.height = ILI9341_HEIGHT;
         ILI9341_Opts.orientation = orientation;
         break;
     case LCD_Orientation_Portrait_2:
-        ILI9341_SendData(0x88);
+        ili9341WriteData(0x88);
         ILI9341_Opts.width = ILI9341_WIDTH;
         ILI9341_Opts.height = ILI9341_HEIGHT;
         ILI9341_Opts.orientation = orientation;
         break;
     case LCD_Orientation_Landscape_1:
-        ILI9341_SendData(0x28);
+        ili9341WriteData(0x28);
         ILI9341_Opts.width = ILI9341_HEIGHT;
-        ILI9341_Opts.orientation = orientation;
-        break;
-    case LCD_Orientation_Landscape_2:
-        ILI9341_SendData(0xE8);
-        ILI9341_Opts.width = ILI9341_HEIGHT;
+        ILI9341_Opts.height = ILI9341_WIDTH;
         ILI9341_Opts.orientation = orientation;
         break;
     default:
+        ili9341WriteData(0xE8);
+        ILI9341_Opts.width = ILI9341_HEIGHT;
+        ILI9341_Opts.height = ILI9341_WIDTH;
+        ILI9341_Opts.orientation = orientation;
         break;
     }
-
-    return;
 }
 
-void ILI9341_DrawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color)
+void ili9431DrawPixel(uint16_t x, uint16_t y, uint16_t color)
+{
+    ili9341SetWindow(x, y, x, y);
+    ili9341SendData(color);
+}
+
+void ili9341DrawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color)
 {
     int16_t sX, sY, dX, dY, err, err2;
 
@@ -288,7 +244,7 @@ void ILI9341_DrawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16
     err = dX - dY;
 
     while (x0 != x1 || y0 != y1) {
-        ILI9341_DrawPixel(x0, y0, color);
+        ili9431DrawPixel(x0, y0, color);
         err2 = err * 2;
         if (err2 > -dY / 2) {
             err -= dY;
@@ -299,74 +255,56 @@ void ILI9341_DrawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16
             y0 += sY;
         }
     }
-    ILI9341_DrawPixel(x1, y1, color);
-
-    return;
+    ili9431DrawPixel(x1, y1, color);
 }
 
-void ILI9341_DrawHorizLine(uint16_t x0, uint16_t x1, uint16_t y, uint16_t color)
+void ili9341DrawRectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color)
 {
-    uint16_t i, len;
+    uint32_t i, j;
 
-    len = x1 - x0 + 1;
+    uint16_t w = x1 - x0 + 1;
+    uint16_t h = y1 - y0 + 1;
 
-    ILI9341_SetCursorPos(x0, y, x1, y);
-    ILI9341_SendCmd(ILI9341_RAMWR);
+    ili9341SetWindow(x0, y0, x1, y1);
 
-    for (i = 0; i < len; i++) {
-        ILI9341_SendData(color >> 8);
-        ILI9341_SendData(color & 0xFF);
+    uint8_t colorH = color >> 8;
+    uint8_t colorL = color & 0xFF;
+
+    SET(ILI9341_DC);
+    CLR(ILI9341_CS);
+    for (i = 0; i < w; i++) {
+        for (j = 0; j < h; j++) {
+            ili9341SendSPI(colorH);
+            ili9341SendSPI(colorL);
+        }
     }
-
-    return;
+    SET(ILI9341_CS);
 }
 
-void ILI9341_DrawVertLine(uint16_t x, uint16_t y0, uint16_t y1, uint16_t color)
+void ili9341Fill(uint16_t color)
 {
-    uint16_t i, len;
-
-    len = y1 - y0 + 1;
-
-    ILI9341_SetCursorPos(x, y0, x, y1);
-    ILI9341_SendCmd(ILI9341_RAMWR);
-
-    for (i = 0; i < len; i++) {
-        ILI9341_SendData(color >> 8);
-        ILI9341_SendData(color & 0xFF);
-    }
-
-    return;
+    ili9341DrawRectangle(0, 0, ILI9341_Opts.width, ILI9341_Opts.height, LCD_COLOR_BLACK);
 }
 
-void ILI9341_DrawRectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color)
+void ili9341DrawHorizLine(uint16_t x0, uint16_t x1, uint16_t y, uint16_t color)
 {
-    ILI9341_DrawHorizLine(x0, x1, y0, color);
-    ILI9341_DrawVertLine(x0, y0, y1, color);
-    ILI9341_DrawVertLine(x1, y0, y1, color);
-    ILI9341_DrawHorizLine(x0, x1, y1, color);
-
-    return;
+    ili9341DrawRectangle(x0, y, x1, y, color);
 }
 
-void ILI9341_DrawFilledRectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color)
+void ili9341DrawVertLine(uint16_t x, uint16_t y0, uint16_t y1, uint16_t color)
 {
-    uint16_t i, w, h;
-
-    w = x1 - x0 + 1;
-    h = y1 - y0 + 1;
-
-    ILI9341_SetCursorPos(x0, y0, x1, y1);
-    ILI9341_SendCmd(ILI9341_RAMWR);
-
-    for (i = 0; i < w * h; i++) {
-        ILI9341_SendData(color >> 8);
-        ILI9341_SendData(color & 0xFF);
-    }
-
-    return;
+    ili9341DrawRectangle(x, y0, x, y1, color);
 }
 
-void ILI9341_DrawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
+void ili9341DrawFrame(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color)
+{
+    ili9341DrawHorizLine(x0, x1, y0, color);
+    ili9341DrawVertLine(x0, y0, y1, color);
+    ili9341DrawVertLine(x1, y0, y1, color);
+    ili9341DrawHorizLine(x0, x1, y1, color);
+}
+
+void ili9341DrawRing(int16_t x0, int16_t y0, int16_t r, uint16_t color)
 {
     int16_t f = 1 - r;
     int16_t ddF_x = 1;
@@ -374,10 +312,10 @@ void ILI9341_DrawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
     int16_t x = 0;
     int16_t y = r;
 
-    ILI9341_DrawPixel(x0, y0 + r, color);
-    ILI9341_DrawPixel(x0, y0 - r, color);
-    ILI9341_DrawPixel(x0 + r, y0, color);
-    ILI9341_DrawPixel(x0 - r, y0, color);
+    ili9431DrawPixel(x0, y0 + r, color);
+    ili9431DrawPixel(x0, y0 - r, color);
+    ili9431DrawPixel(x0 + r, y0, color);
+    ili9431DrawPixel(x0 - r, y0, color);
 
     while (x < y) {
         if (f >= 0) {
@@ -389,21 +327,19 @@ void ILI9341_DrawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
         ddF_x += 2;
         f += ddF_x;
 
-        ILI9341_DrawPixel(x0 + x, y0 + y, color);
-        ILI9341_DrawPixel(x0 - x, y0 + y, color);
-        ILI9341_DrawPixel(x0 + x, y0 - y, color);
-        ILI9341_DrawPixel(x0 - x, y0 - y, color);
+        ili9431DrawPixel(x0 + x, y0 + y, color);
+        ili9431DrawPixel(x0 - x, y0 + y, color);
+        ili9431DrawPixel(x0 + x, y0 - y, color);
+        ili9431DrawPixel(x0 - x, y0 - y, color);
 
-        ILI9341_DrawPixel(x0 + y, y0 + x, color);
-        ILI9341_DrawPixel(x0 - y, y0 + x, color);
-        ILI9341_DrawPixel(x0 + y, y0 - x, color);
-        ILI9341_DrawPixel(x0 - y, y0 - x, color);
+        ili9431DrawPixel(x0 + y, y0 + x, color);
+        ili9431DrawPixel(x0 - y, y0 + x, color);
+        ili9431DrawPixel(x0 + y, y0 - x, color);
+        ili9431DrawPixel(x0 - y, y0 - x, color);
     }
-
-    return;
 }
 
-void ILI9341_DrawFilledCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
+void ili9341DrawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
 {
     int16_t f = 1 - r;
     int16_t ddF_x = 1;
@@ -411,7 +347,7 @@ void ILI9341_DrawFilledCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
     int16_t x = 0;
     int16_t y = r;
 
-    ILI9341_DrawHorizLine(x0 - r, x0 + r, y0, color);
+    ili9341DrawHorizLine(x0 - r, x0 + r, y0, color);
 
     while (x < y) {
         if (f >= 0) {
@@ -423,11 +359,52 @@ void ILI9341_DrawFilledCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
         ddF_x += 2;
         f += ddF_x;
 
-        ILI9341_DrawHorizLine(x0 - x, x0 + x, y0 + y, color);
-        ILI9341_DrawHorizLine(x0 - x, x0 + x, y0 - y, color);
-        ILI9341_DrawHorizLine(x0 - y, x0 + y, y0 + x, color);
-        ILI9341_DrawHorizLine(x0 - y, x0 + y, y0 - x, color);
+        ili9341DrawHorizLine(x0 - x, x0 + x, y0 + y, color);
+        ili9341DrawHorizLine(x0 - x, x0 + x, y0 - y, color);
+        ili9341DrawHorizLine(x0 - y, x0 + y, y0 + x, color);
+        ili9341DrawHorizLine(x0 - y, x0 + y, y0 - x, color);
     }
+}
 
-    return;
+void ili9341DrawColorMap(void)
+{
+    uint16_t r, g, b, color;
+    uint16_t i, j;
+
+    ili9341SetWindow(0, 0, ILI9341_Opts.width - 1, ILI9341_Opts.height - 1);
+
+    uint8_t quarter = ILI9341_Opts.width / 4;
+
+    SET(ILI9341_DC);
+    CLR(ILI9341_CS);
+    for (j = 0; j < ILI9341_Opts.height; j++) {
+        r = 0;
+        b = 0;
+        g = j * 63 / (ILI9341_Opts.height - 1);
+        for (i = 0; i < quarter; i++) {
+            r = i * 31 / (quarter - 1);
+            color = (r << 11) | (g << 5) | (b << 0);
+            ili9341SendSPI(color >> 8);
+            ili9341SendSPI(color & 0xFF);
+        }
+        for (i = 0; i < quarter; i++) {
+            b = i * 31 / (quarter - 1);
+            color = (r << 11) | (g << 5) | (b << 0);
+            ili9341SendSPI(color >> 8);
+            ili9341SendSPI(color & 0xFF);
+        }
+        for (i = 0; i < quarter; i++) {
+            r = ((quarter - 1) - i) * 31 / (quarter - 1);
+            color = (r << 11) | (g << 5) | (b << 0);
+            ili9341SendSPI(color >> 8);
+            ili9341SendSPI(color & 0xFF);
+        }
+        for (i = 0; i < quarter; i++) {
+            b = ((quarter - 1) - i) * 31 / (quarter - 1);
+            color = (r << 11) | (g << 5) | (b << 0);
+            ili9341SendSPI(color >> 8);
+            ili9341SendSPI(color & 0xFF);
+        }
+    }
+    SET(ILI9341_CS);
 }

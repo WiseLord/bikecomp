@@ -1,6 +1,8 @@
 .astylerc
 Makefile
 arduinopromini.h
+glcd.c
+glcd.h
 ili9341.c
 ili9341.h
 main.c

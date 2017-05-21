@@ -8,17 +8,17 @@
 //LCD settings
 #define ILI9341_WIDTH               240
 #define ILI9341_HEIGHT              320
-#define ILI9341_PIXEL               76800
+#define ILI9341_PIXELS              76800U
 
 //Colors
-#define LCD_COLOR_WHITE         0xFFFF
-#define LCD_COLOR_BLACK         0x0000
-#define LCD_COLOR_RED           0xF800
-#define LCD_COLOR_GREEN         0x07E0
-#define LCD_COLOR_BLUE          0x001F
-#define LCD_COLOR_YELLOW        0xFFE0
-#define LCD_COLOR_CYAN          0x07FF
-#define LCD_COLOR_MAGENTA       0xF81F
+#define LCD_COLOR_WHITE             0xFFFF
+#define LCD_COLOR_BLACK             0x0000
+#define LCD_COLOR_RED               0xF800
+#define LCD_COLOR_GREEN             0x07E0
+#define LCD_COLOR_BLUE              0x001F
+#define LCD_COLOR_YELLOW            0xFFE0
+#define LCD_COLOR_CYAN              0x07FF
+#define LCD_COLOR_MAGENTA           0xF81F
 
 // Level 1 commands
 #define ILI9341_NOP                 0x00 // No Operation
@@ -128,26 +128,22 @@ typedef struct {
 } LCD_Options;
 
 
-void ILI9341_Init(void);
-void ILI9341_SPI_Init(void);
-void ILI9341_SendCmd(uint8_t cmd);
-void ILI9341_SendData(uint8_t data);
-void ILI9341_InitLCD(void);
-void ILI9341_DrawPixel(uint16_t x, uint16_t y, uint16_t color);
-void ILI9341_SetCursorPos(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
-void ILI9341_Fill(uint16_t color);
-void ILI9341_Rotate(LCD_Orientation orientation);
+void ili9341Init(void);
+void ili9341Rotate(LCD_Orientation orientation);
 
-void ILI9341_DrawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
-void ILI9341_DrawHorizLine(uint16_t x0, uint16_t x1, uint16_t y, uint16_t color);
-void ILI9341_DrawVertLine(uint16_t x, uint16_t y0, uint16_t y1, uint16_t color);
+void ili9431DrawPixel(uint16_t x, uint16_t y, uint16_t color);
+void ili9341DrawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
 
-void ILI9341_DrawRectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
-void ILI9341_DrawFilledRectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1,
-                                 uint16_t color);
+void ili9341DrawRectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
+void ili9341Fill(uint16_t color);
 
-void ILI9341_DrawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
-void ILI9341_DrawFilledCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
+void ili9341DrawHorizLine(uint16_t x0, uint16_t x1, uint16_t y, uint16_t color);
+void ili9341DrawVertLine(uint16_t x, uint16_t y0, uint16_t y1, uint16_t color);
+void ili9341DrawFrame(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
+
+void ili9341DrawRing(int16_t x0, int16_t y0, int16_t r, uint16_t color);
+void ili9341DrawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
+
+void ili9341DrawColorMap(void);
 
 #endif
-
