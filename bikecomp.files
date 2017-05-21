@@ -1,5 +1,7 @@
 .astylerc
 Makefile
 arduinopromini.h
+ili9341.c
+ili9341.h
 main.c
 pins.h
