@@ -25,9 +25,35 @@
 #define LCD_COLOR_CYAN          0x07FF
 #define LCD_COLOR_MAGENTA       0xF81F
 
-void glcdInit(void);
-void glcdDrawColorMap(void);
+typedef enum {
+    LCD_Orientation_Portrait_1,
+    LCD_Orientation_Portrait_2,
+    LCD_Orientation_Landscape_1,
+    LCD_Orientation_Landscape_2
+} GlcdOrientation;
 
+typedef struct {
+    uint16_t width;
+    uint16_t height;
+    GlcdOrientation orientation;
+} GlcdOpts;
 
+extern GlcdOpts glcdOpts;
+
+// Some function remap
+#if GLCD_TYPE == ILI9341
+#define glcdInit                ili9341Init
+#define glcdDrawPixel           ili9431DrawPixel
+#define glcdDrawRectangle       ili9341DrawRectangle
+#define glcdDrawColorMap        ili9341DrawColorMap
+#endif
+#define glcdFill(c)                     glcdDrawRectangle(0, 0, glcdOpts.width, glcdOpts.height, c)
+#define glcdDrawHorizLine(x0, x1, y, c) glcdDrawRectangle(x0, y, x1, y, c);
+#define glcdDrawVertLine(x, y0, y1, c)  glcdDrawRectangle(x, y0, x, y1, c);
+
+void glcdDrawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
+void glcdDrawFrame(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
+void glcdDrawRing(int16_t x0, int16_t y0, int16_t r, uint16_t color);
+void glcdDrawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
 
 #endif // GLCD_H

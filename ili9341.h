@@ -10,16 +10,6 @@
 #define ILI9341_HEIGHT              320
 #define ILI9341_PIXELS              76800U
 
-//Colors
-#define LCD_COLOR_WHITE             0xFFFF
-#define LCD_COLOR_BLACK             0x0000
-#define LCD_COLOR_RED               0xF800
-#define LCD_COLOR_GREEN             0x07E0
-#define LCD_COLOR_BLUE              0x001F
-#define LCD_COLOR_YELLOW            0xFFE0
-#define LCD_COLOR_CYAN              0x07FF
-#define LCD_COLOR_MAGENTA           0xF81F
-
 // Level 1 commands
 #define ILI9341_NOP                 0x00 // No Operation
 #define ILI9341_SWRESET             0x01 // Software Reset
@@ -114,32 +104,11 @@
 #define ILI9341_EN3G                0xF2 // Enable 3G
 #define ILI9341_PUMPRTCTL           0xF7 // Pump Ratio Control
 
-typedef enum {
-    LCD_Orientation_Portrait_1,
-    LCD_Orientation_Portrait_2,
-    LCD_Orientation_Landscape_1,
-    LCD_Orientation_Landscape_2
-} LCD_Orientation;
-
-typedef struct {
-    uint16_t width;
-    uint16_t height;
-    LCD_Orientation orientation;
-} LCD_Options;
-
-
 void ili9341Init(void);
-void ili9341Rotate(LCD_Orientation orientation);
 
 void ili9431DrawPixel(uint16_t x, uint16_t y, uint16_t color);
-void ili9341DrawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
 
 void ili9341DrawRectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
-void ili9341Fill(uint16_t color);
-
-void ili9341DrawHorizLine(uint16_t x0, uint16_t x1, uint16_t y, uint16_t color);
-void ili9341DrawVertLine(uint16_t x, uint16_t y0, uint16_t y1, uint16_t color);
-void ili9341DrawFrame(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
 
 void ili9341DrawRing(int16_t x0, int16_t y0, int16_t r, uint16_t color);
 void ili9341DrawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);

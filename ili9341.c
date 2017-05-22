@@ -1,8 +1,7 @@
 #include "ili9341.h"
 
 #include <util/delay.h>
-
-LCD_Options ILI9341_Opts;
+#include "glcd.h"
 
 static void inline __attribute__((always_inline)) ili9341SendSPI(uint8_t data)
 {
@@ -169,6 +168,38 @@ static void ili9341SetWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
     ili9341SendCmd(ILI9341_RAMWR);
 }
 
+static void ili9341Rotate(GlcdOrientation orientation)
+{
+    ili9341SendCmd(ILI9341_MADCTL);
+
+    switch (orientation) {
+    case LCD_Orientation_Portrait_1:
+        ili9341WriteData(0x58);
+        glcdOpts.width = ILI9341_WIDTH;
+        glcdOpts.height = ILI9341_HEIGHT;
+        glcdOpts.orientation = orientation;
+        break;
+    case LCD_Orientation_Portrait_2:
+        ili9341WriteData(0x88);
+        glcdOpts.width = ILI9341_WIDTH;
+        glcdOpts.height = ILI9341_HEIGHT;
+        glcdOpts.orientation = orientation;
+        break;
+    case LCD_Orientation_Landscape_1:
+        ili9341WriteData(0x28);
+        glcdOpts.width = ILI9341_HEIGHT;
+        glcdOpts.height = ILI9341_WIDTH;
+        glcdOpts.orientation = orientation;
+        break;
+    default:
+        ili9341WriteData(0xE8);
+        glcdOpts.width = ILI9341_HEIGHT;
+        glcdOpts.height = ILI9341_WIDTH;
+        glcdOpts.orientation = orientation;
+        break;
+    }
+}
+
 void ili9341Init(void)
 {
     // Non-SPI pins
@@ -195,67 +226,10 @@ void ili9341Init(void)
     ili9341Rotate(LCD_Orientation_Landscape_1);
 }
 
-void ili9341Rotate(LCD_Orientation orientation)
-{
-    ili9341SendCmd(ILI9341_MADCTL);
-
-    switch (orientation) {
-    case LCD_Orientation_Portrait_1:
-        ili9341WriteData(0x58);
-        ILI9341_Opts.width = ILI9341_WIDTH;
-        ILI9341_Opts.height = ILI9341_HEIGHT;
-        ILI9341_Opts.orientation = orientation;
-        break;
-    case LCD_Orientation_Portrait_2:
-        ili9341WriteData(0x88);
-        ILI9341_Opts.width = ILI9341_WIDTH;
-        ILI9341_Opts.height = ILI9341_HEIGHT;
-        ILI9341_Opts.orientation = orientation;
-        break;
-    case LCD_Orientation_Landscape_1:
-        ili9341WriteData(0x28);
-        ILI9341_Opts.width = ILI9341_HEIGHT;
-        ILI9341_Opts.height = ILI9341_WIDTH;
-        ILI9341_Opts.orientation = orientation;
-        break;
-    default:
-        ili9341WriteData(0xE8);
-        ILI9341_Opts.width = ILI9341_HEIGHT;
-        ILI9341_Opts.height = ILI9341_WIDTH;
-        ILI9341_Opts.orientation = orientation;
-        break;
-    }
-}
-
 void ili9431DrawPixel(uint16_t x, uint16_t y, uint16_t color)
 {
     ili9341SetWindow(x, y, x, y);
     ili9341SendData(color);
-}
-
-void ili9341DrawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color)
-{
-    int16_t sX, sY, dX, dY, err, err2;
-
-    sX = x0 < x1 ? 1 : -1;
-    sY = y0 < y1 ? 1 : -1;
-    dX = sX > 0 ? x1 - x0 : x0 - x1;
-    dY = sY > 0 ? y1 - y0 : y0 - y1;
-    err = dX - dY;
-
-    while (x0 != x1 || y0 != y1) {
-        ili9431DrawPixel(x0, y0, color);
-        err2 = err * 2;
-        if (err2 > -dY / 2) {
-            err -= dY;
-            x0 += sX;
-        }
-        if (err2 < dX) {
-            err += dX;
-            y0 += sY;
-        }
-    }
-    ili9431DrawPixel(x1, y1, color);
 }
 
 void ili9341DrawRectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color)
@@ -281,106 +255,21 @@ void ili9341DrawRectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, ui
     SET(ILI9341_CS);
 }
 
-void ili9341Fill(uint16_t color)
-{
-    ili9341DrawRectangle(0, 0, ILI9341_Opts.width, ILI9341_Opts.height, LCD_COLOR_BLACK);
-}
-
-void ili9341DrawHorizLine(uint16_t x0, uint16_t x1, uint16_t y, uint16_t color)
-{
-    ili9341DrawRectangle(x0, y, x1, y, color);
-}
-
-void ili9341DrawVertLine(uint16_t x, uint16_t y0, uint16_t y1, uint16_t color)
-{
-    ili9341DrawRectangle(x, y0, x, y1, color);
-}
-
-void ili9341DrawFrame(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color)
-{
-    ili9341DrawHorizLine(x0, x1, y0, color);
-    ili9341DrawVertLine(x0, y0, y1, color);
-    ili9341DrawVertLine(x1, y0, y1, color);
-    ili9341DrawHorizLine(x0, x1, y1, color);
-}
-
-void ili9341DrawRing(int16_t x0, int16_t y0, int16_t r, uint16_t color)
-{
-    int16_t f = 1 - r;
-    int16_t ddF_x = 1;
-    int16_t ddF_y = -2 * r;
-    int16_t x = 0;
-    int16_t y = r;
-
-    ili9431DrawPixel(x0, y0 + r, color);
-    ili9431DrawPixel(x0, y0 - r, color);
-    ili9431DrawPixel(x0 + r, y0, color);
-    ili9431DrawPixel(x0 - r, y0, color);
-
-    while (x < y) {
-        if (f >= 0) {
-            y--;
-            ddF_y += 2;
-            f += ddF_y;
-        }
-        x++;
-        ddF_x += 2;
-        f += ddF_x;
-
-        ili9431DrawPixel(x0 + x, y0 + y, color);
-        ili9431DrawPixel(x0 - x, y0 + y, color);
-        ili9431DrawPixel(x0 + x, y0 - y, color);
-        ili9431DrawPixel(x0 - x, y0 - y, color);
-
-        ili9431DrawPixel(x0 + y, y0 + x, color);
-        ili9431DrawPixel(x0 - y, y0 + x, color);
-        ili9431DrawPixel(x0 + y, y0 - x, color);
-        ili9431DrawPixel(x0 - y, y0 - x, color);
-    }
-}
-
-void ili9341DrawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
-{
-    int16_t f = 1 - r;
-    int16_t ddF_x = 1;
-    int16_t ddF_y = -2 * r;
-    int16_t x = 0;
-    int16_t y = r;
-
-    ili9341DrawHorizLine(x0 - r, x0 + r, y0, color);
-
-    while (x < y) {
-        if (f >= 0) {
-            y--;
-            ddF_y += 2;
-            f += ddF_y;
-        }
-        x++;
-        ddF_x += 2;
-        f += ddF_x;
-
-        ili9341DrawHorizLine(x0 - x, x0 + x, y0 + y, color);
-        ili9341DrawHorizLine(x0 - x, x0 + x, y0 - y, color);
-        ili9341DrawHorizLine(x0 - y, x0 + y, y0 + x, color);
-        ili9341DrawHorizLine(x0 - y, x0 + y, y0 - x, color);
-    }
-}
-
 void ili9341DrawColorMap(void)
 {
     uint16_t r, g, b, color;
     uint16_t i, j;
 
-    ili9341SetWindow(0, 0, ILI9341_Opts.width - 1, ILI9341_Opts.height - 1);
+    ili9341SetWindow(0, 0, glcdOpts.width - 1, glcdOpts.height - 1);
 
-    uint8_t quarter = ILI9341_Opts.width / 4;
+    uint8_t quarter = glcdOpts.width / 4;
 
     SET(ILI9341_DC);
     CLR(ILI9341_CS);
-    for (j = 0; j < ILI9341_Opts.height; j++) {
+    for (j = 0; j < glcdOpts.height; j++) {
         r = 0;
         b = 0;
-        g = j * 63 / (ILI9341_Opts.height - 1);
+        g = j * 63 / (glcdOpts.height - 1);
         for (i = 0; i < quarter; i++) {
             r = i * 31 / (quarter - 1);
             color = (r << 11) | (g << 5) | (b << 0);
