@@ -43,12 +43,29 @@ static void ili9341SendData(uint16_t data)
 static void ili9341InitSeq(void)
 {
     CLR(ILI9341_RST);
-    _delay_ms(10);
+    _delay_ms(100);
     SET(ILI9341_RST);
-    _delay_ms(10);
+    _delay_ms(100);
 
     ili9341SendCmd(ILI9341_SWRESET);
     _delay_ms(10);
+    ili9341SendCmd(ILI9341_DISPOFF);
+
+    ili9341SendCmd(ILI9341_PWCTRLB);
+    ili9341WriteData(0x00);
+    ili9341WriteData(0xC1);
+    ili9341WriteData(0x30);
+
+    ili9341SendCmd(ILI9341_PWSEQCTL);
+    ili9341WriteData(0x64);
+    ili9341WriteData(0x03);
+    ili9341WriteData(0x12);
+    ili9341WriteData(0x81);
+
+    ili9341SendCmd(ILI9341_DRVTIMCTLA1);
+    ili9341WriteData(0x85);
+    ili9341WriteData(0x01);
+    ili9341WriteData(0x79);
 
     ili9341SendCmd(ILI9341_PWCTRLA);
     ili9341WriteData(0x39);
@@ -57,62 +74,46 @@ static void ili9341InitSeq(void)
     ili9341WriteData(0x34);
     ili9341WriteData(0x02);
 
-    ili9341SendCmd(ILI9341_PWCTRLB);
-    ili9341WriteData(0x00);
-    ili9341WriteData(0xC1);
-    ili9341WriteData(0x30);
-
-    ili9341SendCmd(ILI9341_DRVTIMCTLA1);
-    ili9341WriteData(0x85);
-    ili9341WriteData(0x00);
-    ili9341WriteData(0x78);
+    ili9341SendCmd(ILI9341_PUMPRTCTL);
+    ili9341WriteData(0x20);
 
     ili9341SendCmd(ILI9341_DRVTIMB);
     ili9341WriteData(0x00);
     ili9341WriteData(0x00);
 
-    ili9341SendCmd(ILI9341_PWSEQCTL);
-    ili9341WriteData(0x64);
-    ili9341WriteData(0x03);
-    ili9341WriteData(0x12);
-    ili9341WriteData(0x81);
-
-    ili9341SendCmd(ILI9341_PUMPRTCTL);
-    ili9341WriteData(0x20);
-
     ili9341SendCmd(ILI9341_PWCTRL1);
-    ili9341WriteData(0x23);
+    ili9341WriteData(0x26);
 
     ili9341SendCmd(ILI9341_PWCTRL2);
-    ili9341WriteData(0x10);
+    ili9341WriteData(0x11);
 
     ili9341SendCmd(ILI9341_VMCTRL1);
+    ili9341WriteData(0x35);
     ili9341WriteData(0x3E);
-    ili9341WriteData(0x28);
 
     ili9341SendCmd(ILI9341_VMCTRL2);
-    ili9341WriteData(0x86);
-
-    ili9341SendCmd(ILI9341_MADCTL);
-    ili9341WriteData(0x48);
+    ili9341WriteData(0xBE);
 
     ili9341SendCmd(ILI9341_PIXSET);
     ili9341WriteData(0x55);
 
     ili9341SendCmd(ILI9341_FRMCTR1);
     ili9341WriteData(0x00);
-    ili9341WriteData(0x18);
+    ili9341WriteData(0x1B);
+
+    ili9341SendCmd(ILI9341_EN3G);
+    ili9341WriteData(0x08);
+
+    ili9341SendCmd(ILI9341_GAMSET);
+    ili9341WriteData(0x01);
+
+    ili9341SendCmd(ILI9341_ETMOD);
+    ili9341WriteData(0x07);
 
     ili9341SendCmd(ILI9341_DISCTRL);
     ili9341WriteData(0x08);
     ili9341WriteData(0x82);
     ili9341WriteData(0x27);
-
-    ili9341SendCmd(ILI9341_EN3G);
-    ili9341WriteData(0x00);
-
-    ili9341SendCmd(ILI9341_GAMSET);
-    ili9341WriteData(0x01);
 
     ili9341SendCmd(ILI9341_PGAMCTRL);
     ili9341WriteData(0x0F);
@@ -148,11 +149,11 @@ static void ili9341InitSeq(void)
     ili9341WriteData(0x36);
     ili9341WriteData(0x0F);
 
-    _delay_ms(150);
     ili9341SendCmd(ILI9341_SLPOUT);
-    _delay_ms(10);
+    _delay_ms(100);
 
     ili9341SendCmd(ILI9341_DISPON);
+    _delay_ms(100);
 }
 
 static void ili9341SetWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
