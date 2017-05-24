@@ -1,6 +1,10 @@
 .astylerc
 Makefile
 arduinopromini.h
+font-digits-32.c
+font-ks0066-ru-08.c
+font-ks0066-ru-24.c
+fonts.h
 glcd.c
 glcd.h
 ili9341.c

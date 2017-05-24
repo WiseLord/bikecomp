@@ -9,6 +9,8 @@
 #include "ili9341.h"
 #endif
 
+#include "fonts.h"
+
 #if GLCD_TYPE == ILI9341
 #define LCD_WIDTH               ILI9341_WIDTH
 #define LCD_HEIGHT              ILI9341_HEIGHT
@@ -55,5 +57,12 @@ void glcdDrawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t c
 void glcdDrawFrame(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
 void glcdDrawRing(int16_t x0, int16_t y0, int16_t r, uint16_t color);
 void glcdDrawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
+
+void glcdLoadFont(const uint8_t *font, uint16_t color, uint16_t bgColor, FontDirection direction);
+void glcdWriteCharX(uint8_t code);
+void glcdWriteChar(uint8_t code);
+void glcdWriteString(char *string);
+
+void glcdSetXY(uint16_t x, uint16_t y);
 
 #endif // GLCD_H
