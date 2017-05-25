@@ -295,14 +295,14 @@ void ili9341DrawColorMap(void)
 
     ili9341SetWindow(0, 0, glcdOpts.width - 1, glcdOpts.height - 1);
 
-    uint8_t quarter = glcdOpts.width / 4;
+    uint8_t quarter = glcdOpts.height / 4;
 
     SET(ILI9341_DC);
     CLR(ILI9341_CS);
-    for (j = 0; j < glcdOpts.height; j++) {
+    for (j = 0; j < glcdOpts.width; j++) {
         r = 0;
         b = 0;
-        g = j * 63 / (glcdOpts.height - 1);
+        g = j * 63 / (glcdOpts.width - 1);
         for (i = 0; i < quarter; i++) {
             r = i * 31 / (quarter - 1);
             color = (r << 11) | (g << 5) | (b << 0);
