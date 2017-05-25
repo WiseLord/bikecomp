@@ -24,8 +24,20 @@ typedef struct {
 
     uint8_t fwd;
     uint8_t direction;
-    uint16_t color;
-    uint16_t bgColor;
+    union {
+        uint16_t color;
+        struct {
+            uint8_t colorL;
+            uint8_t colorH;
+        };
+    };
+    union {
+        uint16_t bgColor;
+        struct {
+            uint8_t bgColorL;
+            uint8_t bgColorH;
+        };
+    };
 } FontParam;
 
 typedef enum {

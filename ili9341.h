@@ -113,6 +113,9 @@ void ili9341DrawRectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, ui
 void ili9341DrawRing(int16_t x0, int16_t y0, int16_t r, uint16_t color);
 void ili9341DrawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
 
+void ili9341WriteChar(const uint8_t *chOft, uint8_t fwd, uint8_t swd);
+
 void ili9341DrawColorMap(void);
+void ili9341SetWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
 
 #endif

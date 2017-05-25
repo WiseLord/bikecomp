@@ -41,6 +41,7 @@ typedef struct {
 } GlcdOpts;
 
 extern GlcdOpts glcdOpts;
+extern FontParam fp;
 
 // Some function remap
 #if GLCD_TYPE == ILI9341
@@ -59,7 +60,7 @@ void glcdDrawRing(int16_t x0, int16_t y0, int16_t r, uint16_t color);
 void glcdDrawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
 
 void glcdLoadFont(const uint8_t *font, uint16_t color, uint16_t bgColor, FontDirection direction);
-void glcdWriteCharX(uint8_t code);
+void glcdWriteChar(uint8_t code);
 void glcdWriteChar(uint8_t code);
 void glcdWriteString(char *string);
 

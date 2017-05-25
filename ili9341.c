@@ -1,5 +1,6 @@
 #include "ili9341.h"
 
+#include <avr/pgmspace.h>
 #include <util/delay.h>
 #include "glcd.h"
 
@@ -156,13 +157,13 @@ static void ili9341InitSeq(void)
     _delay_ms(100);
 }
 
-static void ili9341SetWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
+void ili9341SetWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
 {
-    ili9341SendCmd(ILI9341_CASET);
+    ili9341SendCmd(ILI9341_PASET);
     ili9341SendData(x0);
     ili9341SendData(x1);
 
-    ili9341SendCmd(ILI9341_PASET);
+    ili9341SendCmd(ILI9341_CASET);
     ili9341SendData(y0);
     ili9341SendData(y1);
 
@@ -175,25 +176,25 @@ static void ili9341Rotate(GlcdOrientation orientation)
 
     switch (orientation) {
     case LCD_Orientation_Portrait_1:
-        ili9341WriteData(0x58);
+        ili9341WriteData(0x78);
         glcdOpts.width = ILI9341_WIDTH;
         glcdOpts.height = ILI9341_HEIGHT;
         glcdOpts.orientation = orientation;
         break;
     case LCD_Orientation_Portrait_2:
-        ili9341WriteData(0x88);
+        ili9341WriteData(0xA8);
         glcdOpts.width = ILI9341_WIDTH;
         glcdOpts.height = ILI9341_HEIGHT;
         glcdOpts.orientation = orientation;
         break;
     case LCD_Orientation_Landscape_1:
-        ili9341WriteData(0x28);
+        ili9341WriteData(0x08);
         glcdOpts.width = ILI9341_HEIGHT;
         glcdOpts.height = ILI9341_WIDTH;
         glcdOpts.orientation = orientation;
         break;
     default:
-        ili9341WriteData(0xE8);
+        ili9341WriteData(0xC8);
         glcdOpts.width = ILI9341_HEIGHT;
         glcdOpts.height = ILI9341_WIDTH;
         glcdOpts.orientation = orientation;
@@ -251,6 +252,37 @@ void ili9341DrawRectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, ui
         for (j = 0; j < h; j++) {
             ili9341SendSPI(colorH);
             ili9341SendSPI(colorL);
+        }
+    }
+    SET(ILI9341_CS);
+}
+
+void ili9341WriteChar(const uint8_t *chOft, uint8_t fwd, uint8_t swd)
+{
+    uint8_t i;
+    uint8_t j;
+    uint8_t k;
+
+    uint8_t pgmData;
+
+    SET(ILI9341_DC);
+    CLR(ILI9341_CS);
+    for (i = 0; i < fwd; i++) {
+        for (j = 0; j < fp.height; j++) {
+            if (i >= swd)
+                pgmData = 0x00;
+            else
+                pgmData = pgm_read_byte(chOft + (swd * j) + i);
+            for (k = 0; k < 8; k++) {
+                if (pgmData & 0x01) {
+                    ili9341SendSPI(fp.colorH);
+                    ili9341SendSPI(fp.colorL);
+                } else {
+                    ili9341SendSPI(fp.bgColorH);
+                    ili9341SendSPI(fp.bgColorL);
+                }
+                pgmData >>= 1;
+            }
         }
     }
     SET(ILI9341_CS);

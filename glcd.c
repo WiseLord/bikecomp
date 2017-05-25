@@ -1,11 +1,12 @@
 #include "glcd.h"
 
 #include <avr/pgmspace.h>
+#include <util/delay.h>
 
 GlcdOpts glcdOpts;
+FontParam fp;
 
 const uint8_t *_font;
-static FontParam fp;
 
 static uint16_t _x, _y;
 
@@ -103,80 +104,9 @@ void glcdDrawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
     }
 }
 
-
-void glcdWriteCharX(uint8_t code)
-{
-    uint8_t i;
-    uint8_t j;
-    uint8_t k;
-
-    uint8_t pgmData;
-
-    uint8_t spos = code - ((code >= 128) ? fp.oftna : fp.ofta);
-
-    uint16_t oft = 0;               // Current symbol offset in array
-    uint8_t swd = 0;                // Current symbol width
-    uint8_t fwd = fp.fwd;           // Fixed width
-
-    for (i = 0; i < spos; i++) {
-        swd = pgm_read_byte(_font + i);
-        oft += swd;
-    }
-    swd = pgm_read_byte(_font + spos);
-    if (!fwd)
-        fwd = swd;
-
-    oft *= fp.height;
-    oft += fp.ccnt;
-
-    for (j = 0; j < fp.height; j++) {
-        for (i = 0; i < fwd; i++) {
-            if (i >= swd)
-                pgmData = 0x00;
-            else
-                pgmData = pgm_read_byte(_font + oft + (swd * j) + i);
-            for (k = 0; k < 8; k++) {
-                switch (fp.direction) {
-                case FONT_DIR_0:
-                    glcdDrawPixel(_x + i, _y + (8 * j + k), pgmData & (1 << k) ? fp.color : fp.bgColor);
-                    break;
-                case FONT_DIR_90:
-                    glcdDrawPixel(_x + i, _y + (8 * j + k), pgmData & (1 << k) ? fp.color : fp.bgColor);
-                    break;
-                case FONT_DIR_180:
-                    glcdDrawPixel(_x + i, _y + (8 * j + k), pgmData & (1 << k) ? fp.color : fp.bgColor);
-                    break;
-                case FONT_DIR_270:
-                    glcdDrawPixel(_x + i, _y + (8 * j + k), pgmData & (1 << k) ? fp.color : fp.bgColor);
-                    break;
-                }
-            }
-        }
-    }
-    switch (fp.direction) {
-    case FONT_DIR_0:
-        glcdSetXY(_x + fwd, _y);
-        break;
-    case FONT_DIR_90:
-        glcdSetXY(_x, _y - fwd);
-        break;
-    case FONT_DIR_180:
-        glcdSetXY(_x - fwd, _y);
-        break;
-    case FONT_DIR_270:
-        glcdSetXY(_x, _y + fwd);
-        break;
-    }
-}
-
-
 void glcdWriteChar(uint8_t code)
 {
     uint8_t i;
-    uint8_t j;
-    uint8_t k;
-
-    uint8_t pgmData;
 
     uint8_t spos = code - ((code >= 128) ? fp.oftna : fp.ofta);
 
@@ -195,44 +125,11 @@ void glcdWriteChar(uint8_t code)
     oft *= fp.height;
     oft += fp.ccnt;
 
-    for (j = 0; j < fp.height; j++) {
-        for (i = 0; i < fwd; i++) {
-            if (i >= swd)
-                pgmData = 0x00;
-            else
-                pgmData = pgm_read_byte(_font + oft + (swd * j) + i);
-            for (k = 0; k < 8; k++) {
-                switch (fp.direction) {
-                case FONT_DIR_0:
-                    glcdDrawPixel(_x + i, _y + (8 * j + k), pgmData & (1 << k) ? fp.color : fp.bgColor);
-                    break;
-                case FONT_DIR_90:
-                    glcdDrawPixel(_x + i, _y + (8 * j + k), pgmData & (1 << k) ? fp.color : fp.bgColor);
-                    break;
-                case FONT_DIR_180:
-                    glcdDrawPixel(_x + i, _y + (8 * j + k), pgmData & (1 << k) ? fp.color : fp.bgColor);
-                    break;
-                case FONT_DIR_270:
-                    glcdDrawPixel(_x + i, _y + (8 * j + k), pgmData & (1 << k) ? fp.color : fp.bgColor);
-                    break;
-                }
-            }
-        }
-    }
-    switch (fp.direction) {
-    case FONT_DIR_0:
-        glcdSetXY(_x + fwd, _y);
-        break;
-    case FONT_DIR_90:
-        glcdSetXY(_x, _y - fwd);
-        break;
-    case FONT_DIR_180:
-        glcdSetXY(_x - fwd, _y);
-        break;
-    case FONT_DIR_270:
-        glcdSetXY(_x, _y + fwd);
-        break;
-    }
+    ili9341SetWindow(_x, _y, _x + fwd - 1, _y + fp.height * 8 - 1);
+
+    ili9341WriteChar(_font + oft, fwd, swd);
+
+    glcdSetXY(_x + fwd, _y);
 }
 
 void glcdWriteString(char *string)

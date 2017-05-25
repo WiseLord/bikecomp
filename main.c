@@ -18,41 +18,28 @@ int main(void)
 
     glcdFill(LCD_COLOR_BLACK);
 
-
-//    glcdWriteChar('D');
     while(1) {
         uint8_t i;
         glcdLoadFont(font_digits_32, LCD_COLOR_WHITE, LCD_COLOR_BLACK, FONT_DIR_0);
         glcdSetXY(0, 0);
-        for (i = 0; i < 10; i++) {
+        for (i = 0; i < 10; i++)
             glcdWriteChar('0' + i);
-        }
-        for (i = 0; i < 10; i++) {
+        for (i = 0; i < 10; i++)
             glcdWriteChar('0' + i);
-        }
+        glcdLoadFont(font_ks0066_ru_24, LCD_COLOR_GREEN, LCD_COLOR_BLACK, FONT_DIR_0);
         glcdSetXY(0, 40);
-        for (i = 0; i < 10; i++) {
-            glcdWriteCharX('0' + i);
-        }
-        for (i = 0; i < 10; i++) {
-            glcdWriteCharX('0' + i);
-        }
+        glcdWriteString("Quite a long test string");
         _delay_ms(500);
+
         glcdLoadFont(font_digits_32, LCD_COLOR_BLACK, LCD_COLOR_BLACK, FONT_DIR_0);
         glcdSetXY(0, 0);
-        for (i = 0; i < 10; i++) {
+        for (i = 0; i < 10; i++)
             glcdWriteChar('0' + i);
-        }
-        for (i = 0; i < 10; i++) {
+        for (i = 0; i < 10; i++)
             glcdWriteChar('0' + i);
-        }
+        glcdLoadFont(font_ks0066_ru_24, LCD_COLOR_BLACK, LCD_COLOR_BLACK, FONT_DIR_0);
         glcdSetXY(0, 40);
-        for (i = 0; i < 10; i++) {
-            glcdWriteCharX('0' + i);
-        }
-        for (i = 0; i < 10; i++) {
-            glcdWriteCharX('0' + i);
-        }
+        glcdWriteString("Quite a long test string");
         _delay_ms(500);
     }
 
