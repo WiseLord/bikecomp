@@ -19,47 +19,30 @@ int main(void)
     glcdFill(LCD_COLOR_BLACK);
 
     while(1) {
-        uint8_t i;
-        glcdLoadFont(font_digits_32, LCD_COLOR_WHITE, LCD_COLOR_BLACK, FONT_DIR_0);
-        glcdSetXY(0, 0);
-        for (i = 0; i < 10; i++)
-            glcdWriteChar('0' + i);
-        for (i = 0; i < 10; i++)
-            glcdWriteChar('0' + i);
         glcdLoadFont(font_ks0066_ru_24, LCD_COLOR_GREEN, LCD_COLOR_BLACK, FONT_DIR_0);
-        glcdSetXY(0, 40);
-        glcdWriteString("Quite a long test string");
-        _delay_ms(500);
-
-        glcdLoadFont(font_digits_32, LCD_COLOR_BLACK, LCD_COLOR_BLACK, FONT_DIR_0);
         glcdSetXY(0, 0);
-        for (i = 0; i < 10; i++)
-            glcdWriteChar('0' + i);
-        for (i = 0; i < 10; i++)
-            glcdWriteChar('0' + i);
-        glcdLoadFont(font_ks0066_ru_24, LCD_COLOR_BLACK, LCD_COLOR_BLACK, FONT_DIR_0);
-        glcdSetXY(0, 40);
-        glcdWriteString("Quite a long test string");
-        _delay_ms(500);
+        glcdWriteString("Speed");
+        glcdSetXY(0, 296);
+        glcdWriteString("Bottom test string");
     }
 
     glcdDrawColorMap();
 
-    glcdDrawCircle(160, 120, 59, LCD_COLOR_BLACK);
-    glcdDrawCircle(160, 120, 56, LCD_COLOR_WHITE);
-    glcdDrawCircle(160, 120, 53, LCD_COLOR_BLACK);
+    glcdDrawCircle(120, 160, 59, LCD_COLOR_BLACK);
+    glcdDrawCircle(120, 160, 56, LCD_COLOR_WHITE);
+    glcdDrawCircle(120, 160, 53, LCD_COLOR_BLACK);
 
     while (1) {
         _delay_ms(500);
-        glcdDrawCircle(160, 120, 50, LCD_COLOR_YELLOW);
+        glcdDrawCircle(120, 160, 50, LCD_COLOR_YELLOW);
         _delay_ms(500);
-        glcdDrawCircle(160, 120, 50, LCD_COLOR_GREEN);
+        glcdDrawCircle(120, 160, 50, LCD_COLOR_GREEN);
         _delay_ms(500);
-        glcdDrawCircle(160, 120, 50, LCD_COLOR_CYAN);
+        glcdDrawCircle(120, 160, 50, LCD_COLOR_CYAN);
         _delay_ms(500);
-        glcdDrawCircle(160, 120, 50, LCD_COLOR_BLUE);
+        glcdDrawCircle(120, 160, 50, LCD_COLOR_BLUE);
         _delay_ms(500);
-        glcdDrawCircle(160, 120, 50, LCD_COLOR_MAGENTA);
+        glcdDrawCircle(120, 160, 50, LCD_COLOR_MAGENTA);
         _delay_ms(500);
     }
 
