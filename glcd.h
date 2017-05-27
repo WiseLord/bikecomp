@@ -59,11 +59,12 @@ void glcdDrawFrame(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t 
 void glcdDrawRing(int16_t x0, int16_t y0, int16_t r, uint16_t color);
 void glcdDrawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
 
-void glcdLoadFont(const uint8_t *font, uint16_t color, uint16_t bgColor, FontDirection direction);
-void glcdWriteChar(uint8_t code);
 void glcdWriteChar(uint8_t code);
 void glcdWriteString(char *string);
 
 void glcdSetXY(uint16_t x, uint16_t y);
+void glcdLoadFont(const uint8_t *font, uint16_t color, uint16_t bgColor);
+
+void glcdWriteLcdDig(uint8_t dig);
 
 #endif // GLCD_H
