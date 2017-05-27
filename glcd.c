@@ -175,11 +175,31 @@ void glcdLoadLcdFont(const uint8_t *font, uint16_t color, uint16_t bgColor)
     flp.bgColor = bgColor;
 }
 
-void glcdWriteLcdDig(uint8_t code)
+void glcdWriteLcdChar(uint8_t code)
 {
     uint8_t dirMask = 0b01001001; // 1 - vertical, 0 - horisontal segment
     uint16_t segColor;
 
+    if (code >= '0' && code <= '9') {
+        code = pgm_read_byte(lcdChar + (code - '0'));
+        for (uint8_t seg = 0; seg < 7; seg++) {
+            segColor = code & (1 << seg) ? flp.color : flp.bgColor;
+            const uint8_t *digStart = _fontLcd + seg * (flp.thickness * 2 + 1);
+            uint8_t startLine = pgm_read_byte(digStart++);
+            uint8_t point1, point2;
+            for (uint8_t line = 0; line < flp.thickness; line++) {
+                point1 = pgm_read_byte(digStart++);
+                point2 = pgm_read_byte(digStart++);
+                if (dirMask & (1 << seg)) {
+                    glcdDrawHorizLine(_x + point1, _x + point2, _y + startLine + line, segColor);
+                } else {
+                    glcdDrawVertLine(_x + startLine + line, _y + point1, _y + point2, segColor);
+                }
+            }
+        }
+        glcdSetXY(_x + flp.width + flp.thickness, _y);
+        return;
+    }
     if (code == '.' || code == ':') {
         const uint8_t *digStart = _fontLcd + 7 * (flp.thickness * 2 + 1);
         uint8_t startLine = pgm_read_byte(digStart++);
@@ -194,28 +214,13 @@ void glcdWriteLcdDig(uint8_t code)
                 glcdDrawHorizLine(_x + point1, _x + point2, _y + 2 * flp.thickness + line, flp.color);
             }
         }
-
-        return;
+        glcdSetXY(_x + 2 * flp.thickness, _y);
     }
+}
 
-    if (code < '0' || code > '9')
-        return;
-
-    code = pgm_read_byte(lcdChar + (code - '0'));
-
-    for (uint8_t seg = 0; seg < 7; seg++) {
-        segColor = code & (1 << seg) ? flp.color : flp.bgColor;
-        const uint8_t *digStart = _fontLcd + seg * (flp.thickness * 2 + 1);
-        uint8_t startLine = pgm_read_byte(digStart++);
-        uint8_t point1, point2;
-        for (uint8_t line = 0; line < flp.thickness; line++) {
-            point1 = pgm_read_byte(digStart++);
-            point2 = pgm_read_byte(digStart++);
-            if (dirMask & (1 << seg)) {
-                glcdDrawHorizLine(_x + point1, _x + point2, _y + startLine + line, segColor);
-            } else {
-                glcdDrawVertLine(_x + startLine + line, _y + point1, _y + point2, segColor);
-            }
-        }
+void glcdWriteLcdString(char *string)
+{
+    while (*string) {
+        glcdWriteLcdChar(*string++);
     }
 }

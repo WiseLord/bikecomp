@@ -25,53 +25,31 @@ int main(void)
 
     glcdLoadLcdFont(font_lcd_72, LCD_COLOR_CYAN, LCD_COLOR_BLACK);
     glcdSetXY(8, 30);
-    glcdWriteLcdDig('5');
-    glcdSetXY(56, 30);
-    glcdWriteLcdDig('7');
-    glcdSetXY(104, 30);
-    glcdWriteLcdDig('8');
-    glcdSetXY(152, 30);
-    glcdWriteLcdDig('3');
-    glcdSetXY(200, 30);
-    glcdWriteLcdDig('2');
+    glcdWriteLcdString("57832");
 
     glcdLoadLcdFont(font_lcd_45, LCD_COLOR_YELLOW, LCD_COLOR_BLACK);
     glcdSetXY(5, 110);
-    glcdWriteLcdDig('2');
-    glcdSetXY(35, 110);
-    glcdWriteLcdDig('6');
-    glcdSetXY(65, 110);
-    glcdWriteLcdDig('4');
-    glcdSetXY(95, 110);
-    glcdWriteLcdDig('9');
-    glcdSetXY(125, 110);
-    glcdWriteLcdDig('7');
-    glcdSetXY(155, 110);
-    glcdWriteLcdDig('8');
-    glcdSetXY(185, 110);
-    glcdWriteLcdDig('1');
-    glcdSetXY(215, 110);
-    glcdWriteLcdDig('6');
+    glcdWriteLcdString("26497816");
 
     glcdLoadLcdFont(font_lcd_27, LCD_COLOR_WHITE, LCD_COLOR_BLACK);
     for (uint8_t i = '0'; i <= '9'; i++) {
         glcdSetXY(225 - (i - '0') * (flp.width + flp.thickness), 160);
-        glcdWriteLcdDig(i);
+        glcdWriteLcdChar(i);
     }
 
     glcdLoadLcdFont(font_lcd_72, LCD_COLOR_RED, LCD_COLOR_BLACK);
     glcdSetXY(0, 200);
-    glcdWriteLcdDig('5');
-    glcdSetXY(48, 200);
-    glcdWriteLcdDig('4');
-    glcdSetXY(96, 200);
-    glcdWriteString("km/h");
+    glcdWriteLcdString("54.3");
+
+//    glcdWriteLcdChar('5');
+//    glcdSetXY(48, 200);
+//    glcdWriteLcdChar('4');
+//    glcdSetXY(96, 200);
+//    glcdWriteString("km/h");
 
     glcdSetXY(96, 200);
-    glcdWriteLcdDig('.');
+    glcdWriteLcdChar('.');
     glcdLoadLcdFont(font_lcd_45, LCD_COLOR_RED, LCD_COLOR_BLACK);
-    glcdSetXY(114, 227);
-    glcdWriteLcdDig('2');
 
 
     while(1);
