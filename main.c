@@ -15,18 +15,25 @@ void hwInit()
 int main(void)
 {
     hwInit();
-
     glcdFill(LCD_COLOR_BLACK);
-    glcdSetXY(50, 0);
+
+    glcdLoadFont(font_ks0066_ru_24, LCD_COLOR_GREEN, LCD_COLOR_BLACK);
+    glcdSetXY(0, 0);
+    glcdWriteString("Speed");
+    glcdSetXY(0, 296);
+    glcdWriteString("Bottom test string");
+
+    glcdLoadLcdFont(font_lcd_72, LCD_COLOR_CYAN, LCD_COLOR_BLACK);
+    glcdSetXY(50, 30);
     glcdWriteLcdDig('1');
-    glcdSetXY(100, 0);
+    glcdSetXY(100, 30);
     glcdWriteLcdDig('8');
-    glcdSetXY(150, 0);
+    glcdSetXY(150, 30);
     glcdWriteLcdDig('3');
-    glcdSetXY(200, 0);
+    glcdSetXY(200, 30);
     glcdWriteLcdDig('2');
 
-    glcdSetXY(0, 0);
+    glcdSetXY(0, 30);
     while (1) {
         uint8_t i;
         for (i = '0'; i <= '9'; i++) {

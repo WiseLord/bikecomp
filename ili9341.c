@@ -43,7 +43,6 @@ static void ili9341SendData(uint16_t data)
 
 static void ili9341InitSeq(void)
 {
-    CLR(ILI9341_RST);
     _delay_ms(100);
     SET(ILI9341_RST);
     _delay_ms(100);
@@ -209,9 +208,6 @@ void ili9341Init(void)
     OUT(ILI9341_RST);
     OUT(ILI9341_LED);
 
-    CLR(ILI9341_CS);
-    SET(ILI9341_LED);
-
     // SPI pins
     OUT(ILI9341_SDI);
     OUT(ILI9341_SCK);
@@ -221,8 +217,13 @@ void ili9341Init(void)
     SPCR = (1 << SPE) | (1 << MSTR);
     SPSR = (1 << SPI2X);
 
+    SET(ILI9341_CS);
+    CLR(ILI9341_RST);
+    SET(ILI9341_LED);
+
     // Init magic
     ili9341InitSeq();
+    SET(ILI9341_LED);
 
     // Set display orientation and size
     ili9341Rotate(LCD_Orientation_Portrait_2);

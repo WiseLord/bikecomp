@@ -4,7 +4,9 @@
 #include <util/delay.h>
 
 GlcdOpts glcdOpts;
+
 FontParam fp;
+FontLcdParam flp;
 
 const uint8_t *_font;
 const uint8_t *_fontLcd = font_lcd_72;
@@ -43,6 +45,7 @@ void glcdDrawFrame(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t 
     glcdDrawVertLine(x1, y0, y1, color);
     glcdDrawHorizLine(x0, x1, y1, color);
 }
+
 void glcdDrawRing(int16_t x0, int16_t y0, int16_t r, uint16_t color)
 {
     int16_t f = 1 - r;
@@ -105,6 +108,21 @@ void glcdDrawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
     }
 }
 
+void glcdSetXY(uint16_t x, uint16_t y)
+{
+    _x = x;
+    _y = y;
+}
+
+void glcdLoadFont(const uint8_t *font, uint16_t color, uint16_t bgColor)
+{
+    _font = font + FONT_HEADER_END;
+
+    memcpy_P(&fp, font, FONT_HEADER_END);
+    fp.color = color;
+    fp.bgColor = bgColor;
+}
+
 void glcdWriteChar(uint8_t code)
 {
     uint8_t i;
@@ -143,38 +161,30 @@ void glcdWriteString(char *string)
     }
 }
 
-void glcdSetXY(uint16_t x, uint16_t y)
+void glcdLoadLcdFont(const uint8_t *font, uint16_t color, uint16_t bgColor)
 {
-    _x = x;
-    _y = y;
-}
+    _fontLcd = font + FONT_LCD_HEADER_END;
 
-void glcdLoadFont(const uint8_t *font, uint16_t color, uint16_t bgColor)
-{
-    _font = font + FONT_HEADER_END;
-
-    memcpy_P(&fp, font, FONT_HEADER_END);
-    fp.color = color;
-    fp.bgColor = bgColor;
+    memcpy_P(&flp, font, FONT_LCD_HEADER_END);
+    flp.color = color;
+    flp.bgColor = bgColor;
 }
 
 void glcdWriteLcdDig(uint8_t dig)
 {
-    uint8_t seg;
     uint8_t dirMask = 0b01001001; // 1 - vertical, 0 - horisontal segment
     uint16_t segColor;
 
     dig = pgm_read_byte(lcdChar + (dig - '0'));
 
-    for (seg = 0; seg < 7; seg++) {
-        segColor = dig & (1 << seg) ? LCD_COLOR_GREEN : LCD_COLOR_BLACK;
-        const uint8_t *digStart = _fontLcd + seg * (8 * 2 + 1);
-        uint8_t startLine = pgm_read_byte(digStart);
-        uint8_t line;
+    for (uint8_t seg = 0; seg < 7; seg++) {
+        segColor = dig & (1 << seg) ? flp.color : flp.bgColor;
+        const uint8_t *digStart = _fontLcd + seg * (flp.thickness * 2 + 1);
+        uint8_t startLine = pgm_read_byte(digStart++);
         uint8_t point1, point2;
-        for (line = 0; line < 8; line++) {
-            point1 = pgm_read_byte(digStart + 1 + line * 2);
-            point2 = pgm_read_byte(digStart + 1 + line * 2 + 1);
+        for (uint8_t line = 0; line < flp.thickness; line++) {
+            point1 = pgm_read_byte(digStart++);
+            point2 = pgm_read_byte(digStart++);
             if (dirMask & (1 << seg)) {
                 glcdDrawHorizLine(_x + point1, _x + point2, _y + startLine + line, segColor);
             } else {
