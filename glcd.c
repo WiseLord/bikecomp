@@ -165,20 +165,46 @@ void glcdLoadLcdFont(const uint8_t *font, uint16_t color, uint16_t bgColor)
 {
     _fontLcd = font + FONT_LCD_HEADER_END;
 
+    glcdSetXY(0, 0);
+    glcdWriteString("Speed");
+    glcdSetXY(0, 296);
+    glcdWriteString("Bottom test string");
+
     memcpy_P(&flp, font, FONT_LCD_HEADER_END);
     flp.color = color;
     flp.bgColor = bgColor;
 }
 
-void glcdWriteLcdDig(uint8_t dig)
+void glcdWriteLcdDig(uint8_t code)
 {
     uint8_t dirMask = 0b01001001; // 1 - vertical, 0 - horisontal segment
     uint16_t segColor;
 
-    dig = pgm_read_byte(lcdChar + (dig - '0'));
+    if (code == '.' || code == ':') {
+        const uint8_t *digStart = _fontLcd + 7 * (flp.thickness * 2 + 1);
+        uint8_t startLine = pgm_read_byte(digStart++);
+        uint8_t point1, point2;
+        for (uint8_t line = 0; line < flp.thickness; line++) {
+            point1 = pgm_read_byte(digStart++);
+            point2 = pgm_read_byte(digStart++);
+            if (code == '.') {
+                glcdDrawHorizLine(_x + point1, _x + point2, _y + startLine + line, flp.color);
+            } else {
+                glcdDrawHorizLine(_x + point1, _x + point2, _y + startLine - 2 * flp.thickness + line, flp.color);
+                glcdDrawHorizLine(_x + point1, _x + point2, _y + 2 * flp.thickness + line, flp.color);
+            }
+        }
+
+        return;
+    }
+
+    if (code < '0' || code > '9')
+        return;
+
+    code = pgm_read_byte(lcdChar + (code - '0'));
 
     for (uint8_t seg = 0; seg < 7; seg++) {
-        segColor = dig & (1 << seg) ? flp.color : flp.bgColor;
+        segColor = code & (1 << seg) ? flp.color : flp.bgColor;
         const uint8_t *digStart = _fontLcd + seg * (flp.thickness * 2 + 1);
         uint8_t startLine = pgm_read_byte(digStart++);
         uint8_t point1, point2;
