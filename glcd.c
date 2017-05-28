@@ -54,10 +54,10 @@ void glcdDrawRing(int16_t x0, int16_t y0, int16_t r, uint16_t color)
     int16_t x = 0;
     int16_t y = r;
 
-    ili9431DrawPixel(x0, y0 + r, color);
-    ili9431DrawPixel(x0, y0 - r, color);
-    ili9431DrawPixel(x0 + r, y0, color);
-    ili9431DrawPixel(x0 - r, y0, color);
+    glcdDrawPixel(x0, y0 + r, color);
+    glcdDrawPixel(x0, y0 - r, color);
+    glcdDrawPixel(x0 + r, y0, color);
+    glcdDrawPixel(x0 - r, y0, color);
 
     while (x < y) {
         if (f >= 0) {
@@ -144,9 +144,12 @@ void glcdWriteChar(uint8_t code)
     oft *= fp.height;
     oft += fp.ccnt;
 
+#if GLCD_TYPE == 9341
     ili9341SetWindow(_x, _y, _x + fwd - 1, _y + fp.height * 8 - 1);
-
     ili9341WriteChar(_font + oft, fwd, swd);
+#else
+#error "Implement _WriteChar in display driver!"
+#endif
 
     glcdSetXY(_x + fwd, _y);
 }

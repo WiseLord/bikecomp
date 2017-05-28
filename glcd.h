@@ -1,17 +1,21 @@
 #ifndef GLCD_H
 #define GLCD_H
 
+#include <inttypes.h>
+
 #ifndef GLCD_TYPE
-#define GLCD_TYPE                       ILI9341
+#define GLCD_TYPE                       9341 // ILI9341
 #endif
 
-#if GLCD_TYPE == ILI9341
+#if GLCD_TYPE == 9341
 #include "ili9341.h"
+#else
+#error "Unknown GLCD_TYPE"
 #endif
 
 #include "fonts.h"
 
-#if GLCD_TYPE == ILI9341
+#if GLCD_TYPE == 9341
 #define LCD_WIDTH                       ILI9341_WIDTH
 #define LCD_HEIGHT                      ILI9341_HEIGHT
 #define LCD_PIXELS                      ILI9341_PIXELS
@@ -67,15 +71,20 @@ extern FontParam fp;
 extern FontLcdParam flp;
 
 // Some function remap
-#if GLCD_TYPE == ILI9341
-#define glcdInit                        ili9341Init
-#define glcdDrawPixel                   ili9431DrawPixel
-#define glcdDrawRectangle               ili9341DrawRectangle
-#define glcdDrawColorMap                ili9341DrawColorMap
+#if GLCD_TYPE == 9341
+#define glcdInit()                              ili9341Init()
+#define glcdDrawPixel(x, y, clr)                ili9431DrawPixel(x, y, clr)
+#define glcdDrawRectangle(x0, y0, x1, y1, clr)  ili9341DrawRectangle(x0, y0, x1, y1, clr)
+#define glcdDrawColorMap()                      ili9341DrawColorMap()
+#else
+#define glcdInit()
+#define glcdDrawPixel(x, y, color)
+#define glcdDrawRectangle(x0, y0, x1, y1, clr)
+#define glcdDrawColorMap()
 #endif
-#define glcdFill(c)                     glcdDrawRectangle(0, 0, glcdOpts.width, glcdOpts.height, c)
-#define glcdDrawHorizLine(x0, x1, y, c) glcdDrawRectangle(x0, y, x1, y, c);
-#define glcdDrawVertLine(x, y0, y1, c)  glcdDrawRectangle(x, y0, x, y1, c);
+#define glcdFill(c)                         glcdDrawRectangle(0, 0, glcdOpts.width, glcdOpts.height, c)
+#define glcdDrawHorizLine(x0, x1, y, c)     glcdDrawRectangle(x0, y, x1, y, c);
+#define glcdDrawVertLine(x, y0, y1, c)      glcdDrawRectangle(x, y0, x, y1, c);
 
 void glcdDrawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
 void glcdDrawFrame(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
