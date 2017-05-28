@@ -11,7 +11,7 @@ FontLcdParam flp;
 const uint8_t *_font;
 const uint8_t *_fontLcd = font_lcd_72;
 
-static uint16_t _x, _y;
+static int16_t _x, _y;
 
 void glcdDrawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color)
 {
@@ -164,11 +164,6 @@ void glcdWriteString(char *string)
 void glcdLoadLcdFont(const uint8_t *font, uint16_t color, uint16_t bgColor)
 {
     _fontLcd = font + FONT_LCD_HEADER_END;
-
-    glcdSetXY(0, 0);
-    glcdWriteString("Speed");
-    glcdSetXY(0, 296);
-    glcdWriteString("Bottom test string");
 
     memcpy_P(&flp, font, FONT_LCD_HEADER_END);
     flp.color = color;

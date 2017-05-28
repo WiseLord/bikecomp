@@ -2,7 +2,7 @@
 #define GLCD_H
 
 #ifndef GLCD_TYPE
-#define GLCD_TYPE               ILI9341
+#define GLCD_TYPE                       ILI9341
 #endif
 
 #if GLCD_TYPE == ILI9341
@@ -12,20 +12,42 @@
 #include "fonts.h"
 
 #if GLCD_TYPE == ILI9341
-#define LCD_WIDTH               ILI9341_WIDTH
-#define LCD_HEIGHT              ILI9341_HEIGHT
-#define LCD_PIXELS              ILI9341_PIXELS
+#define LCD_WIDTH                       ILI9341_WIDTH
+#define LCD_HEIGHT                      ILI9341_HEIGHT
+#define LCD_PIXELS                      ILI9341_PIXELS
 #endif
 
 //Colors
-#define LCD_COLOR_WHITE         0xFFFF
-#define LCD_COLOR_BLACK         0x0000
-#define LCD_COLOR_RED           0xF800
-#define LCD_COLOR_GREEN         0x07E0
-#define LCD_COLOR_BLUE          0x001F
-#define LCD_COLOR_YELLOW        0xFFE0
-#define LCD_COLOR_CYAN          0x07FF
-#define LCD_COLOR_MAGENTA       0xF81F
+#define RGB_TO_565(x)                   (((x >> 8) & 0xF800) | ((x >> 5) & 0x7E0) | ((x >> 3) & 0x1F))
+#define LCD_COLOR_BLACK                 RGB_TO_565(0x000000)
+#define LCD_COLOR_NAVI                  RGB_TO_565(0x000080)
+#define LCD_COLOR_BLUE                  RGB_TO_565(0x0000FF)
+#define LCD_COLOR_GREEN                 RGB_TO_565(0x008000)
+#define LCD_COLOR_TEAL                  RGB_TO_565(0x008080)
+#define LCD_COLOR_DODGER_BLUE           RGB_TO_565(0x0080FF)
+#define LCD_COLOR_LIME                  RGB_TO_565(0x00FF00)
+#define LCD_COLOR_SPRING_GREEN          RGB_TO_565(0x00FF80)
+#define LCD_COLOR_AQUA                  RGB_TO_565(0x00FFFF)
+#define LCD_COLOR_NERO                  RGB_TO_565(0x252525)
+#define LCD_COLOR_ECLIPSE               RGB_TO_565(0x3F3939)
+#define LCD_COLOR_MAROON                RGB_TO_565(0x800000)
+#define LCD_COLOR_PURPLE                RGB_TO_565(0x800080)
+#define LCD_COLOR_ELECTRIC_INDIGO       RGB_TO_565(0x8000FF)
+#define LCD_COLOR_OLIVE                 RGB_TO_565(0x808000)
+#define LCD_COLOR_GRAY                  RGB_TO_565(0x808080)
+#define LCD_COLOR_LIGHT_SLATE_BLUE      RGB_TO_565(0x8080FF)
+#define LCD_COLOR_CHARTREUSE            RGB_TO_565(0x80FF00)
+#define LCD_COLOR_LIGHT_GREEN           RGB_TO_565(0x80FF80)
+#define LCD_COLOR_ELECTRIC_BLUE         RGB_TO_565(0x80FFFF)
+#define LCD_COLOR_RED                   RGB_TO_565(0xFF0000)
+#define LCD_COLOR_DEEP_PINK             RGB_TO_565(0xFF0080)
+#define LCD_COLOR_MAGENTA               RGB_TO_565(0xFF00FF)
+#define LCD_COLOR_DARK_ORANGE           RGB_TO_565(0xFF8000)
+#define LCD_COLOR_LIGHT_CORAL           RGB_TO_565(0xFF8080)
+#define LCD_COLOR_FUCHSIA_PINK          RGB_TO_565(0xFF80FF)
+#define LCD_COLOR_YELLOW                RGB_TO_565(0xFFFF00)
+#define LCD_COLOR_WITCH_HAZE            RGB_TO_565(0xFFFF80)
+#define LCD_COLOR_WHITE                 RGB_TO_565(0xFFFFFF)
 
 typedef enum {
     LCD_Orientation_Portrait_1,
@@ -46,10 +68,10 @@ extern FontLcdParam flp;
 
 // Some function remap
 #if GLCD_TYPE == ILI9341
-#define glcdInit                ili9341Init
-#define glcdDrawPixel           ili9431DrawPixel
-#define glcdDrawRectangle       ili9341DrawRectangle
-#define glcdDrawColorMap        ili9341DrawColorMap
+#define glcdInit                        ili9341Init
+#define glcdDrawPixel                   ili9431DrawPixel
+#define glcdDrawRectangle               ili9341DrawRectangle
+#define glcdDrawColorMap                ili9341DrawColorMap
 #endif
 #define glcdFill(c)                     glcdDrawRectangle(0, 0, glcdOpts.width, glcdOpts.height, c)
 #define glcdDrawHorizLine(x0, x1, y, c) glcdDrawRectangle(x0, y, x1, y, c);

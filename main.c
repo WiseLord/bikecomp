@@ -17,42 +17,26 @@ int main(void)
     hwInit();
     glcdFill(LCD_COLOR_BLACK);
 
-    glcdLoadFont(font_ks0066_ru_24, LCD_COLOR_GREEN, LCD_COLOR_BLACK);
-    glcdSetXY(0, 0);
+    glcdLoadFont(font_ks0066_ru_24, LCD_COLOR_LIME, LCD_COLOR_BLACK);
+    glcdSetXY(156, 0);
     glcdWriteString("Speed");
-    glcdSetXY(0, 296);
-    glcdWriteString("Bottom test string");
 
-    glcdLoadLcdFont(font_lcd_72, LCD_COLOR_CYAN, LCD_COLOR_BLACK);
-    glcdSetXY(8, 30);
-    glcdWriteLcdString("57832");
-
-    glcdLoadLcdFont(font_lcd_45, LCD_COLOR_YELLOW, LCD_COLOR_BLACK);
-    glcdSetXY(5, 110);
-    glcdWriteLcdString("26497816");
-
-    glcdLoadLcdFont(font_lcd_27, LCD_COLOR_WHITE, LCD_COLOR_BLACK);
-    for (uint8_t i = '0'; i <= '9'; i++) {
-        glcdSetXY(225 - (i - '0') * (flp.width + flp.thickness), 160);
-        glcdWriteLcdChar(i);
-    }
+    glcdLoadLcdFont(font_lcd_117, LCD_COLOR_AQUA, LCD_COLOR_BLACK);
+    glcdSetXY(0, 0);
+    glcdWriteLcdString("57.");
+    glcdLoadLcdFont(font_lcd_72, LCD_COLOR_AQUA, LCD_COLOR_BLACK);
+    glcdSetXY(182, 45);
+    glcdWriteLcdString("2");
 
     glcdLoadLcdFont(font_lcd_72, LCD_COLOR_RED, LCD_COLOR_BLACK);
-    glcdSetXY(0, 200);
-    glcdWriteLcdString("54.3");
+    glcdSetXY(0, 150);
+    glcdWriteLcdString("254.3");
 
-//    glcdWriteLcdChar('5');
-//    glcdSetXY(48, 200);
-//    glcdWriteLcdChar('4');
-//    glcdSetXY(96, 200);
-//    glcdWriteString("km/h");
+    glcdLoadLcdFont(font_lcd_45, LCD_COLOR_YELLOW, LCD_COLOR_BLACK);
+    glcdSetXY(0, 230);
+    glcdWriteLcdString("26497816");
 
-    glcdSetXY(96, 200);
-    glcdWriteLcdChar('.');
-    glcdLoadLcdFont(font_lcd_45, LCD_COLOR_RED, LCD_COLOR_BLACK);
-
-
-    while(1);
+    while (1);
 
     glcdDrawColorMap();
 
@@ -63,9 +47,9 @@ int main(void)
     _delay_ms(500);
     glcdDrawCircle(120, 160, 50, LCD_COLOR_YELLOW);
     _delay_ms(500);
-    glcdDrawCircle(120, 160, 50, LCD_COLOR_GREEN);
+    glcdDrawCircle(120, 160, 50, LCD_COLOR_LIME);
     _delay_ms(500);
-    glcdDrawCircle(120, 160, 50, LCD_COLOR_CYAN);
+    glcdDrawCircle(120, 160, 50, LCD_COLOR_AQUA);
     _delay_ms(500);
     glcdDrawCircle(120, 160, 50, LCD_COLOR_BLUE);
     _delay_ms(500);
