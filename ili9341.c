@@ -4,20 +4,13 @@
 #include <util/delay.h>
 #include "glcd.h"
 
-static void inline __attribute__((always_inline)) ili9341SendSPI(uint8_t data)
-{
-    // Fill output buffer with data
-    SPDR = data;
-
-    // Wait for transmission to complete
-    while (!(SPSR & (1 << SPIF)));
-}
+#define ili9341SendSPI(data) { while (!(SPSR & (1 << SPIF))); SPDR = data; }
 
 static void ili9341WriteData(uint8_t data)
 {
-    SET(ILI9341_DC);
     CLR(ILI9341_CS);
-    ili9341SendSPI(data);
+    SPDR = data;
+    while (!(SPSR & (1 << SPIF)));  // Wait for transmittion to complete
     SET(ILI9341_CS);
 }
 
@@ -25,8 +18,10 @@ static void ili9341SendCmd(uint8_t cmd)
 {
     CLR(ILI9341_DC);
     CLR(ILI9341_CS);
-    ili9341SendSPI(cmd);
+    SPDR = cmd;
+    while (!(SPSR & (1 << SPIF)));  // Wait for transmittion to complete
     SET(ILI9341_CS);
+    SET(ILI9341_DC);
 }
 
 static void ili9341SendData(uint16_t data)
@@ -34,15 +29,16 @@ static void ili9341SendData(uint16_t data)
     uint8_t dataH = data >> 8;
     uint8_t dataL = data & 0xFF;
 
-    SET(ILI9341_DC);
     CLR(ILI9341_CS);
     ili9341SendSPI(dataH);
     ili9341SendSPI(dataL);
+    while (!(SPSR & (1 << SPIF)));  // Wait for last transmission to complete
     SET(ILI9341_CS);
 }
 
 static void ili9341InitSeq(void)
 {
+    CLR(ILI9341_RST);
     _delay_ms(100);
     SET(ILI9341_RST);
     _delay_ms(100);
@@ -217,10 +213,6 @@ void ili9341Init(void)
     SPCR = (1 << SPE) | (1 << MSTR);
     SPSR = (1 << SPI2X);
 
-    SET(ILI9341_CS);
-    CLR(ILI9341_RST);
-    SET(ILI9341_LED);
-
     // Init magic
     ili9341InitSeq();
     SET(ILI9341_LED);
@@ -238,16 +230,13 @@ void ili9431DrawPixel(uint16_t x, uint16_t y, uint16_t color)
 void ili9341DrawRectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color)
 {
     uint32_t i, j;
-
     uint16_t w = x1 - x0 + 1;
     uint16_t h = y1 - y0 + 1;
-
-    ili9341SetWindow(x0, y0, x1, y1);
-
     uint8_t colorH = color >> 8;
     uint8_t colorL = color & 0xFF;
 
-    SET(ILI9341_DC);
+    ili9341SetWindow(x0, y0, x1, y1);
+
     CLR(ILI9341_CS);
     for (i = 0; i < w; i++) {
         for (j = 0; j < h; j++) {
@@ -255,6 +244,8 @@ void ili9341DrawRectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, ui
             ili9341SendSPI(colorL);
         }
     }
+    // Wait for last transmission to complete
+    while (!(SPSR & (1 << SPIF)));
     SET(ILI9341_CS);
 }
 
@@ -263,10 +254,8 @@ void ili9341WriteChar(const uint8_t *chOft, uint8_t fwd, uint8_t swd)
     uint8_t i;
     uint8_t j;
     uint8_t k;
-
     uint8_t pgmData;
 
-    SET(ILI9341_DC);
     CLR(ILI9341_CS);
     for (i = 0; i < fwd; i++) {
         for (j = 0; j < fp.height; j++) {
@@ -286,6 +275,8 @@ void ili9341WriteChar(const uint8_t *chOft, uint8_t fwd, uint8_t swd)
             }
         }
     }
+    // Wait for last transmission to complete
+    while (!(SPSR & (1 << SPIF)));
     SET(ILI9341_CS);
 }
 
@@ -293,12 +284,10 @@ void ili9341DrawColorMap(void)
 {
     uint16_t r, g, b, color;
     uint16_t i, j;
+    uint8_t quarter = glcdOpts.height / 4;
 
     ili9341SetWindow(0, 0, glcdOpts.width - 1, glcdOpts.height - 1);
 
-    uint8_t quarter = glcdOpts.height / 4;
-
-    SET(ILI9341_DC);
     CLR(ILI9341_CS);
     for (j = 0; j < glcdOpts.width; j++) {
         r = 0;
@@ -329,5 +318,6 @@ void ili9341DrawColorMap(void)
             ili9341SendSPI(color & 0xFF);
         }
     }
+    while (!(SPSR & (1 << SPIF)));  // Wait for last transmission to complete
     SET(ILI9341_CS);
 }

@@ -39,6 +39,10 @@ int main(void)
     while (1);
 
     glcdDrawColorMap();
+    while(1) {
+        glcdFill(LCD_COLOR_BLACK);
+        glcdDrawColorMap();
+    }
 
     glcdDrawCircle(120, 160, 59, LCD_COLOR_BLACK);
     glcdDrawCircle(120, 160, 56, LCD_COLOR_WHITE);
