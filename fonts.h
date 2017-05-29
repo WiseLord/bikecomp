@@ -92,5 +92,13 @@ typedef struct {
 #define CH_7        (BIT_A | BIT_B | BIT_C)
 #define CH_8        (BIT_A | BIT_B | BIT_C | BIT_D | BIT_E | BIT_F | BIT_G)
 #define CH_9        (BIT_A | BIT_B | BIT_C | BIT_D | BIT_F | BIT_G)
+#define CH_A        (BIT_A | BIT_B | BIT_C | BIT_E | BIT_F | BIT_G)
+#define CH_B        (BIT_C | BIT_D | BIT_E | BIT_F | BIT_G)
+#define CH_C        (BIT_A | BIT_D | BIT_E | BIT_F)
+#define CH_D        (BIT_B | BIT_C | BIT_D | BIT_E | BIT_G)
+#define CH_E        (BIT_A | BIT_D | BIT_E | BIT_F | BIT_G)
+#define CH_F        (BIT_A | BIT_E | BIT_F | BIT_G)
+#define CH_EMPTY    (0)
+#define CH_MINUS    (BIT_G)
 
 #endif /* FONTS_H */

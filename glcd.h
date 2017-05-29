@@ -98,6 +98,7 @@ void glcdWriteChar(uint8_t code);
 void glcdWriteString(char *string);
 
 void glcdLoadLcdFont(const uint8_t *font, uint16_t color, uint16_t bgColor);
+void glcdSkipLcdChar(uint8_t code);
 void glcdWriteLcdChar(uint8_t code);
 void glcdWriteLcdString(char *string);
 

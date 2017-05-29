@@ -3,7 +3,9 @@
 
 const uint8_t lcdChar[] PROGMEM = {
     CH_0, CH_1, CH_2, CH_3, CH_4,
-    CH_5, CH_6, CH_7, CH_8, CH_9
+    CH_5, CH_6, CH_7, CH_8, CH_9,
+    CH_A, CH_B, CH_C, CH_D, CH_E, CH_F,
+    CH_MINUS, CH_EMPTY
 };
 
 // Font format:
