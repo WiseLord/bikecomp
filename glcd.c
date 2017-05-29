@@ -175,12 +175,14 @@ void glcdLoadLcdFont(const uint8_t *font, uint16_t color, uint16_t bgColor)
 
 void glcdSkipLcdChar(uint8_t code)
 {
-    if (code >= '0' && code <= '9') {
+    if ((code >= '0' && code <= '9') ||
+            (code == ' ') || (code == '-') ||
+            (code >= 'A' && code <= 'F') ||
+            (code >= 'a' && code <= 'f')) {
         glcdSetXY(_x + flp.width + flp.thickness, _y);
     } else if (code == '.' || code == ':') {
         glcdSetXY(_x + 2 * flp.thickness, _y);
     }
-
 }
 
 void glcdWriteLcdChar(uint8_t code)

@@ -4,6 +4,7 @@
 #include "ili9341.h"
 #include "glcd.h"
 #include "fonts.h"
+#include "screen.h"
 
 void hwInit()
 {
@@ -21,12 +22,7 @@ int main(void)
     glcdSetXY(156, 0);
     glcdWriteString("Speed");
 
-    glcdLoadLcdFont(font_lcd_117, LCD_COLOR_AQUA, LCD_COLOR_BLACK);
-    glcdSetXY(0, 0);
-    glcdWriteLcdString("57.");
-    glcdLoadLcdFont(font_lcd_72, LCD_COLOR_AQUA, LCD_COLOR_BLACK);
-    glcdSetXY(182, 45);
-    glcdWriteLcdString("2");
+    showScreenMain();
 
     glcdLoadLcdFont(font_lcd_72, LCD_COLOR_RED, LCD_COLOR_BLACK);
     glcdSetXY(0, 150);
@@ -34,7 +30,7 @@ int main(void)
 
     glcdLoadLcdFont(font_lcd_45, LCD_COLOR_YELLOW, LCD_COLOR_BLACK);
     glcdSetXY(0, 230);
-    glcdWriteLcdString("26497816");
+    glcdWriteLcdString("ab-Cd Ef1");
 
     while (1);
 
