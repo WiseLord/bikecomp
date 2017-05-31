@@ -1,3 +1,5 @@
+measure.c
+measure.h
 screen.c
 screen.h
 .astylerc

@@ -92,6 +92,7 @@ void glcdDrawRing(int16_t x0, int16_t y0, int16_t r, uint16_t color);
 void glcdDrawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
 
 void glcdSetXY(uint16_t x, uint16_t y);
+void glcdSetY(uint16_t y);
 
 void glcdLoadFont(const uint8_t *font, uint16_t color, uint16_t bgColor);
 void glcdWriteChar(uint8_t code);

@@ -9,6 +9,7 @@ typedef enum {
     SCREEN_END
 } Screen;
 
-void showScreenMain();
+void showScreenMain(void);
+void updateMainScreen(void);
 
 #endif // SCREEN_H

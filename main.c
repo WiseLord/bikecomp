@@ -5,6 +5,7 @@
 #include "glcd.h"
 #include "fonts.h"
 #include "screen.h"
+#include "measure.h"
 
 void hwInit()
 {
@@ -18,21 +19,12 @@ int main(void)
     hwInit();
     glcdFill(LCD_COLOR_BLACK);
 
-    glcdLoadFont(font_ks0066_ru_24, LCD_COLOR_LIME, LCD_COLOR_BLACK);
-    glcdSetXY(156, 0);
-    glcdWriteString("Speed");
-
     showScreenMain();
 
-    glcdLoadLcdFont(font_lcd_72, LCD_COLOR_RED, LCD_COLOR_BLACK);
-    glcdSetXY(0, 150);
-    glcdWriteLcdString("254.3");
-
-    glcdLoadLcdFont(font_lcd_45, LCD_COLOR_YELLOW, LCD_COLOR_BLACK);
-    glcdSetXY(0, 230);
-    glcdWriteLcdString("ab-Cd Ef1");
-
-    while (1);
+    while (1) {
+        updateMainScreen();
+        testUpdate();
+    }
 
     glcdDrawColorMap();
     while(1) {

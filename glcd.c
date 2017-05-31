@@ -8,8 +8,8 @@ GlcdOpts glcdOpts;
 FontParam fp;
 FontLcdParam flp;
 
-const uint8_t *_font;
-const uint8_t *_fontLcd = font_lcd_72;
+static const uint8_t *_font;
+static const uint8_t *_fontLcd = font_lcd_72;
 
 static int16_t _x, _y;
 
@@ -114,6 +114,11 @@ void glcdSetXY(uint16_t x, uint16_t y)
     _y = y;
 }
 
+void glcdSetY(uint16_t y)
+{
+    _y = y;
+}
+
 void glcdLoadFont(const uint8_t *font, uint16_t color, uint16_t bgColor)
 {
     _font = font + FONT_HEADER_END;
@@ -193,9 +198,9 @@ void glcdWriteLcdChar(uint8_t code)
     if (code >= '0' && code <= '9') {
         code = pgm_read_byte(lcdChar + (code - '0'));
     } else if (code == ' ') {
-        code = pgm_read_byte(lcdChar + 16);
-    } else if (code == '-') {
         code = pgm_read_byte(lcdChar + 17);
+    } else if (code == '-') {
+        code = pgm_read_byte(lcdChar + 16);
     } else if (code == '.' || code == ':') {
         const uint8_t *digStart = _fontLcd + 7 * (flp.thickness * 2 + 1);
         uint8_t startLine = pgm_read_byte(digStart++);
