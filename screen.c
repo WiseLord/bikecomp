@@ -1,5 +1,6 @@
 #include "screen.h"
 
+#include <avr/pgmspace.h>
 #include "glcd.h"
 #include "measure.h"
 
@@ -7,7 +8,31 @@
 
 static char strbuf[STR_BUFSIZE + 1];           // String buffer
 
-static char *mkNumString(int32_t number, uint8_t width, uint8_t lead, uint8_t dot)
+static const ParamPgm speedPgm PROGMEM = {
+    24, 4,
+    font_lcd_117, font_lcd_72,
+    LCD_COLOR_AQUA, LCD_COLOR_BLACK,
+    4, 1, ' ',
+};
+static Param speed = { &speedPgm };
+
+static const ParamPgm trackPgm PROGMEM = {
+    57, 148,
+    font_lcd_72, font_lcd_45,
+    LCD_COLOR_YELLOW, LCD_COLOR_BLACK,
+    5, 1, ' ',
+};
+static Param track = { &trackPgm };
+
+static const ParamPgm distancePgm PROGMEM = {
+    9, 244,
+    font_lcd_72, font_lcd_45,
+    LCD_COLOR_LIGHT_CORAL, LCD_COLOR_BLACK,
+    6, 1, ' ',
+};
+static Param distance = { &distancePgm };
+
+static char *mkNumString(int32_t number, uint8_t width, uint8_t dot, uint8_t lead)
 {
     uint8_t numdiv;
     int8_t i;
@@ -30,61 +55,46 @@ static char *mkNumString(int32_t number, uint8_t width, uint8_t lead, uint8_t do
     return strbuf;
 }
 
-static void updateSpeed(uint8_t x, uint8_t y)
+static void updateParam(Param *param, int32_t val)
 {
-    static char speedStrPrev[] = "    ";
-    char *speedStr = mkNumString(getSpeed(), 4, ' ', 1);
+    ParamPgm parPgm;
+    memcpy_P(&parPgm, param->pgm, sizeof(ParamPgm));
 
-    glcdLoadLcdFont(font_lcd_117, LCD_COLOR_AQUA, LCD_COLOR_BLACK);
-    glcdSetXY(x, y);
+    char *valStr = mkNumString(val, parPgm.len, parPgm.dot, parPgm.lead);
 
-    for (uint8_t i = 0; i < 4; i++) {
-        if (i == 2) {
-            glcdLoadLcdFont(font_lcd_72, LCD_COLOR_AQUA, LCD_COLOR_BLACK);
-            glcdSetY(y + 117 - 72);
+    glcdLoadLcdFont(parPgm.fontMain, parPgm.color, parPgm.bgColor);
+    glcdSetXY(parPgm.x, parPgm.y);
+
+    for (uint8_t i = 0; i < parPgm.len; i++) {
+        if (parPgm.dot && i == parPgm.len - parPgm.dot - 1) {
+            glcdLoadLcdFont(parPgm.fontDeci, parPgm.color, parPgm.bgColor);
+            glcdSetY(parPgm.y + pgm_read_byte(&parPgm.fontMain[1]) - pgm_read_byte(&parPgm.fontDeci[1]));
         }
-        if (speedStr[i] != speedStrPrev[i]) {
-            glcdWriteLcdChar(speedStr[i]);
-            speedStrPrev[i] = speedStr[i];
+        if (valStr[i] != param->str[i]) {
+            param->str[i] = valStr[i];
+            glcdWriteLcdChar(param->str[i]);
         } else {
-            glcdSkipLcdChar(speedStr[i]);
-        }
-    }
-}
-
-static void updateDistance(uint8_t x, uint8_t y)
-{
-    static char distanceStrPrev[] = "     ";
-    char *distanceStr = mkNumString(getDistance(), 5, ' ', 1);
-
-    glcdLoadLcdFont(font_lcd_72, LCD_COLOR_YELLOW, LCD_COLOR_BLACK);
-    glcdSetXY(x, y);
-
-    for (uint8_t i = 0; i < 5; i++) {
-        if (i == 3) {
-            glcdLoadLcdFont(font_lcd_45, LCD_COLOR_YELLOW, LCD_COLOR_BLACK);
-            glcdSetY(y + 72 - 45);
-        }
-        if (distanceStr[i] != distanceStrPrev[i]) {
-            glcdWriteLcdChar(distanceStr[i]);
-            distanceStrPrev[i] = distanceStr[i];
-        } else {
-            glcdSkipLcdChar(distanceStr[i]);
+            glcdSkipLcdChar(param->str[i]);
         }
     }
 }
 
 void updateMainScreen(void)
 {
-    updateSpeed(0, 0);
-    updateDistance(0, 140);
+    updateParam(&speed, getSpeed());
+    updateParam(&track, getDistance());
+    updateParam(&distance, getDistance() * 8);
 }
 
 void showScreenMain(void)
 {
     glcdLoadFont(font_ks0066_ru_24, LCD_COLOR_LIME, LCD_COLOR_BLACK);
-    glcdSetXY(156, 0);
+    glcdSetXY(190, 4);
     glcdWriteString("km/h");
-    glcdSetXY(156, 140);
+    glcdDrawHorizLine(4, 235, 135, LCD_COLOR_AQUA);
+    glcdSetXY(213, 144);
+    glcdWriteString("km");
+    glcdDrawHorizLine(4, 235, 232, LCD_COLOR_AQUA);
+    glcdSetXY(213, 244);
     glcdWriteString("km");
 }
