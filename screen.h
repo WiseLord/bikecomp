@@ -5,6 +5,7 @@
 
 typedef enum {
     SCREEN_MAIN,
+    SCREEN_SETUP,
 
     SCREEN_END
 } Screen;
@@ -27,6 +28,6 @@ typedef struct {
 } Param;
 
 void showScreenMain(void);
-void updateMainScreen(void);
+void showScreenSetup(void);
 
 #endif // SCREEN_H

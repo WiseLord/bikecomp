@@ -6,6 +6,8 @@
 
 #define STR_BUFSIZE                     20
 
+static Screen screen = SCREEN_END;
+
 static char strbuf[STR_BUFSIZE + 1];           // String buffer
 
 static const ParamPgm speedPgm PROGMEM = {
@@ -79,22 +81,44 @@ static void updateParam(Param *param, int32_t val)
     }
 }
 
-void updateMainScreen(void)
+void showScreenMain(void)
 {
+    if (SCREEN_MAIN != screen) {
+        screen = SCREEN_MAIN;
+        glcdFill(LCD_COLOR_BLACK);
+
+        glcdLoadFont(font_ks0066_ru_24, LCD_COLOR_LIME, LCD_COLOR_BLACK);
+        glcdSetXY(190, 4);
+        glcdWriteString("km/h");
+        glcdDrawHorizLine(4, 235, 135, LCD_COLOR_AQUA);
+        glcdSetXY(213, 144);
+        glcdWriteString("km");
+        glcdDrawHorizLine(4, 235, 232, LCD_COLOR_AQUA);
+        glcdSetXY(213, 244);
+        glcdWriteString("km");
+    }
     updateParam(&speed, getSpeed());
     updateParam(&track, getDistance());
     updateParam(&distance, getDistance() * 8);
 }
 
-void showScreenMain(void)
+void showScreenSetup(void)
 {
-    glcdLoadFont(font_ks0066_ru_24, LCD_COLOR_LIME, LCD_COLOR_BLACK);
-    glcdSetXY(190, 4);
-    glcdWriteString("km/h");
-    glcdDrawHorizLine(4, 235, 135, LCD_COLOR_AQUA);
-    glcdSetXY(213, 144);
-    glcdWriteString("km");
-    glcdDrawHorizLine(4, 235, 232, LCD_COLOR_AQUA);
-    glcdSetXY(213, 244);
-    glcdWriteString("km");
+    if (SCREEN_SETUP != screen) {
+        screen = SCREEN_SETUP;
+        glcdFill(LCD_COLOR_NERO);
+
+        glcdLoadFont(font_ks0066_ru_24, LCD_COLOR_LIME, LCD_COLOR_BLACK);
+        glcdSetXY(190, 4);
+        glcdWriteString("km/h");
+        glcdDrawHorizLine(4, 235, 135, LCD_COLOR_AQUA);
+        glcdSetXY(213, 144);
+        glcdWriteString("km");
+        glcdDrawHorizLine(4, 235, 232, LCD_COLOR_AQUA);
+        glcdSetXY(213, 244);
+        glcdWriteString("km");
+    }
+    updateParam(&speed, getSpeed());
+    updateParam(&track, getDistance());
+    updateParam(&distance, getDistance() * 8);
 }

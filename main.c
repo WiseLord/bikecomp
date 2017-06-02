@@ -17,12 +17,9 @@ void hwInit()
 int main(void)
 {
     hwInit();
-    glcdFill(LCD_COLOR_BLACK);
-
-    showScreenMain();
 
     while (1) {
-        updateMainScreen();
+        showScreenMain();
         testUpdate();
     }
 
