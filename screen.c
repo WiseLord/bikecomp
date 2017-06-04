@@ -81,7 +81,7 @@ static void updateParam(Param *param, int32_t val)
     }
 }
 
-void showScreenMain(void)
+void screenShowMain(void)
 {
     if (SCREEN_MAIN != screen) {
         screen = SCREEN_MAIN;
@@ -102,7 +102,7 @@ void showScreenMain(void)
     updateParam(&distance, getDistance() * 8);
 }
 
-void showScreenSetup(void)
+void screenShowSetup(void)
 {
     if (SCREEN_SETUP != screen) {
         screen = SCREEN_SETUP;
@@ -121,4 +121,18 @@ void showScreenSetup(void)
     updateParam(&speed, getSpeed());
     updateParam(&track, getDistance());
     updateParam(&distance, getDistance() * 8);
+}
+
+void screenUpdate()
+{
+    switch (screen) {
+    case SCREEN_MAIN:
+        screenShowMain();
+        break;
+    case SCREEN_SETUP:
+        screenShowSetup();
+        break;
+    default:
+        break;
+    }
 }

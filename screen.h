@@ -27,7 +27,9 @@ typedef struct {
     char str[6];
 } Param;
 
-void showScreenMain(void);
-void showScreenSetup(void);
+void screenShowMain(void);
+void screenShowSetup(void);
+
+void screenUpdate(void);
 
 #endif // SCREEN_H

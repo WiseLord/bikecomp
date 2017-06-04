@@ -15,8 +15,12 @@ uint16_t getDistance(void)
 
 void testUpdate()
 {
-    rawDistance++;
-    if (rawDistance >= 10000)
-        rawDistance = 0;
-    rawSpeed = rawDistance / 16;
+    static uint16_t x;
+    if (++x >= 61) {
+        x = 0;
+        rawDistance++;
+    }
+//    if (rawDistance >= 10000)
+//        rawDistance = 0;
+//    rawSpeed = rawDistance / 10;
 }

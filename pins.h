@@ -33,5 +33,12 @@
 #define ILI9341_CS          ARDUINO_SS
 #define ILI9341_CS_LINE     ARDUINO_SS_LINE
 
+// Buttons
+#define BUTTON_1            ARDUINO_D4
+#define BUTTON_1_LINE       ARDUINO_D4_LINE
+#define BUTTON_2            ARDUINO_D3
+#define BUTTON_2_LINE       ARDUINO_D3_LINE
+#define BUTTON_3            ARDUINO_D2
+#define BUTTON_3_LINE       ARDUINO_D2_LINE
 
 #endif // PINS_H
