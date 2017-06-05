@@ -7,8 +7,11 @@ extern const uint8_t font_digits_32[];
 
 extern const uint8_t lcdChar[];
 extern const uint8_t font_lcd_117[];
+extern const uint8_t font_lcd_99[];
 extern const uint8_t font_lcd_72[];
+extern const uint8_t font_lcd_63[];
 extern const uint8_t font_lcd_45[];
+extern const uint8_t font_lcd_36[];
 extern const uint8_t font_lcd_27[];
 
 typedef enum {
