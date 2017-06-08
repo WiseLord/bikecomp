@@ -3,7 +3,7 @@
 
 #include <inttypes.h>
 
-#define PARAM_STRBUF    6
+#define PARAM_STRBUF    7
 
 typedef enum {
     SCREEN_MAIN,
@@ -14,20 +14,32 @@ typedef enum {
 } Screen;
 
 typedef struct {
-    uint16_t x;
-    uint16_t y;
+    // Rectangle parameters
+    uint16_t left;
+    uint16_t top;
+    uint16_t right;
+    uint16_t bottom;
+    // Text label parameters
+    uint16_t labX;
+    uint16_t labY;
+    // LCD font parameters
     const uint8_t *fontMain;
     const uint8_t *fontDeci;
-    uint16_t color;
-    uint16_t bgColor;
+    uint16_t x;
+    uint16_t y;
     uint8_t len;
     uint8_t dot;
     char lead;
-} ParamPgm;
+} SectionPgm;
 
 typedef struct {
-    const ParamPgm * pgm;
+    const SectionPgm *pgm;
     char str[PARAM_STRBUF];
+} Section;
+
+typedef struct {
+    uint16_t color;
+    const char* label;
 } Param;
 
 void screenShowMain(void);

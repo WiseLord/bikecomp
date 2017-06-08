@@ -1,26 +1,16 @@
 #include "measure.h"
 
-static volatile uint16_t rawSpeed = 234;
-static volatile uint16_t rawDistance = 0;
-
-uint16_t getSpeed(void)
+uint16_t getCurrentSpeed(void)
 {
-    return rawSpeed;
+    return 234;
 }
 
-uint16_t getDistance(void)
+uint16_t getCurrentTrack(void)
 {
-    return rawDistance;
+    return 21927;
 }
 
-void testUpdate()
+uint32_t getTotalDistance(void)
 {
-    static uint16_t x;
-    if (++x >= 61) {
-        x = 0;
-        rawDistance++;
-    }
-//    if (rawDistance >= 10000)
-//        rawDistance = 0;
-//    rawSpeed = rawDistance / 10;
+    return 315274;
 }

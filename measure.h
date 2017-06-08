@@ -3,8 +3,8 @@
 
 #include <inttypes.h>
 
-uint16_t getSpeed(void);
-uint16_t getDistance(void);
-void testUpdate();
+uint16_t getCurrentSpeed(void);
+uint16_t getCurrentTrack(void);
+uint32_t getTotalDistance(void);
 
 #endif // MEASURE_H

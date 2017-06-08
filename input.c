@@ -5,7 +5,7 @@
 #include "measure.h"
 #include "pins.h"
 
-static volatile uint8_t btnCmd;                 // Command buffer
+static volatile uint8_t btnCmd = BTN_0;         // Command buffer
 
 void inputInit(void)
 {
@@ -49,8 +49,6 @@ ISR (TIMER0_OVF_vect, ISR_NOBLOCK)              // 16M/256/PSK = ~61 polls/sec
             btnCmd = btnPrev;
         btnCnt = 0;
     }
-
-    testUpdate();
 }
 
 uint8_t getBtnCmd()
