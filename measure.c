@@ -7,6 +7,10 @@ static volatile uint16_t pedalCnt = 0;
 static volatile uint8_t wheelAntiBounce = ANTI_BOUNCE;
 static volatile uint8_t pedalAntiBounce = ANTI_BOUNCE;
 
+// Data saved in eeprom
+int32_t totalDistance = 12356;
+uint16_t wheelLength = 2075;
+
 void measureInit()
 {
     // Sensor lines as inputs
@@ -21,6 +25,10 @@ void measureInit()
     // INT1 on falling edge (pedal sensor)
     EICRA |= (1 << ISC11) | (0 << ISC10);
     EIMSK |= (1 << INT1);
+
+    // TODO: Temporary set sensor as output for sw interrupts
+    OUT(SENSOR_WHEEL);
+    OUT(SENSOR_PEDAL);
 }
 
 void measureAntiBounce()
@@ -49,17 +57,26 @@ ISR(INT1_vect)
 
 uint16_t getCurrentSpeed(void)
 {
-    return 234;
-}
-
-uint16_t getCurrentTrack(void)
-{
     return pedalCnt;
 }
 
-uint32_t getTotalDistance(void)
+int32_t getCurrentTrack(void)
 {
-    return wheelCnt;
+    int32_t ret = wheelCnt;
+
+    ret *= wheelLength;
+    ret /= 1000;
+
+    return ret;
+}
+
+int32_t getTotalDistance(void)
+{
+    int32_t ret = totalDistance;
+
+    ret += getCurrentTrack();
+
+    return ret;
 }
 
 

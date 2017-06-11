@@ -23,8 +23,8 @@ static const SectionPgm mainMidPgm PROGMEM = {
     0, 109, 239, 226,
     2, 111,
     font_lcd_72, font_lcd_45,
-    13, 143,
-    6, 1, ' ',
+    31, 143,
+    6, 2, ' ',
 };
 static Section mainMid = { &mainMidPgm };
 
@@ -135,8 +135,8 @@ void updateDistance(int32_t value)
 void screenShowMain(void)
 {
     updateSpeed(getCurrentSpeed());
-    updateTrack(getCurrentTrack());
-    updateDistance(getTotalDistance());
+    updateTrack(getCurrentTrack() / 10);
+    updateDistance(getTotalDistance() / 100);
 
     screen = SCREEN_MAIN;
 }

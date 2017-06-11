@@ -52,6 +52,22 @@ ISR (TIMER0_OVF_vect, ISR_NOBLOCK)              // 16M/256/PSK = ~61 polls/sec
     }
 
     measureAntiBounce();
+
+    // TODO: Temporary generate software interrupts
+    static uint8_t w = 0;
+    if (++w > 5) {
+        CLR(SENSOR_WHEEL);
+        w = 0;
+    } else {
+        SET(SENSOR_WHEEL);
+    }
+    static uint8_t p = 0;
+    if (++p > 7) {
+        CLR(SENSOR_PEDAL);
+        p = 0;
+    } else {
+        SET(SENSOR_PEDAL);
+    }
 }
 
 uint8_t getBtnCmd()

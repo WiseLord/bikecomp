@@ -9,7 +9,7 @@ void measureInit(void);
 void measureAntiBounce(void);
 
 uint16_t getCurrentSpeed(void);
-uint16_t getCurrentTrack(void);
-uint32_t getTotalDistance(void);
+int32_t getCurrentTrack(void);
+int32_t getTotalDistance(void);
 
 #endif // MEASURE_H
