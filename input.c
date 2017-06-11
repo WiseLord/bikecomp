@@ -9,13 +9,14 @@ static volatile uint8_t btnCmd = BTN_0;         // Command buffer
 
 void inputInit(void)
 {
-    DDR(BUTTON_1) &= ~BUTTON_1_LINE;
-    DDR(BUTTON_2) &= ~BUTTON_2_LINE;
-    DDR(BUTTON_3) &= ~BUTTON_3_LINE;
-
-    PORT(BUTTON_1) |= BUTTON_1_LINE;
-    PORT(BUTTON_2) |= BUTTON_2_LINE;
-    PORT(BUTTON_3) |= BUTTON_3_LINE;
+    // Buttons as inputs
+    IN(BUTTON_1);
+    IN(BUTTON_2);
+    IN(BUTTON_3);
+    // Enable pull-up resistors
+    SET(BUTTON_1);
+    SET(BUTTON_2);
+    SET(BUTTON_3);
 
     TIMSK0 |= (1 << TOIE0);                     // Overflow interrupt
     TCCR0B = (1 << CS02) | (0 << CS01) | (1 << CS00); // PSK = 1024
@@ -49,6 +50,8 @@ ISR (TIMER0_OVF_vect, ISR_NOBLOCK)              // 16M/256/PSK = ~61 polls/sec
             btnCmd = btnPrev;
         btnCnt = 0;
     }
+
+    measureAntiBounce();
 }
 
 uint8_t getBtnCmd()

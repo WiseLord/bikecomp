@@ -36,9 +36,15 @@
 // Buttons
 #define BUTTON_1            ARDUINO_D4
 #define BUTTON_1_LINE       ARDUINO_D4_LINE
-#define BUTTON_2            ARDUINO_D3
-#define BUTTON_2_LINE       ARDUINO_D3_LINE
-#define BUTTON_3            ARDUINO_D2
-#define BUTTON_3_LINE       ARDUINO_D2_LINE
+#define BUTTON_2            ARDUINO_D5
+#define BUTTON_2_LINE       ARDUINO_D5_LINE
+#define BUTTON_3            ARDUINO_D6
+#define BUTTON_3_LINE       ARDUINO_D6_LINE
+
+// Sensors
+#define SENSOR_WHEEL        ARDUINO_D2
+#define SENSOR_WHEEL_LINE   ARDUINO_D2_LINE
+#define SENSOR_PEDAL        ARDUINO_D3
+#define SENSOR_PEDAL_LINE   ARDUINO_D3_LINE
 
 #endif // PINS_H

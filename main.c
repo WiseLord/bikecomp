@@ -14,6 +14,7 @@ void hwInit()
 {
     glcdInit();
     inputInit();
+    measureInit();
     sei();
 
     return;
