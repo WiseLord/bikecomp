@@ -2,10 +2,14 @@
 #include <avr/interrupt.h>
 #include "pins.h"
 
-static volatile uint16_t wheelCnt = 0;
-static volatile uint16_t pedalCnt = 0;
+static volatile int32_t wheelTurns = 0;
+static volatile int32_t pedalTurns = 0;
 static volatile uint8_t wheelAntiBounce = ANTI_BOUNCE;
 static volatile uint8_t pedalAntiBounce = ANTI_BOUNCE;
+static volatile uint16_t wheelCnt = 0;
+static volatile uint16_t pedalCnt = 0;
+static volatile uint16_t wheelCntBuf = 0;
+static volatile uint16_t pedalCntBuf = 0;
 
 // Data saved in eeprom
 int32_t totalDistance = 12356;
@@ -26,6 +30,9 @@ void measureInit()
     EICRA |= (1 << ISC11) | (0 << ISC10);
     EIMSK |= (1 << INT1);
 
+    // 16bit Timer1 for measuring intervals
+    TCCR1B = (1 << CS12) | (0 << CS11) | (1 << CS10);   // PSK = 1024
+
     // TODO: Temporary set sensor as output for sw interrupts
     OUT(SENSOR_WHEEL);
     OUT(SENSOR_PEDAL);
@@ -42,27 +49,40 @@ void measureAntiBounce()
 ISR(INT0_vect)
 {
     if (!wheelAntiBounce) {
-        wheelCnt++;
+        wheelTurns++;
         wheelAntiBounce = ANTI_BOUNCE;
+        wheelCntBuf = wheelCnt + TCNT1;
+        pedalCnt += TCNT1;
+        TCNT1 = 0;
+        wheelCnt = 0;
     }
 }
 
 ISR(INT1_vect)
 {
     if (!pedalAntiBounce) {
-        pedalCnt++;
+        pedalTurns++;
         pedalAntiBounce = ANTI_BOUNCE;
+        pedalCntBuf = pedalCnt + TCNT1;
+        wheelCnt += TCNT1;
+        TCNT1 = 0;
+        pedalCnt = 0;
     }
 }
 
-uint16_t getCurrentSpeed(void)
+int32_t getCurrentSpeed(void)
 {
-    return pedalCnt;
+    // Timer1: 16MHz / PSK = 15625 clocks/sec
+
+    if (wheelCntBuf)
+        return 15625L * wheelLength / wheelCntBuf;
+    else
+        return 0;
 }
 
 int32_t getCurrentTrack(void)
 {
-    int32_t ret = wheelCnt;
+    int32_t ret = wheelTurns;
 
     ret *= wheelLength;
     ret /= 1000;
@@ -72,11 +92,5 @@ int32_t getCurrentTrack(void)
 
 int32_t getTotalDistance(void)
 {
-    int32_t ret = totalDistance;
-
-    ret += getCurrentTrack();
-
-    return ret;
+    return getCurrentTrack() + totalDistance;
 }
-
-

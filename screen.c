@@ -134,9 +134,9 @@ void updateDistance(int32_t value)
 
 void screenShowMain(void)
 {
-    updateSpeed(getCurrentSpeed());
-    updateTrack(getCurrentTrack() / 10);
-    updateDistance(getTotalDistance() / 100);
+    updateSpeed(getCurrentSpeed() / 100 * 36 / 10); // mm/s => 0.1km/h
+    updateTrack(getCurrentTrack() / 10);            // m => 0.01km
+    updateDistance(getTotalDistance() / 100);       // m => 0.1km
 
     screen = SCREEN_MAIN;
 }
