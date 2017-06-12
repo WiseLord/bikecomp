@@ -7,11 +7,29 @@
 
 typedef enum {
     SCREEN_MAIN,
-    SCREEN_STAT,
     SCREEN_SETUP,
 
     SCREEN_END
 } Screen;
+
+typedef enum {
+    PARAM_TOP_SPEED,
+
+    PARAM_TOP_END
+} ParamTop;
+
+typedef enum {
+    PARAM_MID_TRACK,
+
+    PARAM_MID_END
+} ParamMid;
+
+typedef enum {
+    PARAM_BTM_DISTANCE,
+    PARAM_BTM_TRACKTIME,
+
+    PARAM_BTM_END
+} ParamBtm;
 
 typedef struct {
     // Rectangle parameters

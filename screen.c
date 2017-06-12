@@ -37,6 +37,24 @@ static const SectionPgm mainBtmPgm PROGMEM = {
 };
 static Section mainBtm = { &mainBtmPgm };
 
+static const SectionPgm mainBtmTimeHrPgm PROGMEM = {
+    0, 225, 239, 319,
+    2, 227,
+    font_lcd_63, font_lcd_36,
+    6, 257,
+    2, 0, ' ',
+};
+static Section mainTimeHrBtm = { &mainBtmTimeHrPgm };
+
+static const SectionPgm mainBtmTimeMsPgm PROGMEM = {
+    0, 225, 239, 319,
+    2, 227,
+    font_lcd_63, font_lcd_36,
+    104, 257,
+    5, 2, '0',
+};
+static Section mainTimeMsBtm = { &mainBtmTimeMsPgm };
+
 const char currentSpeedLabel[] PROGMEM = "Current speed";
 static const Param currentSpeedParam PROGMEM = {
     LCD_COLOR_AQUA, currentSpeedLabel,
@@ -50,6 +68,11 @@ static const Param currentTrackParam PROGMEM = {
 const char totalDistanceLabel[] PROGMEM = "Total distance";
 static const Param totalDistanceParam PROGMEM = {
     LCD_COLOR_LIGHT_CORAL, totalDistanceLabel,
+};
+
+const char currentTrackTimeLabel[] PROGMEM = "Track time";
+static const Param currentTrackTimeParam PROGMEM = {
+    LCD_COLOR_GREEN, currentTrackTimeLabel,
 };
 
 static char *mkNumString(int32_t number, uint8_t width, uint8_t dot, uint8_t lead)
@@ -117,27 +140,67 @@ static void updateParam(const Param *param, Section *section, int32_t val, uint8
     }
 }
 
-void updateSpeed(int32_t value)
+static void updateTime(int32_t time)
 {
-    updateParam(&currentSpeedParam, &mainTop, value, SCREEN_MAIN != screen);
+    updateParam(&currentTrackTimeParam, &mainTimeHrBtm, time / 3600, SCREEN_MAIN != screen);
+    glcdWriteLcdChar(':');
+    time %= 3600;
+    time = time / 60 * 100 + time % 60;
+    updateParam(&currentTrackTimeParam, &mainTimeMsBtm, time, 0);
 }
 
-void updateTrack(int32_t value)
+static void updateTop(ParamTop pTop)
 {
-    updateParam(&currentTrackParam, &mainMid, value, SCREEN_MAIN != screen);
+    int32_t value;
+
+    switch (pTop) {
+    case PARAM_TOP_SPEED:
+        value = getCurrentSpeed() / 100 * 36 / 10;  // mm/s => 0.1km/h
+        updateParam(&currentSpeedParam, &mainTop, value, SCREEN_MAIN != screen);
+        break;
+    default:
+        break;
+    }
 }
 
-void updateDistance(int32_t value)
+static void updateMid(ParamMid pMid)
 {
-    updateParam(&totalDistanceParam, &mainBtm, value, SCREEN_MAIN != screen);
+    int32_t value;
+
+    switch (pMid) {
+    case PARAM_MID_TRACK:
+        value = getCurrentTrack() / 10;             // m => 0.01km
+        updateParam(&currentTrackParam, &mainMid, value, SCREEN_MAIN != screen);
+        break;
+    default:
+        break;
+    }
+}
+
+static void updateBtm(ParamBtm pBtm)
+{
+    int32_t value;
+
+    switch (pBtm) {
+    case PARAM_BTM_DISTANCE:
+        value = getTotalDistance() / 100;           // m => 0.1km
+        updateParam(&totalDistanceParam, &mainBtm, value, SCREEN_MAIN != screen);
+        break;
+    case PARAM_BTM_TRACKTIME:
+        value = getTrackTime();
+        updateTime(value);
+        break;
+    default:
+        break;
+    }
 }
 
 void screenShowMain(void)
 {
-    updateSpeed(getCurrentSpeed() / 100 * 36 / 10); // mm/s => 0.1km/h
-    updateTrack(getCurrentTrack() / 10);            // m => 0.01km
-//    updateDistance(getTotalDistance() / 100);       // m => 0.1km
-    updateDistance(getTrackTime());
+    updateTop(PARAM_TOP_SPEED);
+    updateMid(PARAM_MID_TRACK);
+//    updateBtm(PARAM_BTM_DISTANCE);
+    updateBtm(PARAM_BTM_TRACKTIME);
     screen = SCREEN_MAIN;
 }
 
