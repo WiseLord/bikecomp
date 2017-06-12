@@ -136,8 +136,8 @@ void screenShowMain(void)
 {
     updateSpeed(getCurrentSpeed() / 100 * 36 / 10); // mm/s => 0.1km/h
     updateTrack(getCurrentTrack() / 10);            // m => 0.01km
-    updateDistance(getTotalDistance() / 100);       // m => 0.1km
-
+//    updateDistance(getTotalDistance() / 100);       // m => 0.1km
+    updateDistance(getTrackTime());
     screen = SCREEN_MAIN;
 }
 

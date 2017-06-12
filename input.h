@@ -14,8 +14,8 @@
 #define BTN_4_LONG              (BTN_3 << 4)
 
 // Handling long press actions
-#define SHORT_PRESS             6
-#define LONG_PRESS              30
+#define SHORT_PRESS             12
+#define LONG_PRESS              60
 
 void inputInit(void);
 

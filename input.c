@@ -5,7 +5,7 @@
 #include "measure.h"
 #include "pins.h"
 
-static volatile uint8_t btnCmd = BTN_0;         // Command buffer
+static volatile uint8_t btnCmd = BTN_0;     // Command buffer
 
 void inputInit(void)
 {
@@ -18,14 +18,16 @@ void inputInit(void)
     SET(BUTTON_2);
     SET(BUTTON_3);
 
-    TIMSK0 |= (1 << TOIE0);                     // Overflow interrupt
-    TCCR0B = (1 << CS02) | (0 << CS01) | (1 << CS00); // PSK = 1024
+    TIMSK0 |= (1 << OCIE0A);                // Overflow interrupt
+    TCCR0A = (1 << WGM01);                  // CTC mode
+    TCCR0B = (1 << CS02) | (1 << CS00);     // PSK = 1024
+    OCR0A = 125;
 }
 
-ISR (TIMER0_OVF_vect, ISR_NOBLOCK)              // 16M/256/PSK = ~61 polls/sec
+ISR (TIMER0_COMPA_vect, ISR_NOBLOCK)        // 16M/OCR0A/PSK = 125 polls/sec
 {
-    static uint8_t btnCnt = 0;                  // Buttons press duration
-    static uint8_t btnPrev = BTN_STATE_0;       // Previous buttons state
+    static uint8_t btnCnt = 0;              // Buttons press duration
+    static uint8_t btnPrev = BTN_STATE_0;   // Previous buttons state
 
     uint8_t btnNow = BTN_STATE_0;
 
@@ -51,7 +53,7 @@ ISR (TIMER0_OVF_vect, ISR_NOBLOCK)              // 16M/256/PSK = ~61 polls/sec
         btnCnt = 0;
     }
 
-    measureAntiBounce();
+    measureInc8ms();                        // 125Hz => 8ms
 
     // TODO: Temporary generate software interrupts
     static uint8_t w = 0;

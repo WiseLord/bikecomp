@@ -10,6 +10,7 @@ static volatile uint16_t wheelCnt = 0;
 static volatile uint16_t pedalCnt = 0;
 static volatile uint16_t wheelCntBuf = 0;
 static volatile uint16_t pedalCntBuf = 0;
+static volatile int32_t trackTime = 0;
 
 // Data saved in eeprom
 int32_t totalDistance = 12356;
@@ -38,12 +39,13 @@ void measureInit()
     OUT(SENSOR_PEDAL);
 }
 
-void measureAntiBounce()
+void measureInc8ms()
 {
     if (wheelAntiBounce)
         wheelAntiBounce--;
     if (pedalAntiBounce)
         pedalAntiBounce--;
+    trackTime++;
 }
 
 ISR(INT0_vect)
@@ -93,4 +95,9 @@ int32_t getCurrentTrack(void)
 int32_t getTotalDistance(void)
 {
     return getCurrentTrack() + totalDistance;
+}
+
+int32_t getTrackTime()
+{
+    return trackTime / 125;
 }
