@@ -7,6 +7,8 @@
 #define STR_BUFSIZE                     20
 
 static Screen screen = SCREEN_END;
+static ParamMid paramMid = PARAM_MID_TRACK;
+static ParamBtm paramBtm = PARAM_BTM_DISTANCE;
 
 static char strbuf[STR_BUFSIZE + 1];           // String buffer
 
@@ -98,7 +100,7 @@ static char *mkNumString(int32_t number, uint8_t width, uint8_t dot, uint8_t lea
     return strbuf;
 }
 
-static void updateParam(const Param *param, Section *section, int32_t val, uint8_t clear)
+static void updateParam(const Param *param, Section *section, int32_t val, ClearMode clear)
 {
     // Read progmem values to RAM structures
     Param parPgm;
@@ -108,7 +110,7 @@ static void updateParam(const Param *param, Section *section, int32_t val, uint8
     memcpy_P(&secPgm, section->pgm, sizeof(SectionPgm));
 
     // Clear section area if required and draw constant text labels
-    if (clear) {
+    if (clear == CLEAR_ALL) {
         glcdDrawRectangle(secPgm.left, secPgm.top, secPgm.right, secPgm.bottom, LCD_COLOR_BLACK);
         if (secPgm.top) {
             glcdDrawHorizLine(secPgm.left + 2, secPgm.right - 2, secPgm.top - 1, LCD_COLOR_GRAY);
@@ -140,67 +142,80 @@ static void updateParam(const Param *param, Section *section, int32_t val, uint8
     }
 }
 
-static void updateTime(int32_t time)
+static void updateTime(int32_t time, ClearMode clear)
 {
-    updateParam(&currentTrackTimeParam, &mainTimeHrBtm, time / 3600, SCREEN_MAIN != screen);
+    updateParam(&currentTrackTimeParam, &mainTimeHrBtm, time / 3600, clear);
     glcdWriteLcdChar(':');
     time %= 3600;
     time = time / 60 * 100 + time % 60;
-    updateParam(&currentTrackTimeParam, &mainTimeMsBtm, time, 0);
+    updateParam(&currentTrackTimeParam, &mainTimeMsBtm, time, CLEAR_LCDDATA);
 }
 
-static void updateTop(ParamTop pTop)
+static void updateSpeed(void)
 {
     int32_t value;
 
-    switch (pTop) {
-    case PARAM_TOP_SPEED:
-        value = getCurrentSpeed() / 100 * 36 / 10;  // mm/s => 0.1km/h
-        updateParam(&currentSpeedParam, &mainTop, value, SCREEN_MAIN != screen);
-        break;
-    default:
-        break;
-    }
+    value = getCurrentSpeed() / 100 * 36 / 10;  // mm/s => 0.1km/h
+    updateParam(&currentSpeedParam, &mainTop, value, SCREEN_MAIN != screen);
 }
 
-static void updateMid(ParamMid pMid)
+static void updateMid(ClearMode clear)
 {
     int32_t value;
 
-    switch (pMid) {
+    switch (paramMid) {
     case PARAM_MID_TRACK:
         value = getCurrentTrack() / 10;             // m => 0.01km
-        updateParam(&currentTrackParam, &mainMid, value, SCREEN_MAIN != screen);
+        updateParam(&currentTrackParam, &mainMid, value, clear);
         break;
     default:
         break;
     }
 }
 
-static void updateBtm(ParamBtm pBtm)
+static void updateBtm(ClearMode clear)
 {
     int32_t value;
 
-    switch (pBtm) {
+    switch (paramBtm) {
     case PARAM_BTM_DISTANCE:
         value = getTotalDistance() / 100;           // m => 0.1km
-        updateParam(&totalDistanceParam, &mainBtm, value, SCREEN_MAIN != screen);
+        updateParam(&totalDistanceParam, &mainBtm, value, clear);
         break;
     case PARAM_BTM_TRACKTIME:
         value = getTrackTime();
-        updateTime(value);
+        updateTime(value, clear);
         break;
     default:
         break;
     }
+}
+
+Screen getScreen(void)
+{
+    return screen;
+}
+
+
+void switchParamMid(void)
+{
+    if (++paramMid >= PARAM_MID_END)
+        paramMid = PARAM_MID_TRACK;
+    updateMid(CLEAR_ALL);
+}
+
+void switchParamBtm(void)
+{
+    if (++paramBtm >= PARAM_BTM_END)
+        paramBtm = PARAM_BTM_DISTANCE;
+    updateBtm(CLEAR_ALL);
 }
 
 void screenShowMain(void)
 {
-    updateTop(PARAM_TOP_SPEED);
-    updateMid(PARAM_MID_TRACK);
-//    updateBtm(PARAM_BTM_DISTANCE);
-    updateBtm(PARAM_BTM_TRACKTIME);
+    updateSpeed();
+    updateMid(SCREEN_MAIN != screen);
+    updateBtm(SCREEN_MAIN != screen);
     screen = SCREEN_MAIN;
 }
 

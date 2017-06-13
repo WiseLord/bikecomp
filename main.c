@@ -8,7 +8,6 @@
 #include "screen.h"
 #include "measure.h"
 #include "input.h"
-#include "action.h"
 
 void hwInit()
 {
@@ -23,10 +22,25 @@ void hwInit()
 int main(void)
 {
     hwInit();
+    screenShowMain();
 
     while (1) {
-        actionGetInput();
-        actionHandle();
+
+        uint8_t btnCmd = getBtnCmd();
+
+        switch (btnCmd) {
+        case BTN_0:
+            screenShowMain();
+            break;
+        case BTN_1:
+            switchParamMid();
+            break;
+        case BTN_2:
+            switchParamBtm();
+            break;
+        default:
+            break;
+        }
         screenUpdate();
     }
 

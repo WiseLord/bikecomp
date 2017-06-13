@@ -13,12 +13,6 @@ typedef enum {
 } Screen;
 
 typedef enum {
-    PARAM_TOP_SPEED,
-
-    PARAM_TOP_END
-} ParamTop;
-
-typedef enum {
     PARAM_MID_TRACK,
 
     PARAM_MID_END
@@ -59,6 +53,19 @@ typedef struct {
     uint16_t color;
     const char* label;
 } Param;
+
+typedef enum {
+    CLEAR_NOTHING,
+    CLEAR_ALL,
+    CLEAR_LCDDATA,
+
+    CLEAR_END
+} ClearMode;
+
+Screen getScreen(void);
+
+void switchParamMid(void);
+void switchParamBtm(void);
 
 void screenShowMain(void);
 void screenShowSetup(void);

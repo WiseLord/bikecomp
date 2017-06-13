@@ -5,7 +5,7 @@
 #include "measure.h"
 #include "pins.h"
 
-static volatile uint8_t btnCmd = BTN_0;     // Command buffer
+static volatile uint8_t btnCmd = 0;         // Command buffer
 
 void inputInit(void)
 {

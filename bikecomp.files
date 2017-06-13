@@ -1,5 +1,3 @@
-action.c
-action.h
 input.c
 input.h
 measure.c
