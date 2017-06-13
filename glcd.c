@@ -9,7 +9,7 @@ FontParam fp;
 FontLcdParam flp;
 
 static const uint8_t *_font;
-static const uint8_t *_fontLcd = font_lcd_72;
+static const uint8_t *_fontLcd = font_lcd_90;
 
 static int16_t _x, _y;
 

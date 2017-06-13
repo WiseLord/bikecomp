@@ -13,20 +13,20 @@ static ParamBtm paramBtm = PARAM_BTM_DISTANCE;
 static char strbuf[STR_BUFSIZE + 1];           // String buffer
 
 static const SectionPgm mainTopPgm PROGMEM = {
-    0, 0, 239, 107,
-    0, 0,
-    font_lcd_99, font_lcd_72,
-    52, 0,
-    4, 1, ' ',
+    0, 0, 239, 124,
+    2, 0,
+    font_lcd_90, font_lcd_63,
+    10, 29,
+    5, 1, ' ',
 };
 static Section mainTop = { &mainTopPgm };
 
 static const SectionPgm mainMidPgm PROGMEM = {
-    0, 109, 239, 226,
-    2, 111,
-    font_lcd_72, font_lcd_45,
-    31, 143,
-    6, 2, ' ',
+    0, 125, 239, 224,
+    2, 127,
+    font_lcd_63, font_lcd_36,
+    19, 156,
+    7, 2, ' ',
 };
 static Section mainMid = { &mainMidPgm };
 
@@ -34,7 +34,7 @@ static const SectionPgm mainBtmPgm PROGMEM = {
     0, 225, 239, 319,
     2, 227,
     font_lcd_63, font_lcd_36,
-    1, 257,
+    1, 256,
     7, 1, ' ',
 };
 static Section mainBtm = { &mainBtmPgm };
@@ -43,7 +43,7 @@ static const SectionPgm mainBtmTimeHrPgm PROGMEM = {
     0, 225, 239, 319,
     2, 227,
     font_lcd_63, font_lcd_36,
-    6, 257,
+    5, 256,
     2, 0, ' ',
 };
 static Section mainTimeHrBtm = { &mainBtmTimeHrPgm };
@@ -52,7 +52,7 @@ static const SectionPgm mainBtmTimeMsPgm PROGMEM = {
     0, 225, 239, 319,
     2, 227,
     font_lcd_63, font_lcd_36,
-    104, 257,
+    103, 256,
     5, 2, '0',
 };
 static Section mainTimeMsBtm = { &mainBtmTimeMsPgm };
@@ -112,14 +112,13 @@ static void updateParam(const Param *param, Section *section, int32_t val, Clear
     // Clear section area if required and draw constant text labels
     if (clear == CLEAR_ALL) {
         glcdDrawRectangle(secPgm.left, secPgm.top, secPgm.right, secPgm.bottom, LCD_COLOR_BLACK);
-        if (secPgm.top) {
-            glcdDrawHorizLine(secPgm.left + 2, secPgm.right - 2, secPgm.top - 1, LCD_COLOR_GRAY);
-            glcdLoadFont(font_ks0066_ru_24, LCD_COLOR_GRAY, LCD_COLOR_BLACK);
-            glcdSetXY(secPgm.labX, secPgm.labY);
-            glcdWriteString("> ");
-            strcpy_P(strbuf, parPgm.label);
-            glcdWriteString(strbuf);
-        }
+        if (secPgm.top)
+            glcdDrawHorizLine(secPgm.left + 2, secPgm.right - 2, secPgm.top, LCD_COLOR_GRAY);
+        glcdLoadFont(font_ks0066_ru_24, LCD_COLOR_GRAY, LCD_COLOR_BLACK);
+        glcdSetXY(secPgm.labX, secPgm.labY);
+        glcdWriteString("> ");
+        strcpy_P(strbuf, parPgm.label);
+        glcdWriteString(strbuf);
     }
 
     // Redraw param value with selected LCD font
