@@ -13,17 +13,22 @@ typedef enum {
 } Screen;
 
 typedef enum {
-    PARAM_MID_TRACK,
+    SECTION_MAIN_TOP,
+    SECTION_MAIN_MID,
+    SECTION_MAIN_BTM,
 
-    PARAM_MID_END
-} ParamMid;
+    SECTION_END
+} Section;
 
 typedef enum {
-    PARAM_BTM_DISTANCE,
-    PARAM_BTM_TRACKTIME,
+    PARAM_SPEED,
 
-    PARAM_BTM_END
-} ParamBtm;
+    PARAM_TRACK,
+    PARAM_DISTANCE,
+    PARAM_TRACKTIME,
+
+    PARAM_END
+} ParamType;
 
 typedef struct {
     // Rectangle parameters
@@ -34,20 +39,19 @@ typedef struct {
     // Text label parameters
     uint16_t labX;
     uint16_t labY;
-    // LCD font parameters
+    // LCD fonts
     const uint8_t *fontMain;
     const uint8_t *fontDeci;
+} ParamArea;
+
+typedef struct {
+    // LCD text parameters
     uint16_t x;
     uint16_t y;
     uint8_t len;
     uint8_t dot;
     char lead;
-} SectionPgm;
-
-typedef struct {
-    const SectionPgm *pgm;
-    char str[PARAM_STRBUF];
-} Section;
+} LcdText;
 
 typedef struct {
     uint16_t color;
@@ -62,10 +66,7 @@ typedef enum {
     CLEAR_END
 } ClearMode;
 
-Screen getScreen(void);
-
-void switchParamMid(void);
-void switchParamBtm(void);
+void switchParam(Section section);
 
 void screenShowMain(void);
 void screenShowSetup(void);

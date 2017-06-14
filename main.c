@@ -33,10 +33,10 @@ int main(void)
             screenShowMain();
             break;
         case BTN_1:
-            switchParamMid();
+            switchParam(SECTION_MAIN_MID);
             break;
         case BTN_2:
-            switchParamBtm();
+            switchParam(SECTION_MAIN_BTM);
             break;
         default:
             break;

@@ -7,55 +7,45 @@
 #define STR_BUFSIZE                     20
 
 static Screen screen = SCREEN_END;
-static ParamMid paramMid = PARAM_MID_TRACK;
-static ParamBtm paramBtm = PARAM_BTM_DISTANCE;
+static ParamType paramMid = PARAM_TRACK;
+static ParamType paramBtm = PARAM_DISTANCE;
 
-static char strbuf[STR_BUFSIZE + 1];           // String buffer
-
-static const SectionPgm mainTopPgm PROGMEM = {
-    0, 0, 239, 124,
+static const ParamArea areaMainTop PROGMEM = {
+    0, 0, 239, 119,
     2, 0,
     font_lcd_90, font_lcd_63,
-    10, 29,
-    5, 1, ' ',
 };
-static Section mainTop = { &mainTopPgm };
+static char strMainTop[PARAM_STRBUF];
 
-static const SectionPgm mainMidPgm PROGMEM = {
-    0, 125, 239, 224,
-    2, 127,
+static const ParamArea areaMainMid PROGMEM = {
+    0, 120, 239, 219,
+    2, 7,
     font_lcd_63, font_lcd_36,
-    19, 156,
-    7, 2, ' ',
 };
-static Section mainMid = { &mainMidPgm };
+static char strMainMid[PARAM_STRBUF];
 
-static const SectionPgm mainBtmPgm PROGMEM = {
-    0, 225, 239, 319,
-    2, 227,
+static const ParamArea areaMainBtm PROGMEM = {
+    0, 220, 239, 319,
+    2, 7,
     font_lcd_63, font_lcd_36,
-    1, 256,
-    7, 1, ' ',
 };
-static Section mainBtm = { &mainBtmPgm };
+static char strMainBtm[PARAM_STRBUF];
 
-static const SectionPgm mainBtmTimeHrPgm PROGMEM = {
-    0, 225, 239, 319,
-    2, 227,
-    font_lcd_63, font_lcd_36,
-    5, 256,
-    2, 0, ' ',
+static const LcdText textMainTop_5_1 PROGMEM = {
+    10, 29, 5, 1, ' ',
 };
-static Section mainTimeHrBtm = { &mainBtmTimeHrPgm };
-
-static const SectionPgm mainBtmTimeMsPgm PROGMEM = {
-    0, 225, 239, 319,
-    2, 227,
-    font_lcd_63, font_lcd_36,
-    103, 256,
-    5, 2, '0',
+static const LcdText textParam_7_2 PROGMEM = {
+    19, 36, 7, 2, ' ',
 };
-static Section mainTimeMsBtm = { &mainBtmTimeMsPgm };
+static const LcdText textParam_7_1 PROGMEM = {
+    1, 36, 7, 1, ' ',
+};
+static const LcdText textTimeHour PROGMEM = {
+    5, 36, 2, 0, ' ',
+};
+static const LcdText textTimeMinSec PROGMEM = {
+    103, 36, 5, 2, '0',
+};
 
 const char currentSpeedLabel[] PROGMEM = "Current speed";
 static const Param currentSpeedParam PROGMEM = {
@@ -76,6 +66,8 @@ const char currentTrackTimeLabel[] PROGMEM = "Track time";
 static const Param currentTrackTimeParam PROGMEM = {
     LCD_COLOR_GREEN, currentTrackTimeLabel,
 };
+
+static char strbuf[STR_BUFSIZE + 1];
 
 static char *mkNumString(int32_t number, uint8_t width, uint8_t dot, uint8_t lead)
 {
@@ -100,121 +92,144 @@ static char *mkNumString(int32_t number, uint8_t width, uint8_t dot, uint8_t lea
     return strbuf;
 }
 
-static void updateParam(const Param *param, Section *section, int32_t val, ClearMode clear)
+static void updateParam(const Param *paramPgm, const LcdText *lcdTextPgm, int32_t val,
+                        Section section, ClearMode clear)
 {
     // Read progmem values to RAM structures
-    Param parPgm;
-    memcpy_P(&parPgm, param, sizeof(Param));
+    Param param;
+    memcpy_P(&param, paramPgm, sizeof(Param));
 
-    SectionPgm secPgm;
-    memcpy_P(&secPgm, section->pgm, sizeof(SectionPgm));
+    LcdText text;
+    memcpy_P(&text, lcdTextPgm, sizeof(LcdText));
+
+    ParamArea area;
+    char *posStr;
+    switch (section) {
+    case SECTION_MAIN_MID:
+        memcpy_P(&area, &areaMainMid, sizeof(ParamArea));
+        posStr = strMainMid;
+        break;
+    case SECTION_MAIN_BTM:
+        memcpy_P(&area, &areaMainBtm, sizeof(ParamArea));
+        posStr = strMainBtm;
+        break;
+    default:
+        memcpy_P(&area, &areaMainTop, sizeof(ParamArea));
+        posStr = strMainTop;
+        break;
+    }
 
     // Clear section area if required and draw constant text labels
     if (clear == CLEAR_ALL) {
-        glcdDrawRectangle(secPgm.left, secPgm.top, secPgm.right, secPgm.bottom, LCD_COLOR_BLACK);
-        if (secPgm.top)
-            glcdDrawHorizLine(secPgm.left + 2, secPgm.right - 2, secPgm.top, LCD_COLOR_GRAY);
+        glcdDrawRectangle(area.left, area.top, area.right, area.bottom, LCD_COLOR_BLACK);
+        if (area.top)
+            glcdDrawHorizLine(area.left + 2, area.right - 2, area.top + 3, LCD_COLOR_GRAY);
         glcdLoadFont(font_ks0066_ru_24, LCD_COLOR_GRAY, LCD_COLOR_BLACK);
-        glcdSetXY(secPgm.labX, secPgm.labY);
+        glcdSetXY(area.labX, area.top + area.labY);
         glcdWriteString("> ");
-        strcpy_P(strbuf, parPgm.label);
+        strcpy_P(strbuf, param.label);
         glcdWriteString(strbuf);
     }
 
     // Redraw param value with selected LCD font
-    char *valStr = mkNumString(val, secPgm.len, secPgm.dot, secPgm.lead);
+    char *valStr = mkNumString(val, text.len, text.dot, text.lead);
 
-    glcdLoadLcdFont(secPgm.fontMain, parPgm.color, LCD_COLOR_BLACK);
-    glcdSetXY(secPgm.x, secPgm.y);
+    glcdLoadLcdFont(area.fontMain, param.color, LCD_COLOR_BLACK);
+    glcdSetXY(text.x, area.top + text.y);
 
-    for (uint8_t i = 0; i < secPgm.len; i++) {
-        if (secPgm.dot && i == secPgm.len - secPgm.dot - 1) {
-            glcdLoadLcdFont(secPgm.fontDeci, parPgm.color, LCD_COLOR_BLACK);
-            glcdSetY(secPgm.y + pgm_read_byte(&secPgm.fontMain[1]) - pgm_read_byte(&secPgm.fontDeci[1]));
+    for (uint8_t i = 0; i < text.len; i++) {
+        if (text.dot && i == text.len - text.dot - 1) {
+            glcdLoadLcdFont(area.fontDeci, param.color, LCD_COLOR_BLACK);
+            glcdSetY(area.top + text.y + pgm_read_byte(&area.fontMain[1]) - pgm_read_byte(
+                         &area.fontDeci[1]));
         }
-        if (clear || (valStr[i] != section->str[i])) {
-            section->str[i] = valStr[i];
-            glcdWriteLcdChar(section->str[i]);
+        if (clear || (valStr[i] != posStr[i])) {
+            posStr[i] = valStr[i];
+            glcdWriteLcdChar(posStr[i]);
         } else {
-            glcdSkipLcdChar(section->str[i]);
+            glcdSkipLcdChar(posStr[i]);
         }
     }
 }
 
-static void updateTime(int32_t time, ClearMode clear)
+static void updateTime(int32_t time, Section pos, ClearMode clear)
 {
-    updateParam(&currentTrackTimeParam, &mainTimeHrBtm, time / 3600, clear);
+    updateParam(&currentTrackTimeParam, &textTimeHour, time / 3600, pos, clear);
     glcdWriteLcdChar(':');
     time %= 3600;
     time = time / 60 * 100 + time % 60;
-    updateParam(&currentTrackTimeParam, &mainTimeMsBtm, time, CLEAR_LCDDATA);
+    updateParam(&currentTrackTimeParam, &textTimeMinSec, time, pos, CLEAR_LCDDATA);
 }
 
-static void updateSpeed(void)
+static ParamType getParameter(Section section)
+{
+    switch (section) {
+    case SECTION_MAIN_MID:
+        return paramMid;
+        break;
+    case SECTION_MAIN_BTM:
+        return paramBtm;
+        break;
+    default:
+        break;
+    }
+
+    return PARAM_SPEED;
+}
+
+static void updateSection(Section section, ClearMode clear)
 {
     int32_t value;
 
-    value = getCurrentSpeed() / 100 * 36 / 10;  // mm/s => 0.1km/h
-    updateParam(&currentSpeedParam, &mainTop, value, SCREEN_MAIN != screen);
-}
-
-static void updateMid(ClearMode clear)
-{
-    int32_t value;
-
-    switch (paramMid) {
-    case PARAM_MID_TRACK:
+    switch (getParameter(section)) {
+    case PARAM_SPEED:
+        value = getCurrentSpeed() / 100 * 36 / 10;  // mm/s => 0.1km/h
+        updateParam(&currentSpeedParam, &textMainTop_5_1, value, section, clear);
+        break;
+    case PARAM_TRACK:
         value = getCurrentTrack() / 10;             // m => 0.01km
-        updateParam(&currentTrackParam, &mainMid, value, clear);
+        updateParam(&currentTrackParam, &textParam_7_2, value, section, clear);
         break;
-    default:
-        break;
-    }
-}
-
-static void updateBtm(ClearMode clear)
-{
-    int32_t value;
-
-    switch (paramBtm) {
-    case PARAM_BTM_DISTANCE:
+    case PARAM_DISTANCE:
         value = getTotalDistance() / 100;           // m => 0.1km
-        updateParam(&totalDistanceParam, &mainBtm, value, clear);
+        updateParam(&totalDistanceParam, &textParam_7_1, value, section, clear);
         break;
-    case PARAM_BTM_TRACKTIME:
+    case PARAM_TRACKTIME:
         value = getTrackTime();
-        updateTime(value, clear);
+        updateTime(value, section, clear);
         break;
     default:
         break;
     }
 }
 
-Screen getScreen(void)
+void switchParam(Section section)
 {
-    return screen;
-}
+    ParamType *ppar;
 
+    switch (section) {
+    case SECTION_MAIN_MID:
+        ppar = &paramMid;
+        break;
+    case SECTION_MAIN_BTM:
+        ppar = &paramBtm;
+        break;
+    default:
+        return;
+    }
 
-void switchParamMid(void)
-{
-    if (++paramMid >= PARAM_MID_END)
-        paramMid = PARAM_MID_TRACK;
-    updateMid(CLEAR_ALL);
-}
-
-void switchParamBtm(void)
-{
-    if (++paramBtm >= PARAM_BTM_END)
-        paramBtm = PARAM_BTM_DISTANCE;
-    updateBtm(CLEAR_ALL);
+    if (++(*ppar) >= PARAM_END)
+        *ppar = PARAM_TRACK;
+    updateSection(section, CLEAR_ALL);
 }
 
 void screenShowMain(void)
 {
-    updateSpeed();
-    updateMid(SCREEN_MAIN != screen);
-    updateBtm(SCREEN_MAIN != screen);
+    ClearMode clear = (SCREEN_MAIN != screen);
+
+    updateSection(SECTION_MAIN_TOP, clear);
+    updateSection(SECTION_MAIN_MID, clear);
+    updateSection(SECTION_MAIN_BTM, clear);
     screen = SCREEN_MAIN;
 }
 
