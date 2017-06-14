@@ -33,10 +33,6 @@ void measureInit()
 
     // 16bit Timer1 for measuring intervals
     TCCR1B = (1 << CS12) | (0 << CS11) | (1 << CS10);   // PSK = 1024
-
-    // TODO: Temporary set sensor as output for sw interrupts
-    OUT(SENSOR_WHEEL);
-    OUT(SENSOR_PEDAL);
 }
 
 void measureInc8ms()

@@ -55,16 +55,22 @@ ISR (TIMER0_COMPA_vect, ISR_NOBLOCK)        // 16M/OCR0A/PSK = 125 polls/sec
 
     measureInc8ms();                        // 125Hz => 8ms
 
-    // TODO: Temporary generate software interrupts
+    // TODO: Temporary set sensor as output for sw interrupts
+    OUT(SENSOR_WHEEL);
+    OUT(SENSOR_PEDAL);
+    static uint16_t max = 5 * 256;
+    if (++max > 60 * 256)
+        max = 5 * 256;
+
     static uint8_t w = 0;
-    if (++w >= 20) {
+    if (++w >= max / 256) {
         CLR(SENSOR_WHEEL);
         w = 0;
     } else {
         SET(SENSOR_WHEEL);
     }
     static uint8_t p = 0;
-    if (++p >= 30) {
+    if (++p >= max / 128) {
         CLR(SENSOR_PEDAL);
         p = 0;
     } else {
