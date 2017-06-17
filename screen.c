@@ -183,7 +183,7 @@ static void updateSection(Section section, ClearMode clear)
 
     switch (getParameter(section)) {
     case PARAM_SPEED:
-        value = getCurrentSpeed() / 100 * 36 / 10;  // mm/s => 0.1km/h
+        value = getCurrentSpeed() * 36 / 10 / 100;  // mm/s => 0.1km/h
         updateParam(&currentSpeedParam, &textMainTop_5_1, value, section, clear);
         break;
     case PARAM_TRACK:

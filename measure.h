@@ -3,7 +3,7 @@
 
 #include <inttypes.h>
 
-#define ANTI_BOUNCE     5
+#define ANTI_BOUNCE     10
 
 void measureInit(void);
 void measureInc8ms(void);

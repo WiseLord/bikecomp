@@ -6,10 +6,10 @@ static volatile int32_t wheelTurns = 0;
 static volatile int32_t pedalTurns = 0;
 static volatile uint8_t wheelAntiBounce = ANTI_BOUNCE;
 static volatile uint8_t pedalAntiBounce = ANTI_BOUNCE;
-static volatile uint16_t wheelCnt = 0;
-static volatile uint16_t pedalCnt = 0;
-static volatile uint16_t wheelCntBuf = 0;
-static volatile uint16_t pedalCntBuf = 0;
+static volatile int32_t wheelCnt = 0;
+static volatile int32_t pedalCnt = 0;
+static volatile int32_t wheelCntBuf = 0;
+static volatile int32_t pedalCntBuf = 0;
 static volatile int32_t trackTime = 0;
 
 // Data saved in eeprom
@@ -33,6 +33,8 @@ void measureInit()
 
     // 16bit Timer1 for measuring intervals
     TCCR1B = (1 << CS12) | (0 << CS11) | (1 << CS10);   // PSK = 1024
+    // Enable overflow interrupts
+    TIMSK1 |= (1 << TOIE1);
 }
 
 void measureInc8ms()
@@ -48,8 +50,8 @@ ISR(INT0_vect)
 {
     if (!wheelAntiBounce) {
         wheelTurns++;
-        wheelAntiBounce = ANTI_BOUNCE;
         wheelCntBuf = wheelCnt + TCNT1;
+        wheelAntiBounce = ANTI_BOUNCE;
         pedalCnt += TCNT1;
         TCNT1 = 0;
         wheelCnt = 0;
@@ -60,22 +62,31 @@ ISR(INT1_vect)
 {
     if (!pedalAntiBounce) {
         pedalTurns++;
-        pedalAntiBounce = ANTI_BOUNCE;
         pedalCntBuf = pedalCnt + TCNT1;
+        pedalAntiBounce = ANTI_BOUNCE;
         wheelCnt += TCNT1;
         TCNT1 = 0;
         pedalCnt = 0;
     }
 }
 
+ISR (TIMER1_OVF_vect, ISR_NOBLOCK)
+{
+    wheelCnt = 0;
+    pedalCnt = 0;
+    wheelCntBuf += 65536U;
+    pedalCntBuf += 65536U;
+}
+
 int32_t getCurrentSpeed(void)
 {
-    // Timer1: 16MHz / PSK = 15625 clocks/sec
+    int32_t ret = wheelCntBuf;
 
-    if (wheelCntBuf)
-        return 15625L * wheelLength / wheelCntBuf;
-    else
-        return 0;
+    // Timer1: 16MHz / PSK = 15625 clocks/sec
+    if (ret)
+        ret = 15625L * wheelLength / ret;
+
+    return ret;
 }
 
 int32_t getCurrentTrack(void)

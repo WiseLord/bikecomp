@@ -55,6 +55,7 @@ ISR (TIMER0_COMPA_vect, ISR_NOBLOCK)        // 16M/OCR0A/PSK = 125 polls/sec
 
     measureInc8ms();                        // 125Hz => 8ms
 
+    return;
     // TODO: Temporary set sensor as output for sw interrupts
     OUT(SENSOR_WHEEL);
     OUT(SENSOR_PEDAL);
