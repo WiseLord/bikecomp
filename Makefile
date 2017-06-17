@@ -63,4 +63,4 @@ flash: $(ELF)
 
 .PHONY: fuse
 fuse:
-	$(AVRDUDE) $(AD_CMD) -U lfuse:w:0xff:m -U hfuse:w:0xd8:m -U efuse:w:0xCB:m
+	$(AVRDUDE) $(AD_CMD) -U lfuse:w:0xff:m -U hfuse:w:0xd1:m -U efuse:w:0xFF:m

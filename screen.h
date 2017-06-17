@@ -20,16 +20,6 @@ typedef enum {
     SECTION_END
 } Section;
 
-typedef enum {
-    PARAM_SPEED,
-
-    PARAM_TRACK,
-    PARAM_DISTANCE,
-    PARAM_TRACKTIME,
-
-    PARAM_END
-} ParamType;
-
 typedef struct {
     // Rectangle parameters
     uint16_t left;
@@ -56,7 +46,7 @@ typedef struct {
 typedef struct {
     uint16_t color;
     const char* label;
-} Param;
+} ParamData;
 
 typedef enum {
     CLEAR_NOTHING,
@@ -66,6 +56,7 @@ typedef enum {
     CLEAR_END
 } ClearMode;
 
+void screenInit(void);
 void switchParam(Section section);
 
 void screenShowMain(void);

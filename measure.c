@@ -1,23 +1,32 @@
 #include "measure.h"
+
 #include <avr/interrupt.h>
+#include <avr/eeprom.h>
+#include "eeprom.h"
 #include "pins.h"
 
-static volatile int32_t wheelTurns = 0;
-static volatile int32_t pedalTurns = 0;
-static volatile uint8_t wheelAntiBounce = ANTI_BOUNCE;
-static volatile uint8_t pedalAntiBounce = ANTI_BOUNCE;
 static volatile int32_t wheelCnt = 0;
-static volatile int32_t pedalCnt = 0;
 static volatile int32_t wheelCntBuf = 0;
+static volatile int32_t wheelTurns = 0;
+
+static volatile int32_t pedalTurns = 0;
+static volatile int32_t pedalCnt = 0;
 static volatile int32_t pedalCntBuf = 0;
+
 static volatile int32_t trackTime = 0;
 
-// Data saved in eeprom
-int32_t totalDistance = 12356;
-uint16_t wheelLength = 2075;
+static volatile uint8_t wheelAntiBounce = ANTI_BOUNCE;
+static volatile uint8_t pedalAntiBounce = ANTI_BOUNCE;
 
-void measureInit()
+// Data saved in eeprom
+static int32_t totalDistance = 0;
+static uint16_t wheelLength = 2075;
+
+void measureInit(void)
 {
+    // Load data from EEPROM
+    totalDistance = eeprom_read_dword((uint32_t*)EEPROM_DISTANCE);
+
     // Sensor lines as inputs
     IN(SENSOR_WHEEL);
     IN(SENSOR_PEDAL);
@@ -37,7 +46,7 @@ void measureInit()
     TIMSK1 |= (1 << TOIE1);
 }
 
-void measureInc8ms()
+void measureInc8ms(void)
 {
     if (wheelAntiBounce)
         wheelAntiBounce--;
@@ -70,7 +79,7 @@ ISR(INT1_vect)
     }
 }
 
-ISR (TIMER1_OVF_vect, ISR_NOBLOCK)
+ISR (TIMER1_OVF_vect)
 {
     wheelCnt = 0;
     pedalCnt = 0;
@@ -78,33 +87,52 @@ ISR (TIMER1_OVF_vect, ISR_NOBLOCK)
     pedalCntBuf += 65536U;
 }
 
-int32_t getCurrentSpeed(void)
-{
-    int32_t ret = wheelCntBuf;
-
-    // Timer1: 16MHz / PSK = 15625 clocks/sec
-    if (ret)
-        ret = 15625L * wheelLength / ret;
-
-    return ret;
-}
-
-int32_t getCurrentTrack(void)
+static int32_t getCurrentTrack(void)
 {
     int32_t ret = wheelTurns;
 
     ret *= wheelLength;
-    ret /= 1000;
 
     return ret;
 }
 
-int32_t getTotalDistance(void)
+int32_t getParam(Param param)
 {
-    return getCurrentTrack() + totalDistance;
+    int32_t ret = 0;
+
+    switch (param) {
+    case PARAM_SPEED:
+        ret = wheelCntBuf;
+        if (ret)
+            ret = 15625L * wheelLength / ret;
+        break;
+    case PARAM_TRACK:
+        ret = getCurrentTrack();
+        break;
+    case PARAM_TRACKTIME:
+        ret = trackTime / 125;
+        break;
+    case PARAM_SPEED_AVG:
+        ret = trackTime;
+        if (ret)
+            ret = getCurrentTrack() / ret * 125;
+        break;
+    case PARAM_DISTANCE:
+        ret = getCurrentTrack() / 1000 + totalDistance;
+        break;
+    default:
+        break;
+    }
+
+    return ret;
 }
 
-int32_t getTrackTime()
+void resetCurrent(void)
 {
-    return trackTime / 125;
+    totalDistance += getCurrentTrack() / 1000;
+    wheelTurns = 0;
+    pedalTurns = 0;
+    trackTime = 0;
+
+    eeprom_update_dword((uint32_t*)EEPROM_DISTANCE, totalDistance);
 }

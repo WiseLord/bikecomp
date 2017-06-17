@@ -14,6 +14,7 @@ void hwInit()
     glcdInit();
     inputInit();
     measureInit();
+    screenInit();
     sei();
 
     return;
@@ -37,6 +38,9 @@ int main(void)
             break;
         case BTN_2:
             switchParam(SECTION_MAIN_BTM);
+            break;
+        case BTN_1_LONG | BTN_2_LONG:
+            resetCurrent();
             break;
         default:
             break;

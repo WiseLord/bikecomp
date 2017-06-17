@@ -1,14 +1,16 @@
 #include "screen.h"
 
 #include <avr/pgmspace.h>
+#include <avr/eeprom.h>
+#include "eeprom.h"
 #include "glcd.h"
 #include "measure.h"
 
 #define STR_BUFSIZE                     20
 
 static Screen screen = SCREEN_END;
-static ParamType paramMid = PARAM_TRACK;
-static ParamType paramBtm = PARAM_DISTANCE;
+static Param paramMid = PARAM_TRACK;
+static Param paramBtm = PARAM_SPEED_AVG;
 
 static const ParamArea areaMainTop PROGMEM = {
     0, 0, 239, 119,
@@ -47,24 +49,29 @@ static const LcdText textTimeMinSec PROGMEM = {
     103, 36, 5, 2, '0',
 };
 
-const char currentSpeedLabel[] PROGMEM = "Current speed";
-static const Param currentSpeedParam PROGMEM = {
-    LCD_COLOR_AQUA, currentSpeedLabel,
+const char speedLabel[] PROGMEM = "Current speed";
+static const ParamData speedParam PROGMEM = {
+    LCD_COLOR_AQUA, speedLabel,
 };
 
-const char currentTrackLabel[] PROGMEM = "Track length";
-static const Param currentTrackParam PROGMEM = {
-    LCD_COLOR_YELLOW, currentTrackLabel,
+const char trackLabel[] PROGMEM = "Track length";
+static const ParamData trackParam PROGMEM = {
+    LCD_COLOR_YELLOW, trackLabel,
 };
 
-const char totalDistanceLabel[] PROGMEM = "Total distance";
-static const Param totalDistanceParam PROGMEM = {
-    LCD_COLOR_LIGHT_CORAL, totalDistanceLabel,
+const char trackTimeLabel[] PROGMEM = "Track time";
+static const ParamData trackTimeParam PROGMEM = {
+    LCD_COLOR_GREEN, trackTimeLabel,
 };
 
-const char currentTrackTimeLabel[] PROGMEM = "Track time";
-static const Param currentTrackTimeParam PROGMEM = {
-    LCD_COLOR_GREEN, currentTrackTimeLabel,
+const char speedAvgLabel[] PROGMEM = "Average speed";
+static const ParamData speedAvgParam PROGMEM = {
+    LCD_COLOR_OLIVE, speedAvgLabel,
+};
+
+const char distanceLabel[] PROGMEM = "Total distance";
+static const ParamData distanceParam PROGMEM = {
+    LCD_COLOR_LIGHT_CORAL, distanceLabel,
 };
 
 static char strbuf[STR_BUFSIZE + 1];
@@ -92,12 +99,12 @@ static char *mkNumString(int32_t number, uint8_t width, uint8_t dot, uint8_t lea
     return strbuf;
 }
 
-static void updateParam(const Param *paramPgm, const LcdText *lcdTextPgm, int32_t val,
+static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, int32_t val,
                         Section section, ClearMode clear)
 {
     // Read progmem values to RAM structures
-    Param param;
-    memcpy_P(&param, paramPgm, sizeof(Param));
+    ParamData param;
+    memcpy_P(&param, paramPgm, sizeof(ParamData));
 
     LcdText text;
     memcpy_P(&text, lcdTextPgm, sizeof(LcdText));
@@ -154,72 +161,84 @@ static void updateParam(const Param *paramPgm, const LcdText *lcdTextPgm, int32_
 
 static void updateTime(int32_t time, Section pos, ClearMode clear)
 {
-    updateParam(&currentTrackTimeParam, &textTimeHour, time / 3600, pos, clear);
+    updateParam(&trackTimeParam, &textTimeHour, time / 3600, pos, clear);
     glcdWriteLcdChar(':');
     time %= 3600;
     time = time / 60 * 100 + time % 60;
-    updateParam(&currentTrackTimeParam, &textTimeMinSec, time, pos, CLEAR_LCDDATA);
+    updateParam(&trackTimeParam, &textTimeMinSec, time, pos, CLEAR_LCDDATA);
 }
 
-static ParamType getParameter(Section section)
+static Param getParamType(Section section)
 {
     switch (section) {
     case SECTION_MAIN_MID:
         return paramMid;
-        break;
     case SECTION_MAIN_BTM:
         return paramBtm;
-        break;
     default:
-        break;
+        return PARAM_SPEED;
     }
-
-    return PARAM_SPEED;
 }
 
 static void updateSection(Section section, ClearMode clear)
 {
-    int32_t value;
+    Param param = getParamType(section);
+    int32_t value = getParam(param);
 
-    switch (getParameter(section)) {
+    switch (param) {
     case PARAM_SPEED:
-        value = getCurrentSpeed() * 36 / 10 / 100;  // mm/s => 0.1km/h
-        updateParam(&currentSpeedParam, &textMainTop_5_1, value, section, clear);
+        value = value * 36 / 10 / 100;      // mm/s => 0.1km/h
+        updateParam(&speedParam, &textMainTop_5_1, value, section, clear);
         break;
     case PARAM_TRACK:
-        value = getCurrentTrack() / 10;             // m => 0.01km
-        updateParam(&currentTrackParam, &textParam_7_2, value, section, clear);
+        value = value / 1000 / 10;          // mm => 0.01km
+        updateParam(&trackParam, &textParam_7_2, value, section, clear);
+        break;
+    case PARAM_TRACKTIME:                   // sec
+        updateTime(value, section, clear);
+        break;
+    case PARAM_SPEED_AVG:
+        value = value * 36 / 10 / 100;              // mm/s => 0.1km/h
+        updateParam(&speedAvgParam, &textParam_7_1, value, section, clear);
         break;
     case PARAM_DISTANCE:
-        value = getTotalDistance() / 100;           // m => 0.1km
-        updateParam(&totalDistanceParam, &textParam_7_1, value, section, clear);
-        break;
-    case PARAM_TRACKTIME:
-        value = getTrackTime();
-        updateTime(value, section, clear);
+        value = value / 100;                // m => 0.1km
+        updateParam(&distanceParam, &textParam_7_1, value, section, clear);
         break;
     default:
         break;
     }
 }
 
+void screenInit(void)
+{
+    paramMid = eeprom_read_byte((uint8_t*)EEPROM_PARAM_MID);
+    paramBtm = eeprom_read_byte((uint8_t*)EEPROM_PARAM_BTM);
+}
+
 void switchParam(Section section)
 {
-    ParamType *ppar;
-
     switch (section) {
     case SECTION_MAIN_MID:
-        ppar = &paramMid;
+        if (++paramMid >= PARAM_END)
+            paramMid = PARAM_TRACK;
+        if (paramMid == paramBtm)
+            if (++paramMid >= PARAM_END)
+                paramMid = PARAM_TRACK;
+        eeprom_update_byte((uint8_t*)EEPROM_PARAM_MID, paramMid);
         break;
     case SECTION_MAIN_BTM:
-        ppar = &paramBtm;
+        if (++paramBtm >= PARAM_END)
+            paramBtm = PARAM_TRACK;
+        if (paramBtm == paramMid)
+            if (++paramBtm >= PARAM_END)
+                paramBtm = PARAM_TRACK;
+        eeprom_update_byte((uint8_t*)EEPROM_PARAM_BTM, paramBtm);
         break;
     default:
         return;
     }
 
-    if (++(*ppar) >= PARAM_END)
-        *ppar = PARAM_TRACK;
     updateSection(section, CLEAR_ALL);
 }
 

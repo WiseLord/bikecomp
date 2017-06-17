@@ -5,12 +5,21 @@
 
 #define ANTI_BOUNCE     10
 
+typedef enum {
+    PARAM_SPEED,
+
+    PARAM_TRACK,
+    PARAM_TRACKTIME,
+    PARAM_SPEED_AVG,
+    PARAM_DISTANCE,
+
+    PARAM_END
+} Param;
+
 void measureInit(void);
 void measureInc8ms(void);
 
-int32_t getCurrentSpeed(void);      // in m/s
-int32_t getCurrentTrack(void);      // in m
-int32_t getTotalDistance(void);     // in m
-int32_t getTrackTime(void);
+int32_t getParam(Param param);
+void resetCurrent(void);
 
 #endif // MEASURE_H
