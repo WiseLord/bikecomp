@@ -19,40 +19,16 @@ static volatile uint8_t wheelAntiBounce = ANTI_BOUNCE;
 static volatile uint8_t pedalAntiBounce = ANTI_BOUNCE;
 
 // Data saved in eeprom
-static int32_t totalDistance = 0;
-static uint16_t wheelLength = 2075;
+static int32_t totalDistance;
+static uint16_t wheelLength;
 
-void measureInit(void)
+static int32_t getCurrentTrack(void)
 {
-    // Load data from EEPROM
-    totalDistance = eeprom_read_dword((uint32_t*)EEPROM_DISTANCE);
+    int32_t ret = wheelTurns;
 
-    // Sensor lines as inputs
-    IN(SENSOR_WHEEL);
-    IN(SENSOR_PEDAL);
-    // Enable pull-up resistors
-    SET(SENSOR_WHEEL);
-    SET(SENSOR_PEDAL);
-    // INT0 on falling edge (wheel sensor)
-    EICRA |= (1 << ISC01) | (0 << ISC00);
-    EIMSK |= (1 << INT0);
-    // INT1 on falling edge (pedal sensor)
-    EICRA |= (1 << ISC11) | (0 << ISC10);
-    EIMSK |= (1 << INT1);
+    ret *= wheelLength;
 
-    // 16bit Timer1 for measuring intervals
-    TCCR1B = (1 << CS12) | (0 << CS11) | (1 << CS10);   // PSK = 1024
-    // Enable overflow interrupts
-    TIMSK1 |= (1 << TOIE1);
-}
-
-void measureInc8ms(void)
-{
-    if (wheelAntiBounce)
-        wheelAntiBounce--;
-    if (pedalAntiBounce)
-        pedalAntiBounce--;
-    trackTime++;
+    return ret;
 }
 
 ISR(INT0_vect)
@@ -87,16 +63,62 @@ ISR (TIMER1_OVF_vect)
     pedalCntBuf += 65536U;
 }
 
-static int32_t getCurrentTrack(void)
+void measureInit(void)
 {
-    int32_t ret = wheelTurns;
+    // Load data from EEPROM
+    totalDistance = eeprom_read_dword((uint32_t*)EEPROM_DISTANCE);
+    wheelLength = eeprom_read_word((uint16_t*)EEPROM_WHEEL);
 
-    ret *= wheelLength;
+    // Sensor lines as inputs
+    IN(SENSOR_WHEEL);
+    IN(SENSOR_PEDAL);
+    // Enable pull-up resistors
+    SET(SENSOR_WHEEL);
+    SET(SENSOR_PEDAL);
+    // INT0 on falling edge (wheel sensor)
+    EICRA |= (1 << ISC01) | (0 << ISC00);
+    EIMSK |= (1 << INT0);
+    // INT1 on falling edge (pedal sensor)
+    EICRA |= (1 << ISC11) | (0 << ISC10);
+    EIMSK |= (1 << INT1);
 
-    return ret;
+    // 16bit Timer1 for measuring intervals
+    TCCR1B = (1 << CS12) | (0 << CS11) | (1 << CS10);   // PSK = 1024
+    // Enable overflow interrupts
+    TIMSK1 |= (1 << TOIE1);
 }
 
-int32_t getParam(Param param)
+void measureInc8ms(void)
+{
+    if (wheelAntiBounce)
+        wheelAntiBounce--;
+    if (pedalAntiBounce)
+        pedalAntiBounce--;
+    trackTime++;
+}
+
+void measureSetWheel(int8_t diff)
+{
+    wheelLength += diff;
+    if (wheelLength < 500)
+        wheelLength = 500;
+    if (wheelLength > 3000)
+        wheelLength = 3000;
+
+    eeprom_update_word((uint16_t*)EEPROM_WHEEL, wheelLength);
+}
+
+void measureResetCurrent(void)
+{
+    totalDistance += getCurrentTrack() / 1000;
+    wheelTurns = 0;
+    pedalTurns = 0;
+    trackTime = 0;
+
+    eeprom_update_dword((uint32_t*)EEPROM_DISTANCE, totalDistance);
+}
+
+int32_t measureGetValue(Param param)
 {
     int32_t ret = 0;
 
@@ -120,19 +142,12 @@ int32_t getParam(Param param)
     case PARAM_DISTANCE:
         ret = getCurrentTrack() / 1000 + totalDistance;
         break;
+    case PARAM_SETUP_WHEEL:
+        ret = wheelLength;
+        break;
     default:
         break;
     }
 
     return ret;
-}
-
-void resetCurrent(void)
-{
-    totalDistance += getCurrentTrack() / 1000;
-    wheelTurns = 0;
-    pedalTurns = 0;
-    trackTime = 0;
-
-    eeprom_update_dword((uint32_t*)EEPROM_DISTANCE, totalDistance);
 }

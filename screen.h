@@ -17,6 +17,10 @@ typedef enum {
     SECTION_MAIN_MID,
     SECTION_MAIN_BTM,
 
+    SECTION_SETUP_TOP,
+    SECTION_SETUP_MID,
+    SECTION_SETUP_BTM,
+
     SECTION_END
 } Section;
 
@@ -63,5 +67,6 @@ void screenShowMain(void);
 void screenShowSetup(void);
 
 void screenUpdate(void);
+Screen screenGet(void);
 
 #endif // SCREEN_H

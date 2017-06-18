@@ -21,7 +21,7 @@ void inputInit(void)
     TIMSK0 |= (1 << OCIE0A);                // Overflow interrupt
     TCCR0A = (1 << WGM01);                  // CTC mode
     TCCR0B = (1 << CS02) | (1 << CS00);     // PSK = 1024
-    OCR0A = 125;
+    OCR0A = 124;
 }
 
 ISR (TIMER0_COMPA_vect, ISR_NOBLOCK)        // 16M/OCR0A/PSK = 125 polls/sec

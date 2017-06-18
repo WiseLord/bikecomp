@@ -26,21 +26,54 @@ int main(void)
     screenShowMain();
 
     while (1) {
-
+        Screen screen = screenGet();
         uint8_t btnCmd = getBtnCmd();
 
         switch (btnCmd) {
-        case BTN_0:
-            screenShowMain();
-            break;
         case BTN_1:
-            switchParam(SECTION_MAIN_MID);
+            switch (screen) {
+            case SCREEN_MAIN:
+                switchParam(SECTION_MAIN_MID);
+                break;
+            case SCREEN_SETUP:
+                measureSetWheel(+1);
+                break;
+            default:
+                break;
+            }
             break;
         case BTN_2:
-            switchParam(SECTION_MAIN_BTM);
+            switch (screen) {
+            case SCREEN_MAIN:
+                switchParam(SECTION_MAIN_BTM);
+                break;
+            case SCREEN_SETUP:
+                measureSetWheel(-1);
+                break;
+            default:
+                break;
+            }
+            break;
+        case BTN_0_LONG:
+            switch (screen) {
+            case SCREEN_MAIN:
+                screenShowSetup();
+                break;
+            case SCREEN_SETUP:
+                screenShowMain();
+                break;
+            default:
+                break;
+            }
             break;
         case BTN_1_LONG | BTN_2_LONG:
-            resetCurrent();
+            switch (screen) {
+            case SCREEN_MAIN:
+                measureResetCurrent();
+                break;
+            default:
+                break;
+            }
             break;
         default:
             break;

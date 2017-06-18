@@ -13,13 +13,17 @@ typedef enum {
     PARAM_SPEED_AVG,
     PARAM_DISTANCE,
 
-    PARAM_END
+    PARAM_END,
+
+    PARAM_SETUP_WHEEL,
+
+    PARAM_SETUP_END
 } Param;
 
 void measureInit(void);
 void measureInc8ms(void);
-
-int32_t getParam(Param param);
-void resetCurrent(void);
+void measureSetWheel(int8_t diff);
+void measureResetCurrent(void);
+int32_t measureGetValue(Param param);
 
 #endif // MEASURE_H

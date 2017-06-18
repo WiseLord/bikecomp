@@ -9,29 +9,46 @@
 #define STR_BUFSIZE                     20
 
 static Screen screen = SCREEN_END;
+
+static Param paramTop = PARAM_SPEED;
 static Param paramMid = PARAM_TRACK;
 static Param paramBtm = PARAM_SPEED_AVG;
+
+static char strTop[PARAM_STRBUF];
+static char strMid[PARAM_STRBUF];
+static char strBtm[PARAM_STRBUF];
 
 static const ParamArea areaMainTop PROGMEM = {
     0, 0, 239, 119,
     2, 0,
     font_lcd_90, font_lcd_63,
 };
-static char strMainTop[PARAM_STRBUF];
-
 static const ParamArea areaMainMid PROGMEM = {
     0, 120, 239, 219,
     2, 7,
     font_lcd_63, font_lcd_36,
 };
-static char strMainMid[PARAM_STRBUF];
-
 static const ParamArea areaMainBtm PROGMEM = {
     0, 220, 239, 319,
     2, 7,
     font_lcd_63, font_lcd_36,
 };
-static char strMainBtm[PARAM_STRBUF];
+
+static const ParamArea areaSetupTop PROGMEM = {
+    0, 0, 239, 101,
+    2, 0,
+    font_lcd_72, font_lcd_45,
+};
+static const ParamArea areaSetupMid PROGMEM = {
+    0, 102, 239, 210,
+    2, 7,
+    font_lcd_72, font_lcd_45,
+};
+static const ParamArea areaSetupBtm PROGMEM = {
+    0, 211, 239, 319,
+    2, 7,
+    font_lcd_72, font_lcd_45,
+};
 
 static const LcdText textMainTop_5_1 PROGMEM = {
     10, 29, 5, 1, ' ',
@@ -47,6 +64,13 @@ static const LcdText textTimeHour PROGMEM = {
 };
 static const LcdText textTimeMinSec PROGMEM = {
     103, 36, 5, 2, '0',
+};
+
+static const LcdText textParamTop_5 PROGMEM = {
+    7, 29, 5, 0, ' ',
+};
+static const LcdText textParam_5 PROGMEM = {
+    7, 36, 5, 0, ' ',
 };
 
 const char speedLabel[] PROGMEM = "Current speed";
@@ -72,6 +96,16 @@ static const ParamData speedAvgParam PROGMEM = {
 const char distanceLabel[] PROGMEM = "Total distance";
 static const ParamData distanceParam PROGMEM = {
     LCD_COLOR_LIGHT_CORAL, distanceLabel,
+};
+
+const char wheelLabel[] PROGMEM = "Wheel length";
+static const ParamData wheelParam PROGMEM = {
+    LCD_COLOR_WHITE, wheelLabel,
+};
+
+const char emptyLabel[] PROGMEM = "";
+static const ParamData emptyParam PROGMEM = {
+    LCD_COLOR_BLACK, emptyLabel,
 };
 
 static char strbuf[STR_BUFSIZE + 1];
@@ -112,18 +146,32 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
     ParamArea area;
     char *posStr;
     switch (section) {
+    case SECTION_MAIN_TOP:
+        memcpy_P(&area, &areaMainTop, sizeof(ParamArea));
+        posStr = strTop;
+        break;
     case SECTION_MAIN_MID:
         memcpy_P(&area, &areaMainMid, sizeof(ParamArea));
-        posStr = strMainMid;
+        posStr = strMid;
         break;
     case SECTION_MAIN_BTM:
         memcpy_P(&area, &areaMainBtm, sizeof(ParamArea));
-        posStr = strMainBtm;
+        posStr = strBtm;
+        break;
+    case SECTION_SETUP_TOP:
+        memcpy_P(&area, &areaSetupTop, sizeof(ParamArea));
+        posStr = strTop;
+        break;
+    case SECTION_SETUP_MID:
+        memcpy_P(&area, &areaSetupMid, sizeof(ParamArea));
+        posStr = strMid;
+        break;
+    case SECTION_SETUP_BTM:
+        memcpy_P(&area, &areaSetupBtm, sizeof(ParamArea));
+        posStr = strBtm;
         break;
     default:
-        memcpy_P(&area, &areaMainTop, sizeof(ParamArea));
-        posStr = strMainTop;
-        break;
+        return;
     }
 
     // Clear section area if required and draw constant text labels
@@ -171,19 +219,27 @@ static void updateTime(int32_t time, Section pos, ClearMode clear)
 static Param getParamType(Section section)
 {
     switch (section) {
+    case SECTION_MAIN_TOP:
+        return paramTop;
     case SECTION_MAIN_MID:
         return paramMid;
     case SECTION_MAIN_BTM:
         return paramBtm;
+    case SECTION_SETUP_TOP:
+        return PARAM_SETUP_WHEEL;
+    case SECTION_SETUP_MID:
+        return PARAM_SETUP_END;
+    case SECTION_SETUP_BTM:
+        return PARAM_SETUP_END;
     default:
-        return PARAM_SPEED;
+        return PARAM_END;
     }
 }
 
 static void updateSection(Section section, ClearMode clear)
 {
     Param param = getParamType(section);
-    int32_t value = getParam(param);
+    int32_t value = measureGetValue(param);
 
     switch (param) {
     case PARAM_SPEED:
@@ -198,12 +254,18 @@ static void updateSection(Section section, ClearMode clear)
         updateTime(value, section, clear);
         break;
     case PARAM_SPEED_AVG:
-        value = value * 36 / 10 / 100;              // mm/s => 0.1km/h
+        value = value * 36 / 10 / 100;      // mm/s => 0.1km/h
         updateParam(&speedAvgParam, &textParam_7_1, value, section, clear);
         break;
     case PARAM_DISTANCE:
         value = value / 100;                // m => 0.1km
         updateParam(&distanceParam, &textParam_7_1, value, section, clear);
+        break;
+    case PARAM_SETUP_WHEEL:
+        updateParam(&wheelParam, &textParamTop_5, value, section, clear);
+        break;
+    case PARAM_SETUP_END:
+        updateParam(&emptyParam, &textParam_5, value, section, clear);
         break;
     default:
         break;
@@ -249,15 +311,22 @@ void screenShowMain(void)
     updateSection(SECTION_MAIN_TOP, clear);
     updateSection(SECTION_MAIN_MID, clear);
     updateSection(SECTION_MAIN_BTM, clear);
+
     screen = SCREEN_MAIN;
 }
 
 void screenShowSetup(void)
 {
+    ClearMode clear = (SCREEN_SETUP != screen);
 
+    updateSection(SECTION_SETUP_TOP, clear);
+    updateSection(SECTION_SETUP_MID, clear);
+    updateSection(SECTION_SETUP_BTM, clear);
+
+    screen = SCREEN_SETUP;
 }
 
-void screenUpdate()
+void screenUpdate(void)
 {
     switch (screen) {
     case SCREEN_MAIN:
@@ -269,4 +338,9 @@ void screenUpdate()
     default:
         break;
     }
+}
+
+Screen screenGet(void)
+{
+    return screen;
 }
