@@ -218,7 +218,7 @@ void ili9341Init(void)
     SET(ILI9341_LED);
 
     // Set display orientation and size
-    ili9341Rotate(LCD_Orientation_Portrait_2);
+    ili9341Rotate(LCD_Orientation_Portrait_1);
 }
 
 void ili9431DrawPixel(uint16_t x, uint16_t y, uint16_t color)
