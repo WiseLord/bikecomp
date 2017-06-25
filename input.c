@@ -42,13 +42,15 @@ ISR (TIMER0_COMPA_vect, ISR_NOBLOCK)        // 16M/OCR0A/PSK = 125 polls/sec
     if (btnNow) {
         if (btnNow == btnPrev) {
             btnCnt++;
-            if (btnCnt == LONG_PRESS)
+            if (btnCnt == LONG_PRESS) {
                 btnCmd = (btnPrev << 4);
+                btnCnt = LONG_PRESS - AUTOREPEAT;
+            }
         } else {
             btnPrev = btnNow;
         }
     } else {
-        if ((btnCnt > SHORT_PRESS) && (btnCnt < LONG_PRESS))
+        if ((btnCnt > SHORT_PRESS) && (btnCnt < LONG_PRESS - AUTOREPEAT))
             btnCmd = btnPrev;
         btnCnt = 0;
     }

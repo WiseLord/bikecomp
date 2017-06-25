@@ -15,7 +15,8 @@
 
 // Handling long press actions
 #define SHORT_PRESS             12
-#define LONG_PRESS              60
+#define LONG_PRESS              96
+#define AUTOREPEAT              60
 
 void inputInit(void);
 
