@@ -21,10 +21,10 @@ void inputInit(void)
     TIMSK0 |= (1 << OCIE0A);                // Overflow interrupt
     TCCR0A = (1 << WGM01);                  // CTC mode
     TCCR0B = (1 << CS02) | (1 << CS00);     // PSK = 1024
-    OCR0A = 124;
+    OCR0A = 124;                            // 16M/(OCR0A - 1)/PSK = 125 Hz
 }
 
-ISR (TIMER0_COMPA_vect, ISR_NOBLOCK)        // 16M/OCR0A/PSK = 125 polls/sec
+ISR (TIMER0_COMPA_vect, ISR_NOBLOCK)        // TIME_STEP_FREQ = 125 Hz
 {
     static uint8_t btnCnt = 0;              // Buttons press duration
     static uint8_t btnPrev = BTN_STATE_0;   // Previous buttons state
@@ -55,7 +55,7 @@ ISR (TIMER0_COMPA_vect, ISR_NOBLOCK)        // 16M/OCR0A/PSK = 125 polls/sec
         btnCnt = 0;
     }
 
-    measureInc8ms();                        // 125Hz => 8ms
+    measureIncTime();
 
     return;
     // TODO: Temporary set sensor as output for sw interrupts

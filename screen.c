@@ -59,11 +59,10 @@ static const LcdText textParam_7_2 PROGMEM = {
 static const LcdText textParam_7_1 PROGMEM = {
     1, 36, 7, 1, ' ',
 };
-static const LcdText textTimeHour PROGMEM = {
-    5, 36, 2, 0, ' ',
-};
-static const LcdText textTimeMinSec PROGMEM = {
-    103, 36, 5, 2, '0',
+
+static const LcdTimeText textTime PROGMEM = {
+    {5, 36, 2, 0, ' ',},
+    {103, 36, 5, 2, '0',},
 };
 
 static const LcdText textParamTop_5 PROGMEM = {
@@ -88,9 +87,19 @@ static const ParamData trackTimeParam PROGMEM = {
     LCD_COLOR_GREEN, trackTimeLabel,
 };
 
-const char speedAvgLabel[] PROGMEM = "Average speed";
+const char trackTimeMoveLabel[] PROGMEM = "Track time in move";
+static const ParamData trackTimeMoveParam PROGMEM = {
+    LCD_COLOR_TEAL, trackTimeMoveLabel,
+};
+
+const char speedAvgLabel[] PROGMEM = "Avg. speed";
 static const ParamData speedAvgParam PROGMEM = {
     LCD_COLOR_OLIVE, speedAvgLabel,
+};
+
+const char speedAvgMoveLabel[] PROGMEM = "Avg. speed in move";
+static const ParamData speedAvgMoveParam PROGMEM = {
+    LCD_COLOR_CHARTREUSE, speedAvgMoveLabel,
 };
 
 const char distanceLabel[] PROGMEM = "Total distance";
@@ -121,14 +130,18 @@ static char *mkNumString(int32_t number, uint8_t width, uint8_t dot, uint8_t lea
     i = 0;
 
     while (number > 0 || i < dot + 1 + !!dot) {
-        numdiv = number % 10;
-        strbuf[width - 1 - i] = numdiv + 0x30;
+        if (number < 0) {
+            strbuf[width - 1 - i] = '-';
+        } else {
+            numdiv = number % 10;
+            number /= 10;
+            strbuf[width - 1 - i] = numdiv + 0x30;
+        }
         i++;
         if (dot == i) {
             strbuf[width - 1 - i] = '.';
             i++;
         }
-        number /= 10;
     }
     return strbuf;
 }
@@ -207,13 +220,14 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
     }
 }
 
-static void updateTime(int32_t time, Section pos, ClearMode clear)
+static void updateTime(const ParamData *paramPgm, const LcdTimeText *lcdTimeTextPgm, int32_t val,
+                       Section section, ClearMode clear)
 {
-    updateParam(&trackTimeParam, &textTimeHour, time / 3600, pos, clear);
+    updateParam(paramPgm, &lcdTimeTextPgm->hour, val / 3600, section, clear);
     glcdWriteLcdChar(':');
-    time %= 3600;
-    time = time / 60 * 100 + time % 60;
-    updateParam(&trackTimeParam, &textTimeMinSec, time, pos, CLEAR_LCDDATA);
+    val %= 3600;
+    val = val / 60 * 100 + val % 60;
+    updateParam(paramPgm, &lcdTimeTextPgm->minSec, val, section, CLEAR_LCDDATA);
 }
 
 static Param getParamType(Section section)
@@ -250,12 +264,19 @@ static void updateSection(Section section, ClearMode clear)
         value = value / 1000 / 10;          // mm => 0.01km
         updateParam(&trackParam, &textParam_7_2, value, section, clear);
         break;
-    case PARAM_TRACKTIME:                   // sec
-        updateTime(value, section, clear);
+    case PARAM_TRACK_TIME:                  // sec
+        updateTime(&trackTimeParam, &textTime, value, section, clear);
+        break;
+    case PARAM_TRACK_TIME_MOVE:             // sec
+        updateTime(&trackTimeMoveParam, &textTime, value, section, clear);
         break;
     case PARAM_SPEED_AVG:
         value = value * 36 / 10 / 100;      // mm/s => 0.1km/h
         updateParam(&speedAvgParam, &textParam_7_1, value, section, clear);
+        break;
+    case PARAM_SPEED_AVG_MOVE:
+        value = value * 36 / 10 / 100;      // mm/s => 0.1km/h
+        updateParam(&speedAvgMoveParam, &textParam_7_1, value, section, clear);
         break;
     case PARAM_DISTANCE:
         value = value / 100;                // m => 0.1km

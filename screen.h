@@ -48,6 +48,11 @@ typedef struct {
 } LcdText;
 
 typedef struct {
+    LcdText hour;
+    LcdText minSec;
+} LcdTimeText;
+
+typedef struct {
     uint16_t color;
     const char* label;
 } ParamData;

@@ -3,14 +3,18 @@
 
 #include <inttypes.h>
 
-#define ANTI_BOUNCE     10
+#define ANTI_BOUNCE         10
+#define TIME_STEP_FREQ      125
+#define AVG_MIN_TIME        20
 
 typedef enum {
     PARAM_SPEED,
 
     PARAM_TRACK,
-    PARAM_TRACKTIME,
+    PARAM_TRACK_TIME,
+    PARAM_TRACK_TIME_MOVE,
     PARAM_SPEED_AVG,
+    PARAM_SPEED_AVG_MOVE,
     PARAM_DISTANCE,
 
     PARAM_END,
@@ -21,7 +25,7 @@ typedef enum {
 } Param;
 
 void measureInit(void);
-void measureInc8ms(void);
+void measureIncTime(void);
 void measureSetWheel(int8_t diff);
 void measureResetCurrent(void);
 int32_t measureGetValue(Param param);

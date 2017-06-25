@@ -5,15 +5,17 @@
 #include "eeprom.h"
 #include "pins.h"
 
+static volatile int32_t wheelTurns = 0;
 static volatile int32_t wheelCnt = 0;
 static volatile int32_t wheelCntBuf = 0;
-static volatile int32_t wheelTurns = 0;
 
 static volatile int32_t pedalTurns = 0;
 static volatile int32_t pedalCnt = 0;
 static volatile int32_t pedalCntBuf = 0;
 
 static volatile int32_t trackTime = 0;
+static volatile int32_t trackTimeMove = 0;
+static volatile uint8_t inMove = 0;
 
 static volatile uint8_t wheelAntiBounce = ANTI_BOUNCE;
 static volatile uint8_t pedalAntiBounce = ANTI_BOUNCE;
@@ -40,6 +42,7 @@ ISR(INT0_vect)
         pedalCnt += TCNT1;
         TCNT1 = 0;
         wheelCnt = 0;
+        inMove = 1;
     }
 }
 
@@ -52,15 +55,15 @@ ISR(INT1_vect)
         wheelCnt += TCNT1;
         TCNT1 = 0;
         pedalCnt = 0;
+        inMove = 1;
     }
 }
 
 ISR (TIMER1_OVF_vect)
 {
+    inMove = 0;
     wheelCnt = 0;
     pedalCnt = 0;
-    wheelCntBuf += 65536U;
-    pedalCntBuf += 65536U;
 }
 
 void measureInit(void)
@@ -88,13 +91,15 @@ void measureInit(void)
     TIMSK1 |= (1 << TOIE1);
 }
 
-void measureInc8ms(void)
+void measureIncTime(void)
 {
     if (wheelAntiBounce)
         wheelAntiBounce--;
     if (pedalAntiBounce)
         pedalAntiBounce--;
     trackTime++;
+    if (inMove)
+        trackTimeMove++;
 }
 
 void measureSetWheel(int8_t diff)
@@ -114,6 +119,7 @@ void measureResetCurrent(void)
     wheelTurns = 0;
     pedalTurns = 0;
     trackTime = 0;
+    trackTimeMove = 0;
 
     eeprom_update_dword((uint32_t*)EEPROM_DISTANCE, totalDistance);
 }
@@ -124,20 +130,36 @@ int32_t measureGetValue(Param param)
 
     switch (param) {
     case PARAM_SPEED:
-        ret = wheelCntBuf;
-        if (ret)
-            ret = 15625L * wheelLength / ret;
+        if (inMove) {
+            ret = wheelCntBuf;
+            if (ret)
+                ret = 15625L * wheelLength / ret;
+        } else {
+            ret = 0;
+        }
         break;
     case PARAM_TRACK:
         ret = getCurrentTrack();
         break;
-    case PARAM_TRACKTIME:
-        ret = trackTime / 125;
+    case PARAM_TRACK_TIME:
+        ret = trackTime / TIME_STEP_FREQ;
+        break;
+    case PARAM_TRACK_TIME_MOVE:
+        ret = trackTimeMove / TIME_STEP_FREQ;
         break;
     case PARAM_SPEED_AVG:
         ret = trackTime;
-        if (ret)
-            ret = getCurrentTrack() / ret * 125;
+        if (ret > AVG_MIN_TIME * TIME_STEP_FREQ)
+            ret = getCurrentTrack() / ret * TIME_STEP_FREQ;
+        else
+            ret = -TIME_STEP_FREQ;
+        break;
+    case PARAM_SPEED_AVG_MOVE:
+        ret = trackTimeMove;
+        if (ret > AVG_MIN_TIME * TIME_STEP_FREQ)
+            ret = getCurrentTrack() / ret * TIME_STEP_FREQ;
+        else
+            ret = -TIME_STEP_FREQ;
         break;
     case PARAM_DISTANCE:
         ret = getCurrentTrack() / 1000 + totalDistance;
