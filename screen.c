@@ -102,6 +102,11 @@ static const ParamData speedAvgMoveParam PROGMEM = {
     LCD_COLOR_CHARTREUSE, speedAvgMoveLabel,
 };
 
+const char cadenceLabel[] PROGMEM = "Cadence";
+static const ParamData cadenceParam PROGMEM = {
+    LCD_COLOR_CHARTREUSE, cadenceLabel,
+};
+
 const char distanceLabel[] PROGMEM = "Total distance";
 static const ParamData distanceParam PROGMEM = {
     LCD_COLOR_LIGHT_CORAL, distanceLabel,
@@ -277,6 +282,9 @@ static void updateSection(Section section, ClearMode clear)
     case PARAM_SPEED_AVG_MOVE:
         value = value * 36 / 10 / 100;      // mm/s => 0.1km/h
         updateParam(&speedAvgMoveParam, &textParam_7_1, value, section, clear);
+        break;
+    case PARAM_CADENCE:
+        updateParam(&cadenceParam, &textParam_7_1, value, section, clear);
         break;
     case PARAM_DISTANCE:
         value = value / 100;                // m => 0.1km

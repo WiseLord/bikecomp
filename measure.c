@@ -33,6 +33,40 @@ static int32_t getCurrentTrack(void)
     return ret;
 }
 
+void measureInit(void)
+{
+    // Load data from EEPROM
+    totalDistance = eeprom_read_dword((uint32_t*)EEPROM_DISTANCE);
+    wheelLength = eeprom_read_word((uint16_t*)EEPROM_WHEEL);
+
+    // Sensor lines as inputs
+    IN(SENSOR_WHEEL);
+    IN(SENSOR_PEDAL);
+    // Enable pull-up resistors
+    SET(SENSOR_WHEEL);
+    SET(SENSOR_PEDAL);
+    // INT0 on falling edge (wheel sensor)
+    EICRA |= (1 << ISC01) | (0 << ISC00);
+    EIMSK |= (1 << INT0);
+    // INT1 on falling edge (pedal sensor)
+    EICRA |= (1 << ISC11) | (0 << ISC10);
+    EIMSK |= (1 << INT1);
+
+    // 16bit Timer1 for measuring intervals
+    TCCR1B = (1 << CS12) | (0 << CS11) | (1 << CS10);   // PSK = 1024
+    // Enable overflow interrupts
+    TIMSK1 |= (1 << TOIE1);
+}
+
+ISR (TIMER1_OVF_vect)                                   // 16M/PSK = 15625 counts/sec
+{
+    wheelCnt = 0;
+    pedalCnt = 0;
+    wheelCntBuf = 0;
+    pedalCntBuf = 0;
+    inMove = 0;
+}
+
 ISR(INT0_vect)
 {
     if (!wheelAntiBounce) {
@@ -59,40 +93,6 @@ ISR(INT1_vect)
         pedalCnt = 0;
         inMove = 1;
     }
-}
-
-ISR (TIMER1_OVF_vect)
-{
-    wheelCnt = 0;
-    pedalCnt = 0;
-    wheelCntBuf = 0;
-    pedalCntBuf = 0;
-    inMove = 0;
-}
-
-void measureInit(void)
-{
-    // Load data from EEPROM
-    totalDistance = eeprom_read_dword((uint32_t*)EEPROM_DISTANCE);
-    wheelLength = eeprom_read_word((uint16_t*)EEPROM_WHEEL);
-
-    // Sensor lines as inputs
-    IN(SENSOR_WHEEL);
-    IN(SENSOR_PEDAL);
-    // Enable pull-up resistors
-    SET(SENSOR_WHEEL);
-    SET(SENSOR_PEDAL);
-    // INT0 on falling edge (wheel sensor)
-    EICRA |= (1 << ISC01) | (0 << ISC00);
-    EIMSK |= (1 << INT0);
-    // INT1 on falling edge (pedal sensor)
-    EICRA |= (1 << ISC11) | (0 << ISC10);
-    EIMSK |= (1 << INT1);
-
-    // 16bit Timer1 for measuring intervals
-    TCCR1B = (1 << CS12) | (0 << CS11) | (1 << CS10);   // PSK = 1024
-    // Enable overflow interrupts
-    TIMSK1 |= (1 << TOIE1);
 }
 
 void measureIncTime(void)
@@ -164,6 +164,15 @@ int32_t measureGetValue(Param param)
             ret = getCurrentTrack() / ret * TIME_STEP_FREQ;
         else
             ret = -TIME_STEP_FREQ;
+        break;
+    case PARAM_CADENCE:
+        if (inMove) {
+            ret = pedalCntBuf;
+            if (ret)
+                ret = 15625L * 60 * 10 / ret;
+        } else {
+            ret = 0;
+        }
         break;
     case PARAM_DISTANCE:
         ret = getCurrentTrack() / 1000 + totalDistance;
