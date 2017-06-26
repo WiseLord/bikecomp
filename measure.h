@@ -7,16 +7,14 @@
 #define TIME_STEP_FREQ      125
 #define AVG_MIN_TIME        20
 
-#define SLEEP_TIMER         7   // ~4.2sec intervals => ~30 sec
+#define SLEEP_TIMER         2  // ~4.2sec intervals => ~30 sec
 
 typedef enum {
     PARAM_SPEED,
 
     PARAM_TRACK,
     PARAM_TRACK_TIME,
-    PARAM_TRACK_TIME_MOVE,
     PARAM_SPEED_AVG,
-    PARAM_SPEED_AVG_MOVE,
     PARAM_CADENCE,
     PARAM_DISTANCE,
 

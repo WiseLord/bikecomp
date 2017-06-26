@@ -14,7 +14,6 @@ static volatile int32_t pedalCnt = 0;
 static volatile int32_t pedalCntBuf = 0;
 
 static volatile int32_t trackTime = 0;
-static volatile int32_t trackTimeMove = 0;
 
 static volatile uint8_t inMove = 0;
 static volatile uint8_t inPause = 0;
@@ -113,10 +112,8 @@ void measureIncTime(void)
         wheelAntiBounce--;
     if (pedalAntiBounce)
         pedalAntiBounce--;
-    if (!inPause) {
+    if (!inPause && inMove) {
         trackTime++;
-        if (inMove)
-            trackTimeMove++;
     }
 }
 
@@ -143,7 +140,6 @@ void measureResetCurrent(void)
     wheelTurns = 0;
     pedalTurns = 0;
     trackTime = 0;
-    trackTimeMove = 0;
 
     eeprom_update_dword((uint32_t *)EEPROM_DISTANCE, totalDistance);
 }
@@ -168,18 +164,8 @@ int32_t measureGetValue(Param param)
     case PARAM_TRACK_TIME:
         ret = trackTime / TIME_STEP_FREQ;
         break;
-    case PARAM_TRACK_TIME_MOVE:
-        ret = trackTimeMove / TIME_STEP_FREQ;
-        break;
     case PARAM_SPEED_AVG:
         ret = trackTime;
-        if (ret > AVG_MIN_TIME * TIME_STEP_FREQ)
-            ret = getCurrentTrack() / ret * TIME_STEP_FREQ;
-        else
-            ret = -TIME_STEP_FREQ;
-        break;
-    case PARAM_SPEED_AVG_MOVE:
-        ret = trackTimeMove;
         if (ret > AVG_MIN_TIME * TIME_STEP_FREQ)
             ret = getCurrentTrack() / ret * TIME_STEP_FREQ;
         else

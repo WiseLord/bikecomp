@@ -91,19 +91,9 @@ static const ParamData trackTimeParam PROGMEM = {
     LCD_COLOR_GREEN, trackTimeLabel,
 };
 
-const char trackTimeMoveLabel[] PROGMEM = "Track time in move";
-static const ParamData trackTimeMoveParam PROGMEM = {
-    LCD_COLOR_TEAL, trackTimeMoveLabel,
-};
-
 const char speedAvgLabel[] PROGMEM = "Avg. speed";
 static const ParamData speedAvgParam PROGMEM = {
     LCD_COLOR_OLIVE, speedAvgLabel,
-};
-
-const char speedAvgMoveLabel[] PROGMEM = "Avg. speed in move";
-static const ParamData speedAvgMoveParam PROGMEM = {
-    LCD_COLOR_CHARTREUSE, speedAvgMoveLabel,
 };
 
 const char cadenceLabel[] PROGMEM = "Cadence";
@@ -300,16 +290,9 @@ static void updateSection(Section section, ClearMode clear)
     case PARAM_TRACK_TIME:                  // sec
         updateTime(&trackTimeParam, &textTime, value, section, clear);
         break;
-    case PARAM_TRACK_TIME_MOVE:             // sec
-        updateTime(&trackTimeMoveParam, &textTime, value, section, clear);
-        break;
     case PARAM_SPEED_AVG:
         value = value * 36 / 10 / 100;      // mm/s => 0.1km/h
         updateParam(&speedAvgParam, &textParam_7_1, value, section, clear);
-        break;
-    case PARAM_SPEED_AVG_MOVE:
-        value = value * 36 / 10 / 100;      // mm/s => 0.1km/h
-        updateParam(&speedAvgMoveParam, &textParam_7_1, value, section, clear);
         break;
     case PARAM_CADENCE:
         updateParam(&cadenceParam, &textParam_7_1, value, section, clear);
