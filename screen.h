@@ -79,7 +79,7 @@ void switchParam(Section section);
 void switchParamSetup(void);
 void diffParamSetup(int8_t value);
 
-void screenShowMain(void);
+void screenShowMain(ClearMode clear);
 void screenShowSetup(void);
 
 void screenUpdate(void);

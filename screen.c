@@ -395,9 +395,10 @@ void diffParamSetup(int8_t value)
     }
 }
 
-void screenShowMain(void)
+void screenShowMain(ClearMode clear)
 {
-    ClearMode clear = (SCREEN_MAIN != screen);
+    if (clear == CLEAR_NOTHING)
+        clear = (SCREEN_MAIN != screen);
 
     updateSection(SECTION_MAIN_TOP, clear);
     updateSection(SECTION_MAIN_MID, clear);
@@ -423,7 +424,7 @@ void screenUpdate(void)
 {
     switch (screen) {
     case SCREEN_MAIN:
-        screenShowMain();
+        screenShowMain(CLEAR_NOTHING);
         break;
     case SCREEN_SETUP:
         screenShowSetup();

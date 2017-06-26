@@ -224,16 +224,16 @@ void ili9341Init(void)
 void ili9341Sleep(void)
 {
     CLR(ILI9341_LED);
-    _delay_ms(200);
+    _delay_ms(120);
     ili9341SendCmd(ILI9341_SLPIN);
-    _delay_ms(50);
+    _delay_ms(5);
 }
 
 void ili9341Wakeup(void)
 {
-    _delay_ms(200);
+    _delay_ms(120);
     ili9341SendCmd(ILI9341_SLPOUT);
-    _delay_ms(50);
+    _delay_ms(5);
     SET(ILI9341_LED);
 }
 

@@ -46,13 +46,14 @@ void sleep(void)
     PCICR &= ~(1<<PCIE2);       // Buttons interrupt disable
     TIMSK0 |= (1 << OCIE0A);    // Input timer compare enable
     TIMSK1 |= (1 << TOIE1);     // Measure timer overflow enable
-    glcdWakeup();
+    glcdInit();
+    screenShowMain(CLEAR_ALL);
 }
 
 int main(void)
 {
     hwInit();
-    screenShowMain();
+    screenShowMain(CLEAR_ALL);
 
     while (1) {
         Screen screen = screenGet();
@@ -106,7 +107,7 @@ int main(void)
                 screenShowSetup();
                 break;
             case SCREEN_SETUP:
-                screenShowMain();
+                screenShowMain(CLEAR_NOTHING);
                 break;
             default:
                 break;
