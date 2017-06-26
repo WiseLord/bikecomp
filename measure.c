@@ -15,7 +15,9 @@ static volatile int32_t pedalCntBuf = 0;
 
 static volatile int32_t trackTime = 0;
 static volatile int32_t trackTimeMove = 0;
+
 static volatile uint8_t inMove = 0;
+static volatile uint8_t inPause = 0;
 
 static volatile uint8_t wheelAntiBounce = ANTI_BOUNCE;
 static volatile uint8_t pedalAntiBounce = ANTI_BOUNCE;
@@ -101,12 +103,14 @@ void measureIncTime(void)
         wheelAntiBounce--;
     if (pedalAntiBounce)
         pedalAntiBounce--;
-    trackTime++;
-    if (inMove)
-        trackTimeMove++;
+    if (!inPause) {
+        trackTime++;
+        if (inMove)
+            trackTimeMove++;
+    }
 }
 
-void measureSetWheel(int8_t diff)
+void measureDiffWheel(int8_t diff)
 {
     wheelLength += diff;
     if (wheelLength < 500)
@@ -117,8 +121,14 @@ void measureSetWheel(int8_t diff)
     eeprom_update_word((uint16_t*)EEPROM_WHEEL, wheelLength);
 }
 
+void measurePauseCurrent(void)
+{
+    inPause = !inPause;
+}
+
 void measureResetCurrent(void)
 {
+    inPause = 0;
     totalDistance += getCurrentTrack() / 1000;
     wheelTurns = 0;
     pedalTurns = 0;

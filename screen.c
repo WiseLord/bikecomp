@@ -18,6 +18,10 @@ static char strTop[PARAM_STRBUF];
 static char strMid[PARAM_STRBUF];
 static char strBtm[PARAM_STRBUF];
 
+static Param paramSetup = PARAM_SETUP_AUTO_OFF;
+
+static ColorMode colorMode = COLOR_MODE_FULL_COLOR;
+
 static const ParamArea areaMainTop PROGMEM = {
     0, 0, 239, 119,
     2, 0,
@@ -66,10 +70,10 @@ static const LcdTimeText textTime PROGMEM = {
 };
 
 static const LcdText textParamTop_5 PROGMEM = {
-    7, 29, 5, 0, ' ',
+    55, 29, 4, 0, ' ',
 };
 static const LcdText textParam_5 PROGMEM = {
-    7, 36, 5, 0, ' ',
+    55, 36, 4, 0, ' ',
 };
 
 const char speedLabel[] PROGMEM = "Current speed";
@@ -112,14 +116,19 @@ static const ParamData distanceParam PROGMEM = {
     LCD_COLOR_LIGHT_CORAL, distanceLabel,
 };
 
-const char wheelLabel[] PROGMEM = "Wheel length";
-static const ParamData wheelParam PROGMEM = {
-    LCD_COLOR_WHITE, wheelLabel,
+const char autoOffLabel[] PROGMEM = "Auto off timeout";
+static const ParamData autoOffParam PROGMEM = {
+    LCD_COLOR_AQUA, autoOffLabel,
 };
 
-const char emptyLabel[] PROGMEM = "";
-static const ParamData emptyParam PROGMEM = {
-    LCD_COLOR_BLACK, emptyLabel,
+const char wheelLabel[] PROGMEM = "Wheel length";
+static const ParamData wheelParam PROGMEM = {
+    LCD_COLOR_AQUA, wheelLabel,
+};
+
+const char colorModeLabel[] PROGMEM = "Color mode";
+static const ParamData colorModeParam PROGMEM = {
+    LCD_COLOR_AQUA, colorModeLabel,
 };
 
 static char strbuf[STR_BUFSIZE + 1];
@@ -192,12 +201,31 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
         return;
     }
 
+    uint16_t paramColor = param.color;
+    uint16_t labelColor = LCD_COLOR_GRAY;
+    uint16_t bgColor = LCD_COLOR_BLACK;
+
+    switch (colorMode) {
+    case COLOR_MODE_WHITE_ON_BLACK:
+        paramColor = LCD_COLOR_WHITE;
+        labelColor = LCD_COLOR_WHITE;
+        bgColor = LCD_COLOR_BLACK;
+        break;
+    case COLOR_MODE_BLACK_ON_WHITE:
+        paramColor = LCD_COLOR_BLACK;
+        labelColor = LCD_COLOR_BLACK;
+        bgColor = LCD_COLOR_WHITE;
+        break;
+    default:
+        break;
+    }
+
     // Clear section area if required and draw constant text labels
     if (clear == CLEAR_ALL) {
-        glcdDrawRectangle(area.left, area.top, area.right, area.bottom, LCD_COLOR_BLACK);
+        glcdDrawRectangle(area.left, area.top, area.right, area.bottom, bgColor);
         if (area.top)
-            glcdDrawHorizLine(area.left + 2, area.right - 2, area.top + 3, LCD_COLOR_GRAY);
-        glcdLoadFont(font_ks0066_ru_24, LCD_COLOR_GRAY, LCD_COLOR_BLACK);
+            glcdDrawHorizLine(area.left + 2, area.right - 2, area.top + 3, labelColor);
+        glcdLoadFont(font_ks0066_ru_24, labelColor, bgColor);
         glcdSetXY(area.labX, area.top + area.labY);
         glcdWriteString("> ");
         strcpy_P(strbuf, param.label);
@@ -207,12 +235,12 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
     // Redraw param value with selected LCD font
     char *valStr = mkNumString(val, text.len, text.dot, text.lead);
 
-    glcdLoadLcdFont(area.fontMain, param.color, LCD_COLOR_BLACK);
+    glcdLoadLcdFont(area.fontMain, paramColor, bgColor);
     glcdSetXY(text.x, area.top + text.y);
 
     for (uint8_t i = 0; i < text.len; i++) {
         if (text.dot && i == text.len - text.dot - 1) {
-            glcdLoadLcdFont(area.fontDeci, param.color, LCD_COLOR_BLACK);
+            glcdLoadLcdFont(area.fontDeci, paramColor, bgColor);
             glcdSetY(area.top + text.y + pgm_read_byte(&area.fontMain[1]) - pgm_read_byte(
                          &area.fontDeci[1]));
         }
@@ -245,11 +273,11 @@ static Param getParamType(Section section)
     case SECTION_MAIN_BTM:
         return paramBtm;
     case SECTION_SETUP_TOP:
-        return PARAM_SETUP_WHEEL;
+        return PARAM_SETUP_AUTO_OFF;
     case SECTION_SETUP_MID:
-        return PARAM_SETUP_END;
+        return PARAM_SETUP_WHEEL;
     case SECTION_SETUP_BTM:
-        return PARAM_SETUP_END;
+        return PARAM_SETUP_COLOR_MODE;
     default:
         return PARAM_END;
     }
@@ -290,21 +318,42 @@ static void updateSection(Section section, ClearMode clear)
         value = value / 100;                // m => 0.1km
         updateParam(&distanceParam, &textParam_7_1, value, section, clear);
         break;
-    case PARAM_SETUP_WHEEL:
-        updateParam(&wheelParam, &textParamTop_5, value, section, clear);
+    case PARAM_SETUP_AUTO_OFF:
+        updateParam(&autoOffParam, &textParamTop_5, value, section, clear);
         break;
-    case PARAM_SETUP_END:
-        updateParam(&emptyParam, &textParam_5, value, section, clear);
+    case PARAM_SETUP_WHEEL:
+        updateParam(&wheelParam, &textParam_5, value, section, clear);
+        break;
+    case PARAM_SETUP_COLOR_MODE:
+        value = colorMode;
+        updateParam(&colorModeParam, &textParam_5, value, section, clear);
         break;
     default:
         break;
     }
 }
 
+static void screenDiffColorMode(int8_t value)
+{
+    if (colorMode || value > 0)
+        colorMode += value;
+    else
+        colorMode = COLOR_MODE_BLACK_ON_WHITE;
+    if (colorMode >= COLOR_MODE_END)
+        colorMode = COLOR_MODE_FULL_COLOR;
+}
+
 void screenInit(void)
 {
     paramMid = eeprom_read_byte((uint8_t*)EEPROM_PARAM_MID);
+    if (paramMid >= PARAM_END)
+        switchParam(SECTION_MAIN_MID);
     paramBtm = eeprom_read_byte((uint8_t*)EEPROM_PARAM_BTM);
+    if (paramBtm >= PARAM_END)
+        switchParam(SECTION_MAIN_BTM);
+    colorMode = eeprom_read_byte((uint8_t*)EEPROM_COLOR_MODE);
+    if (colorMode >= COLOR_MODE_END)
+        colorMode = COLOR_MODE_FULL_COLOR;
 }
 
 void switchParam(Section section)
@@ -333,6 +382,36 @@ void switchParam(Section section)
     updateSection(section, CLEAR_ALL);
 }
 
+void switchParamSetup(void)
+{
+    if (++paramSetup >= PARAM_SETUP_END)
+        paramSetup = PARAM_SETUP_AUTO_OFF;
+}
+
+void diffParamSetup(int8_t value)
+{
+    if (paramSetup != PARAM_SETUP_WHEEL) {
+        if (value > 0)
+            value = 1;
+        else if (value < 0)
+            value = -1;
+    }
+    switch (paramSetup) {
+    case PARAM_SETUP_AUTO_OFF:
+        break;
+    case PARAM_SETUP_WHEEL:
+        measureDiffWheel(value);
+        break;
+    case PARAM_SETUP_COLOR_MODE:
+        screen = SCREEN_END;
+        screenDiffColorMode(value);
+        screenShowSetup();
+        break;
+    default:
+        break;
+    }
+}
+
 void screenShowMain(void)
 {
     ClearMode clear = (SCREEN_MAIN != screen);
@@ -342,6 +421,8 @@ void screenShowMain(void)
     updateSection(SECTION_MAIN_BTM, clear);
 
     screen = SCREEN_MAIN;
+
+    paramSetup = PARAM_SETUP_AUTO_OFF;
 }
 
 void screenShowSetup(void)

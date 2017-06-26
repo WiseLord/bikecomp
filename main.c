@@ -31,6 +31,13 @@ int main(void)
 
         switch (btnCmd) {
         case BTN_0:
+            switch (screen) {
+            case SCREEN_SETUP:
+                switchParamSetup();
+                break;
+            default:
+                break;
+            }
             break;
         case BTN_1:
             switch (screen) {
@@ -38,7 +45,7 @@ int main(void)
                 switchParam(SECTION_MAIN_MID);
                 break;
             case SCREEN_SETUP:
-                measureSetWheel(-1);
+                diffParamSetup(-1);
                 break;
             default:
                 break;
@@ -50,7 +57,7 @@ int main(void)
                 switchParam(SECTION_MAIN_BTM);
                 break;
             case SCREEN_SETUP:
-                measureSetWheel(+1);
+                diffParamSetup(+1);
                 break;
             default:
                 break;
@@ -70,8 +77,11 @@ int main(void)
             break;
         case BTN_1_LONG:
             switch (screen) {
+            case SCREEN_MAIN:
+                measurePauseCurrent();
+                break;
             case SCREEN_SETUP:
-                measureSetWheel(-10);
+                diffParamSetup(-10);
                 break;
             default:
                 break;
@@ -79,8 +89,11 @@ int main(void)
             break;
         case BTN_2_LONG:
             switch (screen) {
+            case SCREEN_MAIN:
+                measureResetCurrent();
+                break;
             case SCREEN_SETUP:
-                measureSetWheel(+10);
+                diffParamSetup(+10);
                 break;
             default:
                 break;
@@ -88,9 +101,6 @@ int main(void)
             break;
         case BTN_1_LONG | BTN_2_LONG:
             switch (screen) {
-            case SCREEN_MAIN:
-                measureResetCurrent();
-                break;
             default:
                 break;
             }

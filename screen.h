@@ -65,8 +65,19 @@ typedef enum {
     CLEAR_END
 } ClearMode;
 
+typedef enum {
+    COLOR_MODE_FULL_COLOR,
+    COLOR_MODE_WHITE_ON_BLACK,
+    COLOR_MODE_BLACK_ON_WHITE,
+
+    COLOR_MODE_END,
+} ColorMode;
+
 void screenInit(void);
 void switchParam(Section section);
+
+void switchParamSetup(void);
+void diffParamSetup(int8_t value);
 
 void screenShowMain(void);
 void screenShowSetup(void);

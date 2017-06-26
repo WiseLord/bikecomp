@@ -20,14 +20,17 @@ typedef enum {
 
     PARAM_END,
 
+    PARAM_SETUP_AUTO_OFF,
     PARAM_SETUP_WHEEL,
+    PARAM_SETUP_COLOR_MODE,
 
     PARAM_SETUP_END
 } Param;
 
 void measureInit(void);
 void measureIncTime(void);
-void measureSetWheel(int8_t diff);
+void measureDiffWheel(int8_t diff);
+void measurePauseCurrent(void);
 void measureResetCurrent(void);
 int32_t measureGetValue(Param param);
 
