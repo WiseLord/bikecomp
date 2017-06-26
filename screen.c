@@ -302,6 +302,7 @@ static void updateSection(Section section, ClearMode clear)
         updateParam(&distanceParam, &textParam_7_1, value, section, clear);
         break;
     case PARAM_SETUP_AUTO_OFF:
+        value = 30 * (measureGetAutoOff() + 1);
         updateParam(&autoOffParam, &textParamTop_5, value, section, clear);
         break;
     case PARAM_SETUP_WHEEL:
@@ -321,9 +322,11 @@ static void screenDiffColorMode(int8_t value)
     if (colorMode || value > 0)
         colorMode += value;
     else
-        colorMode = COLOR_MODE_BLACK_ON_WHITE;
+        colorMode = COLOR_MODE_END - 1;
     if (colorMode >= COLOR_MODE_END)
         colorMode = COLOR_MODE_FULL_COLOR;
+
+    eeprom_update_byte((uint8_t *)EEPROM_COLOR_MODE, colorMode);
 }
 
 void screenInit(void)
@@ -381,14 +384,14 @@ void diffParamSetup(int8_t value)
     }
     switch (paramSetup) {
     case PARAM_SETUP_AUTO_OFF:
+        measureDiffAutoMode(value);
         break;
     case PARAM_SETUP_WHEEL:
         measureDiffWheel(value);
         break;
     case PARAM_SETUP_COLOR_MODE:
-        screen = SCREEN_END;
         screenDiffColorMode(value);
-        screenShowSetup();
+        screenShowSetup(CLEAR_ALL);
         break;
     default:
         break;
@@ -409,9 +412,10 @@ void screenShowMain(ClearMode clear)
     paramSetup = PARAM_SETUP_AUTO_OFF;
 }
 
-void screenShowSetup(void)
+void screenShowSetup(ClearMode clear)
 {
-    ClearMode clear = (SCREEN_SETUP != screen);
+    if (clear == CLEAR_NOTHING)
+        clear = (SCREEN_SETUP != screen);
 
     updateSection(SECTION_SETUP_TOP, clear);
     updateSection(SECTION_SETUP_MID, clear);
@@ -427,7 +431,7 @@ void screenUpdate(void)
         screenShowMain(CLEAR_NOTHING);
         break;
     case SCREEN_SETUP:
-        screenShowSetup();
+        screenShowSetup(CLEAR_NOTHING);
         break;
     default:
         break;

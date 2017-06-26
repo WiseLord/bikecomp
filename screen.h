@@ -70,7 +70,7 @@ typedef enum {
     COLOR_MODE_WHITE_ON_BLACK,
     COLOR_MODE_BLACK_ON_WHITE,
 
-    COLOR_MODE_END,
+    COLOR_MODE_END
 } ColorMode;
 
 void screenInit(void);
@@ -80,7 +80,7 @@ void switchParamSetup(void);
 void diffParamSetup(int8_t value);
 
 void screenShowMain(ClearMode clear);
-void screenShowSetup(void);
+void screenShowSetup(ClearMode clear);
 
 void screenUpdate(void);
 Screen screenGet(void);

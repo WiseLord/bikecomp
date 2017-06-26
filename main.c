@@ -104,10 +104,10 @@ int main(void)
         case BTN_0_LONG:
             switch (screen) {
             case SCREEN_MAIN:
-                screenShowSetup();
+                screenShowSetup(CLEAR_ALL);
                 break;
             case SCREEN_SETUP:
-                screenShowMain(CLEAR_NOTHING);
+                screenShowMain(CLEAR_ALL);
                 break;
             default:
                 break;

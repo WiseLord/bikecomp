@@ -5,6 +5,7 @@
 #define EEPROM_PARAM_BTM        0x01
 
 #define EEPROM_COLOR_MODE       0x08
+#define EEPROM_AUTO_OFF         0x0A
 
 #define EEPROM_WHEEL            0x10
 #define EEPROM_DISTANCE         0x12

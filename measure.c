@@ -22,6 +22,7 @@ static volatile uint8_t wheelAntiBounce = ANTI_BOUNCE;
 static volatile uint8_t pedalAntiBounce = ANTI_BOUNCE;
 
 static volatile uint8_t sleepTimer = SLEEP_TIMER;
+static uint8_t autoOff = 0;
 
 // Data saved in eeprom
 static int32_t totalDistance;
@@ -40,7 +41,14 @@ void measureInit(void)
 {
     // Load data from EEPROM
     totalDistance = eeprom_read_dword((uint32_t *)EEPROM_DISTANCE);
+
     wheelLength = eeprom_read_word((uint16_t *)EEPROM_WHEEL);
+    if (wheelLength > WHEEL_MAX_LENGTH)
+        wheelLength = WHEEL_AVG_LENGTH;
+
+    autoOff = eeprom_read_byte((uint8_t*)EEPROM_AUTO_OFF);
+    if (autoOff >= AUTO_OFF_END)
+        autoOff = AUTO_OFF_30;
 
     // Sensor lines as inputs
     IN(SENSOR_WHEEL);
@@ -82,7 +90,7 @@ ISR(INT0_vect)
 
     wheelCnt = 0;
     inMove = 1;
-    sleepTimer = SLEEP_TIMER;
+    sleepTimer = SLEEP_TIMER * (autoOff + 1);
 }
 
 ISR(INT1_vect)
@@ -99,11 +107,11 @@ ISR(INT1_vect)
 
     pedalCnt = 0;
     inMove = 1;
-    sleepTimer = SLEEP_TIMER;
+    sleepTimer = SLEEP_TIMER * (autoOff + 1);
 }
 
 ISR (PCINT2_vect) {
-    sleepTimer = SLEEP_TIMER;
+    sleepTimer = SLEEP_TIMER * (autoOff + 1);
 }
 
 void measureIncTime(void)
@@ -117,13 +125,25 @@ void measureIncTime(void)
     }
 }
 
+void measureDiffAutoMode(int8_t diff)
+{
+    if (autoOff || diff > 0)
+        autoOff += diff;
+    else
+        autoOff = AUTO_OFF_END - 1;
+    if (autoOff >= AUTO_OFF_END)
+        autoOff = AUTO_OFF_30;
+
+    eeprom_update_byte((uint8_t *)EEPROM_AUTO_OFF, autoOff);
+}
+
 void measureDiffWheel(int8_t diff)
 {
     wheelLength += diff;
-    if (wheelLength < 500)
-        wheelLength = 500;
-    if (wheelLength > 3000)
-        wheelLength = 3000;
+    if (wheelLength < WHEEL_MIN_LENGTH)
+        wheelLength = WHEEL_MIN_LENGTH;
+    if (wheelLength > WHEEL_MAX_LENGTH)
+        wheelLength = WHEEL_MAX_LENGTH;
 
     eeprom_update_word((uint16_t *)EEPROM_WHEEL, wheelLength);
 }
@@ -200,5 +220,10 @@ uint8_t measureGetSleepTimer(void)
 
 void measureResetSleepTimer()
 {
-    sleepTimer = SLEEP_TIMER;
+    sleepTimer = SLEEP_TIMER * (autoOff + 1);
+}
+
+AutoOff measureGetAutoOff()
+{
+    return autoOff;
 }
