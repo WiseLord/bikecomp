@@ -221,6 +221,22 @@ void ili9341Init(void)
     ili9341Rotate(LCD_Orientation_Portrait_1);
 }
 
+void ili9341Sleep(void)
+{
+    CLR(ILI9341_LED);
+    _delay_ms(200);
+    ili9341SendCmd(ILI9341_SLPIN);
+    _delay_ms(50);
+}
+
+void ili9341Wakeup(void)
+{
+    _delay_ms(200);
+    ili9341SendCmd(ILI9341_SLPOUT);
+    _delay_ms(50);
+    SET(ILI9341_LED);
+}
+
 void ili9431DrawPixel(uint16_t x, uint16_t y, uint16_t color)
 {
     ili9341SetWindow(x, y, x, y);

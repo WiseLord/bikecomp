@@ -18,13 +18,12 @@ void inputInit(void)
     SET(BUTTON_2);
     SET(BUTTON_3);
 
-    TIMSK0 |= (1 << OCIE0A);                // Overflow interrupt
     TCCR0A = (1 << WGM01);                  // CTC mode
     TCCR0B = (1 << CS02) | (1 << CS00);     // PSK = 1024
     OCR0A = 124;                            // 16M/(OCR0A - 1)/PSK = 125 Hz
 }
 
-ISR (TIMER0_COMPA_vect, ISR_NOBLOCK)        // TIME_STEP_FREQ = 125 Hz
+ISR(TIMER0_COMPA_vect, ISR_NOBLOCK)        // TIME_STEP_FREQ = 125 Hz
 {
     static uint8_t btnCnt = 0;              // Buttons press duration
     static uint8_t btnPrev = BTN_STATE_0;   // Previous buttons state

@@ -106,6 +106,9 @@
 
 void ili9341Init(void);
 
+void ili9341Sleep(void);
+void ili9341Wakeup(void);
+
 void ili9431DrawPixel(uint16_t x, uint16_t y, uint16_t color);
 
 void ili9341DrawRectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);

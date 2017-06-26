@@ -22,6 +22,8 @@ static volatile uint8_t inPause = 0;
 static volatile uint8_t wheelAntiBounce = ANTI_BOUNCE;
 static volatile uint8_t pedalAntiBounce = ANTI_BOUNCE;
 
+static volatile uint8_t sleepTimer = SLEEP_TIMER;
+
 // Data saved in eeprom
 static int32_t totalDistance;
 static uint16_t wheelLength;
@@ -38,8 +40,8 @@ static int32_t getCurrentTrack(void)
 void measureInit(void)
 {
     // Load data from EEPROM
-    totalDistance = eeprom_read_dword((uint32_t*)EEPROM_DISTANCE);
-    wheelLength = eeprom_read_word((uint16_t*)EEPROM_WHEEL);
+    totalDistance = eeprom_read_dword((uint32_t *)EEPROM_DISTANCE);
+    wheelLength = eeprom_read_word((uint16_t *)EEPROM_WHEEL);
 
     // Sensor lines as inputs
     IN(SENSOR_WHEEL);
@@ -49,15 +51,11 @@ void measureInit(void)
     SET(SENSOR_PEDAL);
     // INT0 on falling edge (wheel sensor)
     EICRA |= (1 << ISC01) | (0 << ISC00);
-    EIMSK |= (1 << INT0);
     // INT1 on falling edge (pedal sensor)
     EICRA |= (1 << ISC11) | (0 << ISC10);
-    EIMSK |= (1 << INT1);
 
     // 16bit Timer1 for measuring intervals
     TCCR1B = (1 << CS12) | (0 << CS11) | (1 << CS10);   // PSK = 1024
-    // Enable overflow interrupts
-    TIMSK1 |= (1 << TOIE1);
 }
 
 ISR (TIMER1_OVF_vect)                                   // 16M/PSK = 15625 counts/sec
@@ -67,34 +65,46 @@ ISR (TIMER1_OVF_vect)                                   // 16M/PSK = 15625 count
     wheelCntBuf = 0;
     pedalCntBuf = 0;
     inMove = 0;
+    if (sleepTimer)
+        sleepTimer--;
 }
 
 ISR(INT0_vect)
 {
-    if (!wheelAntiBounce) {
-        wheelAntiBounce = ANTI_BOUNCE;
-        wheelTurns++;
-        if (inMove)
-            wheelCntBuf = wheelCnt + TCNT1;
-        pedalCnt += TCNT1;
-        TCNT1 = 0;
-        wheelCnt = 0;
-        inMove = 1;
-    }
+    if (wheelAntiBounce)
+        return;
+
+    wheelAntiBounce = ANTI_BOUNCE;
+    wheelTurns++;
+    if (inMove)
+        wheelCntBuf = wheelCnt + TCNT1;
+    pedalCnt += TCNT1;
+    TCNT1 = 0;
+
+    wheelCnt = 0;
+    inMove = 1;
+    sleepTimer = SLEEP_TIMER;
 }
 
 ISR(INT1_vect)
 {
-    if (!pedalAntiBounce) {
-        pedalAntiBounce = ANTI_BOUNCE;
-        pedalTurns++;
-        if (inMove)
-            pedalCntBuf = pedalCnt + TCNT1;
-        wheelCnt += TCNT1;
-        TCNT1 = 0;
-        pedalCnt = 0;
-        inMove = 1;
-    }
+    if (pedalAntiBounce)
+        return;
+
+    pedalAntiBounce = ANTI_BOUNCE;
+    pedalTurns++;
+    if (inMove)
+        pedalCntBuf = pedalCnt + TCNT1;
+    wheelCnt += TCNT1;
+    TCNT1 = 0;
+
+    pedalCnt = 0;
+    inMove = 1;
+    sleepTimer = SLEEP_TIMER;
+}
+
+ISR (PCINT2_vect) {
+    sleepTimer = SLEEP_TIMER;
 }
 
 void measureIncTime(void)
@@ -118,7 +128,7 @@ void measureDiffWheel(int8_t diff)
     if (wheelLength > 3000)
         wheelLength = 3000;
 
-    eeprom_update_word((uint16_t*)EEPROM_WHEEL, wheelLength);
+    eeprom_update_word((uint16_t *)EEPROM_WHEEL, wheelLength);
 }
 
 void measurePauseCurrent(void)
@@ -135,7 +145,7 @@ void measureResetCurrent(void)
     trackTime = 0;
     trackTimeMove = 0;
 
-    eeprom_update_dword((uint32_t*)EEPROM_DISTANCE, totalDistance);
+    eeprom_update_dword((uint32_t *)EEPROM_DISTANCE, totalDistance);
 }
 
 int32_t measureGetValue(Param param)
@@ -195,4 +205,14 @@ int32_t measureGetValue(Param param)
     }
 
     return ret;
+}
+
+uint8_t measureGetSleepTimer(void)
+{
+    return sleepTimer;
+}
+
+void measureResetSleepTimer()
+{
+    sleepTimer = SLEEP_TIMER;
 }

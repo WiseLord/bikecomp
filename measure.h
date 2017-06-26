@@ -7,6 +7,8 @@
 #define TIME_STEP_FREQ      125
 #define AVG_MIN_TIME        20
 
+#define SLEEP_TIMER         7   // ~4.2sec intervals => ~30 sec
+
 typedef enum {
     PARAM_SPEED,
 
@@ -33,5 +35,7 @@ void measureDiffWheel(int8_t diff);
 void measurePauseCurrent(void);
 void measureResetCurrent(void);
 int32_t measureGetValue(Param param);
+uint8_t measureGetSleepTimer(void);
+void measureResetSleepTimer(void);
 
 #endif // MEASURE_H

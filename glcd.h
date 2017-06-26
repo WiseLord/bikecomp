@@ -73,6 +73,8 @@ extern FontLcdParam flp;
 // Some function remap
 #if GLCD_TYPE == 9341
 #define glcdInit()                              ili9341Init()
+#define glcdSleep()                             ili9341Sleep();
+#define glcdWakeup()                            ili9341Wakeup();
 #define glcdDrawPixel(x, y, clr)                ili9431DrawPixel(x, y, clr)
 #define glcdDrawRectangle(x0, y0, x1, y1, clr)  ili9341DrawRectangle(x0, y0, x1, y1, clr)
 #define glcdDrawColorMap()                      ili9341DrawColorMap()

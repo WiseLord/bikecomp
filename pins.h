@@ -40,6 +40,9 @@
 #define BUTTON_2_LINE       ARDUINO_D5_LINE
 #define BUTTON_3            ARDUINO_D6
 #define BUTTON_3_LINE       ARDUINO_D6_LINE
+#define PCINT_BUTTON1       PCINT20
+#define PCINT_BUTTON2       PCINT21
+#define PCINT_BUTTON3       PCINT22
 
 // Sensors
 #define SENSOR_WHEEL        ARDUINO_D2

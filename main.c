@@ -1,5 +1,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <avr/sleep.h>
 #include <util/delay.h>
 
 #include "ili9341.h"
@@ -15,9 +16,37 @@ void hwInit()
     inputInit();
     measureInit();
     screenInit();
+
+    // Setup sleep mode
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    PCMSK2 |= (BUTTON_1_LINE | BUTTON_2_LINE | BUTTON_3_LINE);
+
+    // Interrupts
+    TIMSK0 |= (1 << OCIE0A);    // Input timer compare
+    TIMSK1 |= (1 << TOIE1);     // Measure timer overflow
+    EIMSK |= (1 << INT0);       // Wheel sensor
+    EIMSK |= (1 << INT1);       // Pedal sensor
     sei();
 
     return;
+}
+
+void sleep(void)
+{
+    // Prepare sleep
+    glcdSleep();
+    TIMSK0 &= ~(1 << OCIE0A);   // Input timer compare disable
+    TIMSK1 &= ~(1 << TOIE1);    // Measure timer overflow disable
+    PCICR |= (1<<PCIE2);        // Buttons interrupt enable
+
+    // Sleep
+    sleep_mode();
+
+    // Wakeup
+    PCICR &= ~(1<<PCIE2);       // Buttons interrupt disable
+    TIMSK0 |= (1 << OCIE0A);    // Input timer compare enable
+    TIMSK1 |= (1 << TOIE1);     // Measure timer overflow enable
+    glcdWakeup();
 }
 
 int main(void)
@@ -28,6 +57,14 @@ int main(void)
     while (1) {
         Screen screen = screenGet();
         uint8_t btnCmd = getBtnCmd();
+
+        if (measureGetSleepTimer() == 0) {
+            btnCmd = BTN_STATE_0;
+            sleep();
+        }
+
+        if (btnCmd)
+            measureResetSleepTimer();
 
         switch (btnCmd) {
         case BTN_0:
