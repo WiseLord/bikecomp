@@ -36,9 +36,10 @@ static int32_t getCurrentTrack(void)
 ISR(INT0_vect)
 {
     if (!wheelAntiBounce) {
-        wheelTurns++;
-        wheelCntBuf = wheelCnt + TCNT1;
         wheelAntiBounce = ANTI_BOUNCE;
+        wheelTurns++;
+        if (inMove)
+            wheelCntBuf = wheelCnt + TCNT1;
         pedalCnt += TCNT1;
         TCNT1 = 0;
         wheelCnt = 0;
@@ -49,9 +50,10 @@ ISR(INT0_vect)
 ISR(INT1_vect)
 {
     if (!pedalAntiBounce) {
-        pedalTurns++;
-        pedalCntBuf = pedalCnt + TCNT1;
         pedalAntiBounce = ANTI_BOUNCE;
+        pedalTurns++;
+        if (inMove)
+            pedalCntBuf = pedalCnt + TCNT1;
         wheelCnt += TCNT1;
         TCNT1 = 0;
         pedalCnt = 0;
@@ -61,9 +63,11 @@ ISR(INT1_vect)
 
 ISR (TIMER1_OVF_vect)
 {
-    inMove = 0;
     wheelCnt = 0;
     pedalCnt = 0;
+    wheelCntBuf = 0;
+    pedalCntBuf = 0;
+    inMove = 0;
 }
 
 void measureInit(void)
