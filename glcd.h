@@ -14,6 +14,7 @@
 #endif
 
 #include "fonts.h"
+#include "icons.h"
 
 #if GLCD_TYPE == 9341
 #define LCD_WIDTH                       ILI9341_WIDTH
@@ -99,6 +100,8 @@ void glcdSetY(uint16_t y);
 void glcdLoadFont(const uint8_t *font, uint16_t color, uint16_t bgColor);
 void glcdWriteChar(uint8_t code);
 void glcdWriteString(char *string);
+
+void glcdWriteIcon(const uint8_t *icon, uint16_t color, uint16_t bgColor);
 
 void glcdLoadLcdFont(const uint8_t *font, uint16_t color, uint16_t bgColor);
 void glcdSkipLcdChar(uint8_t code);

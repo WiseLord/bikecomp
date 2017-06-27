@@ -1,4 +1,6 @@
 eeprom.h
+icons.c
+icons.h
 input.c
 input.h
 measure.c

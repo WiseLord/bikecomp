@@ -296,6 +296,42 @@ void ili9341WriteChar(const uint8_t *chOft, uint8_t fwd, uint8_t swd)
     SET(ILI9341_CS);
 }
 
+void ili9341WriteIcon(const uint8_t *icon, uint16_t color, uint16_t bgColor)
+{
+    uint8_t i;
+    uint8_t j;
+    uint8_t k;
+    uint8_t pgmData;
+
+    uint8_t width = pgm_read_byte(icon++);
+    uint8_t height = pgm_read_byte(icon++);
+
+    uint8_t colorH = color >> 8;
+    uint8_t colorL = color & 0xFF;
+    uint8_t bgColorH = bgColor >> 8;
+    uint8_t bgColorL = bgColor & 0xFF;
+
+    CLR(ILI9341_CS);
+    for (i = 0; i < width; i++) {
+        for (j = 0; j < height / 8; j++) {
+            pgmData = pgm_read_byte(icon + (width * j) + i);
+            for (k = 0; k < 8; k++) {
+                if (pgmData & 0x01) {
+                    ili9341SendSPI(colorH);
+                    ili9341SendSPI(colorL);
+                } else {
+                    ili9341SendSPI(bgColorH);
+                    ili9341SendSPI(bgColorL);
+                }
+                pgmData >>= 1;
+            }
+        }
+    }
+    // Wait for last transmission to complete
+    while (!(SPSR & (1 << SPIF)));
+    SET(ILI9341_CS);
+}
+
 void ili9341DrawColorMap(void)
 {
     uint16_t r, g, b, color;

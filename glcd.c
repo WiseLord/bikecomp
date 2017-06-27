@@ -159,6 +159,16 @@ void glcdWriteChar(uint8_t code)
     glcdSetXY(_x + fwd, _y);
 }
 
+void glcdWriteIcon(const uint8_t *icon, uint16_t color, uint16_t bgColor)
+{
+#if GLCD_TYPE == 9341
+    ili9341SetWindow(_x, _y, _x + pgm_read_byte(&icon[0]) - 1, _y + pgm_read_byte(&icon[1]) - 1);
+    ili9341WriteIcon(icon, color, bgColor);
+#else
+#error "Implement _WriteIcon in display driver!"
+#endif
+}
+
 void glcdWriteString(char *string)
 {
     if (*string)

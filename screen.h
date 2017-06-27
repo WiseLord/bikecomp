@@ -58,9 +58,10 @@ typedef struct {
 } ParamData;
 
 typedef enum {
-    CLEAR_NOTHING,
-    CLEAR_ALL,
-    CLEAR_LCDDATA,
+    CLEAR_NOTHING   = 0b00,
+    CLEAR_LCDDATA   = 0b01,
+    CLEAR_ICON      = 0b10,
+    CLEAR_ALL       = 0b11,
 
     CLEAR_END
 } ClearMode;

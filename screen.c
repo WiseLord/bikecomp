@@ -222,6 +222,17 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
         glcdWriteString(strbuf);
     }
 
+    // Draw icon
+    if (clear & CLEAR_ICON) {
+        if (section >= SECTION_SETUP_TOP && section <= SECTION_SETUP_BTM) {
+            uint16_t iconColor = bgColor;
+            if (section - SECTION_SETUP_TOP == paramSetup - PARAM_SETUP_AUTO_OFF)
+                iconColor = labelColor;
+            glcdSetXY(area.labX, area.top + area.labY + 40);
+            glcdWriteIcon(icon_pointer, iconColor, bgColor);
+        }
+    }
+
     // Redraw param value with selected LCD font
     char *valStr = mkNumString(val, text.len, text.dot, text.lead);
 
@@ -234,7 +245,7 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
             glcdSetY(area.top + text.y + pgm_read_byte(&area.fontMain[1]) - pgm_read_byte(
                          &area.fontDeci[1]));
         }
-        if (clear || (valStr[i] != posStr[i])) {
+        if (clear & CLEAR_LCDDATA || (valStr[i] != posStr[i])) {
             posStr[i] = valStr[i];
             glcdWriteLcdChar(posStr[i]);
         } else {
@@ -331,13 +342,13 @@ static void screenDiffColorMode(int8_t value)
 
 void screenInit(void)
 {
-    paramMid = eeprom_read_byte((uint8_t*)EEPROM_PARAM_MID);
+    paramMid = eeprom_read_byte((uint8_t *)EEPROM_PARAM_MID);
     if (paramMid >= PARAM_END)
         switchParam(SECTION_MAIN_MID);
-    paramBtm = eeprom_read_byte((uint8_t*)EEPROM_PARAM_BTM);
+    paramBtm = eeprom_read_byte((uint8_t *)EEPROM_PARAM_BTM);
     if (paramBtm >= PARAM_END)
         switchParam(SECTION_MAIN_BTM);
-    colorMode = eeprom_read_byte((uint8_t*)EEPROM_COLOR_MODE);
+    colorMode = eeprom_read_byte((uint8_t *)EEPROM_COLOR_MODE);
     if (colorMode >= COLOR_MODE_END)
         colorMode = COLOR_MODE_FULL_COLOR;
 }
@@ -351,7 +362,7 @@ void switchParam(Section section)
         if (paramMid == paramBtm)
             if (++paramMid >= PARAM_END)
                 paramMid = PARAM_TRACK;
-        eeprom_update_byte((uint8_t*)EEPROM_PARAM_MID, paramMid);
+        eeprom_update_byte((uint8_t *)EEPROM_PARAM_MID, paramMid);
         break;
     case SECTION_MAIN_BTM:
         if (++paramBtm >= PARAM_END)
@@ -359,7 +370,7 @@ void switchParam(Section section)
         if (paramBtm == paramMid)
             if (++paramBtm >= PARAM_END)
                 paramBtm = PARAM_TRACK;
-        eeprom_update_byte((uint8_t*)EEPROM_PARAM_BTM, paramBtm);
+        eeprom_update_byte((uint8_t *)EEPROM_PARAM_BTM, paramBtm);
         break;
     default:
         return;
@@ -372,6 +383,8 @@ void switchParamSetup(void)
 {
     if (++paramSetup >= PARAM_SETUP_END)
         paramSetup = PARAM_SETUP_AUTO_OFF;
+
+    screenShowSetup(CLEAR_ICON);
 }
 
 void diffParamSetup(int8_t value)
