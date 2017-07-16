@@ -5,3 +5,4 @@
 *.lss
 build-*
 *.creator.user*
+*.workspace

@@ -155,8 +155,13 @@ static void ili9341InitSeq(void)
 void ili9341SetWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
 {
     ili9341SendCmd(ILI9341_PASET);
+#ifdef SIM_MODE
+    ili9341SendData(239 - x1);
+    ili9341SendData(239 - x0);
+#else
     ili9341SendData(x0);
     ili9341SendData(x1);
+#endif
 
     ili9341SendCmd(ILI9341_CASET);
     ili9341SendData(y0);
@@ -218,7 +223,11 @@ void ili9341Init(void)
     SET(ILI9341_LED);
 
     // Set display orientation and size
+#ifdef SIM_MODE
+    ili9341Rotate(LCD_Orientation_Portrait_2);
+#else
     ili9341Rotate(LCD_Orientation_Portrait_1);
+#endif
 }
 
 void ili9341Sleep(void)
