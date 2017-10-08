@@ -9,6 +9,8 @@
 
 #if GLCD_TYPE == 9341
 #include "ili9341.h"
+#elif GLCD_TYPE == 1306
+#include "ssd1306.h"
 #else
 #error "Unknown GLCD_TYPE"
 #endif
@@ -20,6 +22,10 @@
 #define LCD_WIDTH                       ILI9341_WIDTH
 #define LCD_HEIGHT                      ILI9341_HEIGHT
 #define LCD_PIXELS                      ILI9341_PIXELS
+#elif GLCD_TYPE == 1306
+#define LCD_WIDTH                       SSD1306_WIDTH
+#define LCD_HEIGHT                      SSD1306_HEIGHT
+#define LCD_PIXELS                      SSD1306_PIXELS
 #endif
 
 //Colors
@@ -74,11 +80,19 @@ extern FontLcdParam flp;
 // Some function remap
 #if GLCD_TYPE == 9341
 #define glcdInit()                              ili9341Init()
-#define glcdSleep()                             ili9341Sleep();
-#define glcdWakeup()                            ili9341Wakeup();
+#define glcdSleep()                             ili9341Sleep()
+#define glcdWakeup()                            ili9341Wakeup()
 #define glcdDrawPixel(x, y, clr)                ili9431DrawPixel(x, y, clr)
 #define glcdDrawRectangle(x0, y0, x1, y1, clr)  ili9341DrawRectangle(x0, y0, x1, y1, clr)
 #define glcdDrawColorMap()                      ili9341DrawColorMap()
+#define glcdUpdateScreen()
+#elif GLCD_TYPE == 1306
+#define glcdInit()                              ssd1306Init()
+#define glcdSleep()                             ssd1306Sleep()
+#define glcdDrawPixel(x, y, color)              ssd1306DrawPixel(x, y, color)
+#define glcdDrawRectangle(x0, y0, x1, y1, clr)  ssd1306DrawRectangle(x0, y0, x1, y1, clr)
+#define glcdDrawColorMap()                      ssd1306DrawColorMap()
+#define glcdUpdateScreen()                      ssd1306UpdateFb()
 #else
 #define glcdInit()
 #define glcdDrawPixel(x, y, color)
