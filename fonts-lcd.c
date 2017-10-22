@@ -28,7 +28,7 @@ const uint8_t lcdChar[] PROGMEM = {
 // pairs of Xp1..XpN to draw "thickness" horisontal lines starting from Yp
 
 const uint8_t font_lcd_117[] PROGMEM = {
-    65, 117, 13,
+    117, 65, 13,
     0,      // A
     4, 55, 3, 55, 2, 54, 1, 54, 0, 53, 0, 53, 0, 52, 2, 52, 4, 51, 6, 51, 8, 50, 10, 50, 12, 49,
     52,     // B
@@ -48,7 +48,7 @@ const uint8_t font_lcd_117[] PROGMEM = {
 };
 
 const uint8_t font_lcd_99[] PROGMEM = {
-    55, 99, 11,  // width, height and thickness
+    99, 55, 11,  // width, height and thickness
     0,      // A
     3, 46, 2, 46, 1, 45, 0, 45, 0, 44, 0, 44, 2, 43, 4, 43, 6, 42, 8, 42, 10, 41,
     44,     // B
@@ -68,7 +68,7 @@ const uint8_t font_lcd_99[] PROGMEM = {
 };
 
 const uint8_t font_lcd_90[] PROGMEM = {
-    50, 90, 10, // width, height and thickness
+    90, 50, 10, // width, height and thickness
     0,      // A
     3, 42, 2, 41, 1, 41, 0, 40, 0, 40, 1, 39, 3, 39, 5, 38, 7, 38, 9, 37,
     40,     // B
@@ -88,7 +88,7 @@ const uint8_t font_lcd_90[] PROGMEM = {
 };
 
 const uint8_t font_lcd_72[] PROGMEM = {
-    40, 72, 8,  // width, height and thickness
+    72, 40, 8,  // width, height and thickness
     0,      // A
     3, 33, 2, 32, 1, 32, 0, 31, 1, 31, 3, 30, 5, 30, 7, 29,
     32,     // B
@@ -108,7 +108,7 @@ const uint8_t font_lcd_72[] PROGMEM = {
 };
 
 const uint8_t font_lcd_63[] PROGMEM = {
-    35, 63, 7,
+    63, 35, 7,
     0,      // A
     3, 28, 2, 28, 1, 27, 0, 27, 1, 26, 3, 26, 5, 26,
     28,     // B
@@ -128,7 +128,7 @@ const uint8_t font_lcd_63[] PROGMEM = {
 };
 
 const uint8_t font_lcd_45[] PROGMEM = {
-    25, 45, 5,
+    45, 25, 5,
     0,      // A
     2, 20, 1, 20, 0, 19, 2, 19, 4, 18,
     20,     // B
@@ -148,7 +148,7 @@ const uint8_t font_lcd_45[] PROGMEM = {
 };
 
 const uint8_t font_lcd_36[] PROGMEM = {
-    20, 36, 4,
+    36, 20, 4,
     0,      // A
     2, 15, 1, 15, 0, 14, 2, 14,
     16,     // B
@@ -168,7 +168,7 @@ const uint8_t font_lcd_36[] PROGMEM = {
 };
 
 const uint8_t font_lcd_27[] PROGMEM = {
-    15, 27, 3,
+    27, 15, 3,
     0,      // A
     1, 13, 2, 12, 3, 11,
     12,     // B

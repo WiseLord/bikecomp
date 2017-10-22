@@ -35,12 +35,19 @@ typedef enum {
 
 typedef struct {
     uint8_t height;
-    uint8_t ltspPos;
-    uint8_t ccnt;
-    uint8_t ofta;
-    uint8_t oftna;
-
-    uint8_t fwd;
+    union {
+        struct {
+            uint8_t ltspPos;
+            uint8_t ccnt;
+            uint8_t ofta;
+            uint8_t oftna;
+            uint8_t fwd;
+        };
+        struct {
+            uint8_t width;
+            uint8_t thickness;
+        };
+    };
     union {
         uint16_t color;
         struct {
@@ -56,26 +63,6 @@ typedef struct {
         };
     };
 } FontParam;
-
-typedef struct {
-    uint8_t width;
-    uint8_t height;
-    uint8_t thickness;
-    union {
-        uint16_t color;
-        struct {
-            uint8_t colorL;
-            uint8_t colorH;
-        };
-    };
-    union {
-        uint16_t bgColor;
-        struct {
-            uint8_t bgColorL;
-            uint8_t bgColorH;
-        };
-    };
-} FontLcdParam;
 
 #define BIT_A       (1<<0)
 #define BIT_B       (1<<1)

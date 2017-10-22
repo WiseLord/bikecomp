@@ -5,14 +5,6 @@
 
 GlcdOpts glcdOpts;
 
-FontParam fp;
-FontLcdParam flp;
-
-static const uint8_t *_font;
-static const uint8_t *_fontLcd = font_lcd_90;
-
-static int16_t _x, _y;
-
 void glcdDrawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color)
 {
     int16_t sX, sY, dX, dY, err, err2;
@@ -110,65 +102,64 @@ void glcdDrawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
 
 void glcdSetXY(uint16_t x, uint16_t y)
 {
-    _x = x;
-    _y = y;
+    glcdOpts.x = x;
+    glcdOpts.y = y;
 }
 
 void glcdSetY(uint16_t y)
 {
-    _y = y;
+    glcdOpts.y = y;
 }
 
 void glcdLoadFont(const uint8_t *font, uint16_t color, uint16_t bgColor)
 {
-    _font = font + FONT_HEADER_END;
+    glcdOpts.font = font + FONT_HEADER_END;
 
-    memcpy_P(&fp, font, FONT_HEADER_END);
-    fp.color = color;
-    fp.bgColor = bgColor;
+    memcpy_P(&glcdOpts.fp, font, FONT_HEADER_END);
+    glcdOpts.fp.color = color;
+    glcdOpts.fp.bgColor = bgColor;
 }
 
 void glcdWriteChar(uint8_t code)
 {
     uint8_t i;
 
-    uint8_t spos = code - ((code >= 128) ? fp.oftna : fp.ofta);
+    uint8_t spos = code - ((code >= 128) ? glcdOpts.fp.oftna : glcdOpts.fp.ofta);
 
     uint16_t oft = 0;               // Current symbol offset in array
     uint8_t swd = 0;                // Current symbol width
-    uint8_t fwd = fp.fwd;           // Fixed width
+    uint8_t fwd = glcdOpts.fp.fwd;           // Fixed width
 
     for (i = 0; i < spos; i++) {
-        swd = pgm_read_byte(_font + i);
+        swd = pgm_read_byte(glcdOpts.font + i);
         oft += swd;
     }
-    swd = pgm_read_byte(_font + spos);
+    swd = pgm_read_byte(glcdOpts.font + spos);
     if (!fwd)
         fwd = swd;
 
-    oft *= fp.height;
-    oft += fp.ccnt;
+    oft *= glcdOpts.fp.height;
+    oft += glcdOpts.fp.ccnt;
 
 #if GLCD_TYPE == 9341
-    ili9341SetWindow(_x, _y, _x + fwd - 1, _y + fp.height * 8 - 1);
-    ili9341WriteChar(_font + oft, fwd, swd);
+    ili9341SetWindow(glcdOpts.x, glcdOpts.y, glcdOpts.x + fwd - 1, glcdOpts.y + glcdOpts.fp.height * 8 - 1);
+    ili9341WriteChar(glcdOpts.font + oft, fwd, swd);
 #elif GLCD_TYPE == 1306
     glcdSetXY(_x, _y);
-    ssd1306WriteChar(_font + oft, fwd, swd);
+    ssd1306WriteChar(glcdOpts.font + oft, fwd, swd);
 #else
 #error "Implement _WriteChar in display driver!"
 #endif
 
-    glcdSetXY(_x + fwd, _y);
+    glcdSetXY(glcdOpts.x + fwd, glcdOpts.y);
 }
 
 void glcdWriteIcon(const uint8_t *icon, uint16_t color, uint16_t bgColor)
 {
 #if GLCD_TYPE == 9341
-    ili9341SetWindow(_x, _y, _x + pgm_read_byte(&icon[0]) - 1, _y + pgm_read_byte(&icon[1]) - 1);
+    ili9341SetWindow(glcdOpts.x, glcdOpts.y, glcdOpts.x + pgm_read_byte(&icon[0]) - 1, glcdOpts.y + pgm_read_byte(&icon[1]) - 1);
     ili9341WriteIcon(icon, color, bgColor);
 #elif GLCD_TYPE == 1306
-    glcdSetXY(_x, _y);
     ssd1306WriteIcon(icon, color, bgColor);
 #else
 #error "Implement _WriteIcon in display driver!"
@@ -180,18 +171,18 @@ void glcdWriteString(char *string)
     if (*string)
         glcdWriteChar(*string++);
     while (*string) {
-        glcdWriteChar(fp.ltspPos);
+        glcdWriteChar(glcdOpts.fp.ltspPos);
         glcdWriteChar(*string++);
     }
 }
 
 void glcdLoadLcdFont(const uint8_t *font, uint16_t color, uint16_t bgColor)
 {
-    _fontLcd = font + FONT_LCD_HEADER_END;
+    glcdOpts.font = font + FONT_LCD_HEADER_END;
 
-    memcpy_P(&flp, font, FONT_LCD_HEADER_END);
-    flp.color = color;
-    flp.bgColor = bgColor;
+    memcpy_P(&glcdOpts.fp, font, FONT_LCD_HEADER_END);
+    glcdOpts.fp.color = color;
+    glcdOpts.fp.bgColor = bgColor;
 }
 
 void glcdSkipLcdChar(uint8_t code)
@@ -200,9 +191,9 @@ void glcdSkipLcdChar(uint8_t code)
             (code == ' ') || (code == '-') ||
             (code >= 'A' && code <= 'F') ||
             (code >= 'a' && code <= 'f')) {
-        glcdSetXY(_x + flp.width + flp.thickness, _y);
+        glcdSetXY(glcdOpts.x + glcdOpts.fp.width + glcdOpts.fp.thickness, glcdOpts.y);
     } else if (code == '.' || code == ':') {
-        glcdSetXY(_x + 2 * flp.thickness, _y);
+        glcdSetXY(glcdOpts.x + 2 * glcdOpts.fp.thickness, glcdOpts.y);
     }
 }
 
@@ -218,20 +209,20 @@ void glcdWriteLcdChar(uint8_t code)
     } else if (code == '-') {
         code = pgm_read_byte(lcdChar + 16);
     } else if (code == '.' || code == ':') {
-        const uint8_t *digStart = _fontLcd + 7 * (flp.thickness * 2 + 1);
+        const uint8_t *digStart = glcdOpts.font + 7 * (glcdOpts.fp.thickness * 2 + 1);
         uint8_t startLine = pgm_read_byte(digStart++);
         uint8_t point1, point2;
-        for (uint8_t line = 0; line < flp.thickness; line++) {
+        for (uint8_t line = 0; line < glcdOpts.fp.thickness; line++) {
             point1 = pgm_read_byte(digStart++);
             point2 = pgm_read_byte(digStart++);
             if (code == '.') {
-                glcdDrawHorizLine(_x + point1, _x + point2, _y + startLine + line, flp.color);
+                glcdDrawHorizLine(glcdOpts.x + point1, glcdOpts.x + point2, glcdOpts.y + startLine + line, glcdOpts.fp.color);
             } else {
-                glcdDrawHorizLine(_x + point1, _x + point2, _y + startLine - 2 * flp.thickness + line, flp.color);
-                glcdDrawHorizLine(_x + point1, _x + point2, _y + 2 * flp.thickness + line, flp.color);
+                glcdDrawHorizLine(glcdOpts.x + point1, glcdOpts.x + point2, glcdOpts.y + startLine - 2 * glcdOpts.fp.thickness + line, glcdOpts.fp.color);
+                glcdDrawHorizLine(glcdOpts.x + point1, glcdOpts.x + point2, glcdOpts.y + 2 * glcdOpts.fp.thickness + line, glcdOpts.fp.color);
             }
         }
-        glcdSetXY(_x + 2 * flp.thickness, _y);
+        glcdSetXY(glcdOpts.x + 2 * glcdOpts.fp.thickness, glcdOpts.y);
         return;
     } else if (code >= 'A' && code <= 'F') {
         code = pgm_read_byte(lcdChar + (code - 'A' + 10));
@@ -242,21 +233,21 @@ void glcdWriteLcdChar(uint8_t code)
     }
 
     for (uint8_t seg = 0; seg < 7; seg++) {
-        segColor = code & (1 << seg) ? flp.color : flp.bgColor;
-        const uint8_t *digStart = _fontLcd + seg * (flp.thickness * 2 + 1);
+        segColor = code & (1 << seg) ? glcdOpts.fp.color : glcdOpts.fp.bgColor;
+        const uint8_t *digStart = glcdOpts.font + seg * (glcdOpts.fp.thickness * 2 + 1);
         uint8_t startLine = pgm_read_byte(digStart++);
         uint8_t point1, point2;
-        for (uint8_t line = 0; line < flp.thickness; line++) {
+        for (uint8_t line = 0; line < glcdOpts.fp.thickness; line++) {
             point1 = pgm_read_byte(digStart++);
             point2 = pgm_read_byte(digStart++);
             if (dirMask & (1 << seg)) {
-                glcdDrawHorizLine(_x + point1, _x + point2, _y + startLine + line, segColor);
+                glcdDrawHorizLine(glcdOpts.x + point1, glcdOpts.x + point2, glcdOpts.y + startLine + line, segColor);
             } else {
-                glcdDrawVertLine(_x + startLine + line, _y + point1, _y + point2, segColor);
+                glcdDrawVertLine(glcdOpts.x + startLine + line, glcdOpts.y + point1, glcdOpts.y + point2, segColor);
             }
         }
     }
-    glcdSetXY(_x + flp.width + flp.thickness, _y);
+    glcdSetXY(glcdOpts.x + glcdOpts.fp.width + glcdOpts.fp.thickness, glcdOpts.y);
 }
 
 void glcdWriteLcdString(char *string)

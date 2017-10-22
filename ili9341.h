@@ -113,9 +113,6 @@ void ili9431DrawPixel(uint16_t x, uint16_t y, uint16_t color);
 
 void ili9341DrawRectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
 
-void ili9341DrawRing(int16_t x0, int16_t y0, int16_t r, uint16_t color);
-void ili9341DrawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
-
 void ili9341WriteChar(const uint8_t *chOft, uint8_t fwd, uint8_t swd);
 void ili9341WriteIcon(const uint8_t *icon, uint16_t color, uint16_t bgColor);
 

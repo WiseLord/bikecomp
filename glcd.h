@@ -71,11 +71,13 @@ typedef struct {
     uint16_t width;
     uint16_t height;
     GlcdOrientation orientation;
+    int16_t x;
+    int16_t y;
+    const uint8_t *font;
+    FontParam fp;
 } GlcdOpts;
 
 extern GlcdOpts glcdOpts;
-extern FontParam fp;
-extern FontLcdParam flp;
 
 // Some function remap
 #if GLCD_TYPE == 9341

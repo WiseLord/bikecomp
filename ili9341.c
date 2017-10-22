@@ -283,18 +283,18 @@ void ili9341WriteChar(const uint8_t *chOft, uint8_t fwd, uint8_t swd)
 
     CLR(ILI9341_CS);
     for (i = 0; i < fwd; i++) {
-        for (j = 0; j < fp.height; j++) {
+        for (j = 0; j < glcdOpts.fp.height; j++) {
             if (i >= swd)
                 pgmData = 0x00;
             else
                 pgmData = pgm_read_byte(chOft + (swd * j) + i);
             for (k = 0; k < 8; k++) {
                 if (pgmData & 0x01) {
-                    ili9341SendSPI(fp.colorH);
-                    ili9341SendSPI(fp.colorL);
+                    ili9341SendSPI(glcdOpts.fp.colorH);
+                    ili9341SendSPI(glcdOpts.fp.colorL);
                 } else {
-                    ili9341SendSPI(fp.bgColorH);
-                    ili9341SendSPI(fp.bgColorL);
+                    ili9341SendSPI(glcdOpts.fp.bgColorH);
+                    ili9341SendSPI(glcdOpts.fp.bgColorL);
                 }
                 pgmData >>= 1;
             }
