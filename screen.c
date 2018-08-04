@@ -2,6 +2,7 @@
 
 #include <avr/pgmspace.h>
 #include <avr/eeprom.h>
+#include "adc.h"
 #include "eeprom.h"
 #include "glcd.h"
 #include "measure.h"
@@ -220,6 +221,17 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
         glcdWriteString("> ");
         strcpy_P(strbuf, param.label);
         glcdWriteString(strbuf);
+    }
+
+    // Draw battery
+    if (section == SECTION_MAIN_TOP) {
+        if (clear) {
+            // Draw battery outline
+        }
+        int16_t volt = adcGetVoltage();
+        glcdLoadFont(font_ks0066_ru_24, labelColor, bgColor);
+        glcdSetXY(190, area.top + area.labY);
+        glcdWriteString(mkNumString(volt, 4, 0, ' '));
     }
 
     // Draw icon

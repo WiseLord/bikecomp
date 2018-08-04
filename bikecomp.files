@@ -1,3 +1,5 @@
+adc.c
+adc.h
 eeprom.h
 icons.c
 icons.h

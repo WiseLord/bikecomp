@@ -2,6 +2,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include "adc.h"
 #include "measure.h"
 #include "pins.h"
 
@@ -55,6 +56,10 @@ ISR(TIMER0_COMPA_vect, ISR_NOBLOCK)        // TIME_STEP_FREQ = 125 Hz
     }
 
     measureIncTime();
+    static uint8_t batteryTimer = 0;
+    if (batteryTimer++ == 0) {
+        adcStart(); // Measure batter level every ~2 seconds
+    }
 
     return;
     // TODO: Temporary set sensor as output for sw interrupts

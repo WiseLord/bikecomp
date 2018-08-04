@@ -4,6 +4,7 @@
 #include <util/delay.h>
 
 #include "ili9341.h"
+#include "adc.h"
 #include "glcd.h"
 #include "fonts.h"
 #include "screen.h"
@@ -14,6 +15,7 @@ void hwInit()
 {
     glcdInit();
     inputInit();
+    adcInit();
     measureInit();
     screenInit();
 
@@ -35,6 +37,7 @@ void sleep(void)
 {
     // Prepare sleep
     glcdSleep();
+    ADCSRA &= ~(1 << ADEN);     // Disable ADC
     TIMSK0 &= ~(1 << OCIE0A);   // Input timer compare disable
     TIMSK1 &= ~(1 << TOIE1);    // Measure timer overflow disable
     PCICR |= (1<<PCIE2);        // Buttons interrupt enable
@@ -46,6 +49,8 @@ void sleep(void)
     PCICR &= ~(1<<PCIE2);       // Buttons interrupt disable
     TIMSK0 |= (1 << OCIE0A);    // Input timer compare enable
     TIMSK1 |= (1 << TOIE1);     // Measure timer overflow enable
+    ADCSRA |= (1 << ADEN);      // Enable ADC
+
     glcdInit();
     screenShowMain(CLEAR_ALL);
 }
