@@ -37,6 +37,7 @@ AD_CMD   = $(AD_MCU) $(AD_PROG) $(AD_PORT) -V
 # Build objects
 OBJS     = $(addprefix $(BUILDDIR)/, $(SRCS:.c=.o))
 ELF      = $(BUILDDIR)/$(TARG).elf
+HEX      = flash/$(TARG).hex
 
 all: $(HEX) size
 

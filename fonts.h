@@ -1,6 +1,8 @@
 #ifndef FONTS_H
 #define FONTS_H
 
+#include <stdint.h>
+
 extern const uint8_t font_ks0066_ru_08[];
 extern const uint8_t font_ks0066_ru_24[];
 extern const uint8_t font_digits_32[];

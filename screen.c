@@ -2,6 +2,9 @@
 
 #include <avr/pgmspace.h>
 #include <avr/eeprom.h>
+
+#include <stdbool.h>
+
 #include "adc.h"
 #include "eeprom.h"
 #include "glcd.h"
@@ -223,6 +226,7 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
         glcdWriteString(strbuf);
     }
 
+
     // Draw battery
     if (section == SECTION_MAIN_TOP) {
         if (clear) {
@@ -232,6 +236,25 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
         glcdLoadFont(font_ks0066_ru_24, labelColor, bgColor);
         glcdSetXY(190, area.top + area.labY);
         glcdWriteString(mkNumString(volt, 4, 0, ' '));
+    }
+
+    // Draw more/less than average icon
+    glcdLoadLcdFont(area.fontMain, paramColor, bgColor);
+
+    if (section == SECTION_MAIN_TOP) {
+        int32_t avgSpeed = measureGetValue(PARAM_SPEED_AVG) * 36 / 10 / 100;
+        uint8_t fTh = pgm_read_byte(&area.fontMain[2]);
+
+        static bool oldMore = false;
+        bool more = (val > avgSpeed);
+
+        if (more != oldMore) {
+            oldMore = more;
+            glcdSetXY(text.x + fTh + 1, area.top + text.y + fTh + 3);
+            glcdWriteIcon(icon_up, more ? labelColor : bgColor, bgColor);
+            glcdSetXY(text.x + fTh + 1, area.top + text.y + fTh * 5 + 3);
+            glcdWriteIcon(icon_down, more ? bgColor : labelColor, bgColor);
+        }
     }
 
     // Draw icon
