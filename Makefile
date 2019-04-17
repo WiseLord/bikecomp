@@ -38,18 +38,17 @@ AD_CMD   = $(AD_MCU) $(AD_PROG) $(AD_PORT) -V
 OBJS     = $(addprefix $(BUILDDIR)/, $(SRCS:.c=.o))
 ELF      = $(BUILDDIR)/$(TARG).elf
 
-all: $(ELF) size
+all: $(HEX) size
 
-# Dependencies
--include $(OBJS:.o=.d)
+$(HEX): $(ELF)
+	$(OBJCOPY) -O ihex -R .eeprom -R .nwram $(ELF) $(HEX)
 
 $(ELF): $(OBJS)
-	@mkdir -p $(BUILDDIR) flash
-	$(CC) $(LDFLAGS) -o $(ELF) $(OBJS) -lm
-	$(OBJCOPY) -O ihex -R .eeprom -R .nwram $(ELF) flash/$(TARG).hex
+	@mkdir -p $(addprefix $(BUILDDIR)/, $(SUBDIRS)) flash
+	$(CC) $(LDFLAGS) -o $(ELF) $(OBJS)
 	$(OBJDUMP) -h -S $(ELF) > $(BUILDDIR)/$(TARG).lss
 
-size:
+size: $(ELF)
 	@sh ./size.sh $(ELF)
 
 $(BUILDDIR)/%.o: %.c
@@ -67,3 +66,6 @@ flash: $(ELF)
 .PHONY: fuse
 fuse:
 	$(AVRDUDE) $(AD_CMD) -U lfuse:w:0xff:m -U hfuse:w:0xd1:m -U efuse:w:0xFF:m
+
+# Dependencies
+-include $(OBJS:.o=.d)
