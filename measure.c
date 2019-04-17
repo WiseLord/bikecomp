@@ -185,9 +185,9 @@ int32_t measureGetValue(Param param)
         ret = trackTime / TIME_STEP_FREQ;
         break;
     case PARAM_SPEED_AVG:
-        ret = trackTime;
-        if (ret > AVG_MIN_TIME * TIME_STEP_FREQ)
-            ret = getCurrentTrack() / ret * TIME_STEP_FREQ;
+        ret = trackTime / TIME_STEP_FREQ;
+        if (ret > AVG_MIN_TIME)
+            ret = getCurrentTrack() / ret;
         else
             ret = -TIME_STEP_FREQ;
         break;
