@@ -3,8 +3,9 @@
 
 #include <stdint.h>
 
-void adcInit();
-int16_t adcGetVoltage();
-void adcStart();
+void adcInit(void);
+int16_t adcGetVoltage(void);
+uint8_t adcGetPercent(void);
+void adcStart(void);
 
 #endif // ADC_H

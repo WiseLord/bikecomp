@@ -2,6 +2,9 @@
 
 #include <avr/io.h>
 
+#define LOW_BAT_ADC     350
+#define FULL_BAT_ADC    280
+
 void adcInit()
 {
     // Set prescaler to 16
@@ -15,7 +18,7 @@ void adcInit()
     ADCSRA |= (1 << ADEN);
 }
 
-int16_t adcGetVoltage()
+int16_t adcGetVoltage(void)
 {
     int16_t ret = ADCW;
 
@@ -26,7 +29,20 @@ int16_t adcGetVoltage()
     return ret;
 }
 
-void adcStart()
+void adcStart(void)
 {
     ADCSRA |= 1 << ADSC;            // Start new measurement
+}
+
+uint8_t adcGetPercent(void)
+{
+    uint16_t adc = ADCW;
+
+    if (adc > LOW_BAT_ADC) {
+        return 0;
+    } else if (adc < FULL_BAT_ADC) {
+        return 100;
+    } else {
+        return 100 * (LOW_BAT_ADC - adc) / (LOW_BAT_ADC - FULL_BAT_ADC);
+    }
 }

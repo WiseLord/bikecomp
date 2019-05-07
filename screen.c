@@ -231,11 +231,23 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
     if (section == SECTION_MAIN_TOP) {
         if (clear) {
             // Draw battery outline
+            glcdDrawRectangle(181, 5, 182, 18, labelColor);
+            glcdDrawFrame(183, 1, 238, 22, labelColor);
+            glcdDrawFrame(184, 2, 237, 21, labelColor);
         }
-        int16_t volt = adcGetVoltage();
-        glcdLoadFont(font_ks0066_ru_24, labelColor, bgColor);
-        glcdSetXY(190, area.top + area.labY);
-        glcdWriteString(mkNumString(volt, 4, 0, ' '));
+
+        static uint8_t btLenPrev = 0;
+        uint8_t btLen = adcGetPercent() / 2;
+
+        if (clear || btLen != btLenPrev) {
+            btLenPrev = btLen;
+            if (btLen) {
+                glcdDrawRectangle(186, 4, 186 - 1 + btLen, 19, labelColor);
+            }
+            if (50 - btLen) {
+                glcdDrawRectangle(186 + btLen, 4, 235, 19, bgColor);
+            }
+        }
     }
 
     // Draw more/less than average icon

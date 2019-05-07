@@ -6,3 +6,5 @@
 build-*
 *.creator.user*
 *.workspace
+*.cflags
+*.cxxflags
