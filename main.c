@@ -13,6 +13,8 @@
 void hwInit()
 {
     glcdInit(GLCD_PORTRATE);
+    glcdSetBacklight(true);
+
     inputInit();
     adcInit();
     measureInit();
@@ -35,6 +37,7 @@ void hwInit()
 void sleep(void)
 {
     // Prepare sleep
+    glcdSetBacklight(false);
     glcdSleep(true);
     ADCSRA &= ~(1 << ADEN);     // Disable ADC
     TIMSK0 &= ~(1 << OCIE0A);   // Input timer compare disable
@@ -51,6 +54,7 @@ void sleep(void)
     ADCSRA |= (1 << ADEN);      // Enable ADC
 
     glcdInit(GLCD_PORTRATE);
+    glcdSetBacklight(true);
     screenShowMain(CLEAR_ALL);
 }
 

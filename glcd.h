@@ -62,6 +62,9 @@ extern GlcdOpts glcdOpts;
 
 void glcdInit(GlcdOrientation value);
 
+void glcdSetBacklight(bool value);
+
+
 void glcdSleep(bool value);
 
 void glcdDrawFrame(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
