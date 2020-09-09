@@ -8,6 +8,7 @@
 #include "adc.h"
 #include "eeprom.h"
 #include "display/glcd.h"
+#include "gui/icons.h"
 #include "measure.h"
 
 #define STR_BUFSIZE                     40
@@ -154,6 +155,26 @@ static char *mkNumString(int32_t number, uint8_t width, uint8_t dot, uint8_t lea
     return strbuf;
 }
 
+static const __flash tImage *findIcon(Icon code, const __flash tFont *iFont)
+{
+    const __flash tImage *ret = NULL;
+
+    // Find icon pos
+    int32_t iPos = -1;
+    for (uint16_t i = 0; i < iFont->length; i++) {
+        if (iFont->chars[i].code == (int32_t)code) {
+            iPos = i;
+            break;
+        }
+    }
+
+    if (iPos >= 0) {
+        ret = iFont->chars[iPos].image;
+    }
+
+    return  ret;
+}
+
 static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, int32_t val,
                         Section section, ClearMode clear)
 {
@@ -259,9 +280,11 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
     glcdSetFontColor(paramColor);
     glcdSetFontBgColor(bgColor);
 
+    const __flash tImage *img;
+
     if (section == SECTION_MAIN_TOP) {
         int32_t avgSpeed = measureGetValue(PARAM_SPEED_AVG) * 36 / 10 / 100;
-        uint8_t fTh = pgm_read_byte(&area.fontMain[2]);
+        uint8_t fTh = area.fontMain->thickness;
 
         static bool oldMore = false;
         bool more = (val > avgSpeed);
@@ -269,16 +292,11 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
         if (more != oldMore) {
             oldMore = more;
             glcdSetXY(text.x + fTh + 1, area.top + text.y + fTh + 3);
-// TODO     glcdWriteIcon(icon_up, more ? labelColor : bgColor, bgColor);
-            glcdSetFont(&fontterminus24b);
-            glcdSetFontColor(more ? labelColor : bgColor);
-            glcdSetFontBgColor(bgColor);
-            glcdWriteUChar('m');
+            img = findIcon(ICON_ABOVE, &bikecompicons);
+            glcdDrawImage(img, more ? labelColor : bgColor, bgColor);
             glcdSetXY(text.x + fTh + 1, area.top + text.y + fTh * 5 + 3);
-// TODO     glcdWriteIcon(icon_down, more ? bgColor : labelColor, bgColor);
-            glcdSetFontColor(more ? bgColor : labelColor);
-            glcdSetFontBgColor(bgColor);
-            glcdWriteUChar('l');
+            img = findIcon(ICON_BELOW, &bikecompicons);
+            glcdDrawImage(img, more ? bgColor : labelColor, bgColor);
         }
     }
 
@@ -289,11 +307,8 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
             if (section - SECTION_SETUP_TOP == paramSetup - PARAM_SETUP_AUTO_OFF)
                 iconColor = labelColor;
             glcdSetXY(area.labX, area.top + area.labY + 40);
-// TODO       glcdWriteIcon(icon_pointer, iconColor, bgColor);
-            glcdSetFont(&fontterminus24b);
-            glcdSetFontColor(iconColor);
-            glcdSetFontBgColor(bgColor);
-            glcdWriteUChar('>');
+            img = findIcon(ICON_POINTER, &bikecompicons);
+            glcdDrawImage(img, iconColor, bgColor);
         }
     }
 
@@ -310,8 +325,7 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
             font7segLoad(area.fontDeci);
             glcdSetFontColor(paramColor);
             glcdSetFontBgColor(bgColor);
-            glcdSetY(area.top + text.y + pgm_read_byte(&area.fontMain[1]) - pgm_read_byte(
-                         &area.fontDeci[1]));
+            glcdSetY(area.top + text.y + area.fontMain->height - area.fontDeci->height);
         }
         if (clear & CLEAR_LCDDATA || (valStr[i] != posStr[i])) {
             posStr[i] = valStr[i];

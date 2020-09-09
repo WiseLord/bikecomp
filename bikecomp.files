@@ -85,6 +85,8 @@ src/display/hw/stm32f3.h
 src/eeprom.h
 src/font7seg.c
 src/font7seg.h
+src/gui/icons.c
+src/gui/icons.h
 src/input.c
 src/input.h
 src/main.c

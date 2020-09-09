@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data type="font" name="bikecomp-icons">
+    <family>Liberation Sans</family>
+    <size>14</size>
+    <ascent>18</ascent>
+    <descent>13</descent>
+    <style>Bold</style>
+    <widthType>proportional</widthType>
+    <antialiasing>false</antialiasing>
+    <foreground>ff000000</foreground>
+    <background>ffffffff</background>
+    <multiplicityWidth>1</multiplicityWidth>
+    <multiplicityHeight>1</multiplicityHeight>
+    <string>\x0000\x0001\x0002</string>
+    <converted>/home/AVR/Projects/bikecomp/src/gui/icons.c</converted>
+    <chars>
+        <char code="0000" character="\x0000">
+            <picture format="png">iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAaklEQVQ4jc3UOw7AIAwD0KT3v3M6sFQ02AHFEp6QyOcNCI8Ig3F3M6NlD76uhwwanO/hcFA9aNCkwCi9KN0PUGIR2Ly6Uorok0kLZCLKWZVpREVOWiwQbXH+Ld2iA87U2Cbin3FxSJ/ourzrTwxXlwkK+QAAAABJRU5ErkJggg==</picture>
+        </char>
+        <char code="0001" character="\x0001">
+            <picture format="png">iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAZUlEQVQ4jc3SSwoAIAgE0KH739kWQUSZfXQit+XMgwK+GxEJCUn+lDIJblRZDxXBgaqL0SJcodoVggiHqO4yRzT2bHKUoOtRgpYo9QJTNOu0j8iiWbMh5YvGfvs1n4haxfJzhYkyLc9B6T+mMJkAAAAASUVORK5CYII=</picture>
+        </char>
+        <char code="0002" character="\x0002">
+            <picture format="png">iVBORw0KGgoAAAANSUhEUgAAABgAAAAwCAIAAACE6i30AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAqklEQVRIic3XOQ7AIAxEUfv+h3aKSBEiLF4+EjSE5hUE7EFFxMykPPSd6pZ+X0VL20XF0m6dtnoobQ2gnDWGEtYUilorKGRtIL+1h5yWC/JYXmhrBaC1FYMWVhiaWRloaCWhv5WHOqsEtVYVEqh3HLAuG2aGbfYdv585kMwVYS4tU0aYwsaUWqb4M+2IaZBMy2ZCBBNrmKDFRD8mjDLxmAnszBOCedQg7e0BaZiJo7VO1x0AAAAASUVORK5CYII=</picture>
+        </char>
+    </chars>
+</data>

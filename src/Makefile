@@ -11,6 +11,8 @@ F_CPU    = 16000000
 # Source files
 SRCS     = $(wildcard *.c)
 
+SRCS += gui/icons.c
+
 SRCS += display/glcd.c
 SRCS += display/dispdrv.c
 SRCS += display/gc320x240/ili9341.c
