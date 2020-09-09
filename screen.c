@@ -10,7 +10,7 @@
 #include "display/glcd.h"
 #include "measure.h"
 
-#define STR_BUFSIZE                     20
+#define STR_BUFSIZE                     40
 
 static Screen screen = SCREEN_END;
 
@@ -80,47 +80,47 @@ static const LcdText textParam_5 PROGMEM = {
     55, 36, 4, 0, ' ',
 };
 
-const char speedLabel[] PROGMEM = "Current speed";
+const char speedLabel[] PROGMEM = "Скорость";
 static const ParamData speedParam PROGMEM = {
     COLOR_AQUA, speedLabel,
 };
 
-const char trackLabel[] PROGMEM = "Track length";
+const char trackLabel[] PROGMEM = "Расстояние";
 static const ParamData trackParam PROGMEM = {
     COLOR_YELLOW, trackLabel,
 };
 
-const char trackTimeLabel[] PROGMEM = "Track time";
+const char trackTimeLabel[] PROGMEM = "Время поездки";
 static const ParamData trackTimeParam PROGMEM = {
     COLOR_GREEN, trackTimeLabel,
 };
 
-const char speedAvgLabel[] PROGMEM = "Avg. speed";
+const char speedAvgLabel[] PROGMEM = "Средняя скорость";
 static const ParamData speedAvgParam PROGMEM = {
     COLOR_OLIVE, speedAvgLabel,
 };
 
-const char cadenceLabel[] PROGMEM = "Cadence";
+const char cadenceLabel[] PROGMEM = "Кадэнс";
 static const ParamData cadenceParam PROGMEM = {
     COLOR_CHARTREUSE, cadenceLabel,
 };
 
-const char distanceLabel[] PROGMEM = "Total distance";
+const char distanceLabel[] PROGMEM = "Общее расстояние";
 static const ParamData distanceParam PROGMEM = {
     COLOR_LIGHT_CORAL, distanceLabel,
 };
 
-const char autoOffLabel[] PROGMEM = "Auto off timeout";
+const char autoOffLabel[] PROGMEM = "Таймаут выключения";
 static const ParamData autoOffParam PROGMEM = {
     COLOR_AQUA, autoOffLabel,
 };
 
-const char wheelLabel[] PROGMEM = "Wheel length";
+const char wheelLabel[] PROGMEM = "Окружность колеса";
 static const ParamData wheelParam PROGMEM = {
     COLOR_AQUA, wheelLabel,
 };
 
-const char colorModeLabel[] PROGMEM = "Color mode";
+const char colorModeLabel[] PROGMEM = "Цветовой режим";
 static const ParamData colorModeParam PROGMEM = {
     COLOR_AQUA, colorModeLabel,
 };
