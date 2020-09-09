@@ -216,9 +216,9 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
 
     // Clear section area if required and draw constant text labels
     if (clear == CLEAR_ALL) {
-        glcdDrawRectangle(area.left, area.top, area.right, area.bottom, bgColor);
+        glcdDrawRect(area.left, area.top, area.right - area.left + 1, area.bottom - area.top + 1, bgColor);
         if (area.top) {
-            glcdDrawRectangle(area.left + 2, area.top + 3, area.right - 2, area.top + 3, labelColor);
+            glcdDrawRect(area.left + 2, area.top + 3, area.right - 2 - (area.left + 2) + 1, area.top + 3 - (area.top + 3) + 1, labelColor);
         }
         glcdSetFont(&fontterminus24);
         glcdSetFontColor(labelColor);
@@ -235,9 +235,9 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
     if (section == SECTION_MAIN_TOP) {
         if (clear) {
             // Draw battery outline
-            glcdDrawRectangle(181, 5, 182, 18, labelColor);
-            glcdDrawFrame(183, 1, 238, 22, labelColor);
-            glcdDrawFrame(184, 2, 237, 21, labelColor);
+            glcdDrawRect(181, 5, 182 - 181 + 1, 18 - 5 + 1, labelColor);
+            glcdDrawFrame(183, 1, 238 - 183 + 1, 22 - 1 + 1, 1, labelColor);
+            glcdDrawFrame(184, 2, 237 - 184 + 1, 21 - 2 + 1, 1, labelColor);
         }
 
         static uint8_t btLenPrev = 0;
@@ -246,10 +246,10 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
         if (clear || btLen != btLenPrev) {
             btLenPrev = btLen;
             if (btLen) {
-                glcdDrawRectangle(186, 4, 186 - 1 + btLen, 19, labelColor);
+                glcdDrawRect(186, 4, 186 - 1 + btLen - 186 + 1, 19 - 4 + 1, labelColor);
             }
             if (50 - btLen) {
-                glcdDrawRectangle(186 + btLen, 4, 235, 19, bgColor);
+                glcdDrawRect(186 + btLen, 4, 235 - (186 + btLen) + 1, 19 - 4 + 1, bgColor);
             }
         }
     }

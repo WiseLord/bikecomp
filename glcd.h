@@ -66,6 +66,8 @@ void glcdInit(GlcdOrientation value);
 
 void glcdSetBacklight(bool value);
 
+void glcdSleep(bool value);
+
 void glcdSetFont(const __flash tFont *font);
 void glcdSetFontColor(color_t color);
 void glcdSetFontBgColor(color_t color);
@@ -78,18 +80,13 @@ void glcdWriteChar(UChar code);
 void glcdWriteString(const char *string);
 
 
-void glcdSleep(bool value);
+void glcdDrawRect(int16_t x, int16_t y, int16_t w, int16_t h, color_t color);
 
-void glcdDrawFrame(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
-
-
-
-void glcdWriteIcon(const uint8_t *icon, uint16_t color, uint16_t bgColor);
+void glcdDrawFrame(int16_t x, int16_t y, int16_t w, int16_t h, int16_t t, color_t color);
 
 void glcdLoadLcdFont(const uint8_t *font, uint16_t color, uint16_t bgColor);
 void glcdSkipLcdChar(uint8_t code);
 void glcdWriteLcdChar(uint8_t code);
 
-void glcdDrawRectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
 
 #endif // GLCD_H

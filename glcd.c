@@ -5,9 +5,9 @@
 
 GlcdOpts glcdOpts;
 
-#define glcdDrawHorizLine(x0, x1, y, c)     glcdDrawRectangle(x0, y, x1, y, c);
-#define glcdDrawVertLine(x, y0, y1, c)      glcdDrawRectangle(x, y0, x, y1, c);
-#define glcdDrawPixel(x, y, clr)                ili9431DrawPixel(x, y, clr)
+#define glcdDrawHorizLine(x0, x1, y, c)     ili9341DrawRectangle(x0, y, x1, y, c);
+#define glcdDrawVertLine(x, y0, y1, c)      ili9341DrawRectangle(x, y0, x, y1, c);
+#define glcdDrawPixel(x, y, clr)            ili9431DrawPixel(x, y, clr)
 
 void glcdDrawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color)
 {
@@ -34,12 +34,12 @@ void glcdDrawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t c
     glcdDrawPixel(x1, y1, color);
 }
 
-void glcdDrawFrame(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color)
+void glcdDrawFrame(int16_t x, int16_t y, int16_t w, int16_t h, int16_t t, color_t color)
 {
-    glcdDrawHorizLine(x0, x1, y0, color);
-    glcdDrawVertLine(x0, y0, y1, color);
-    glcdDrawVertLine(x1, y0, y1, color);
-    glcdDrawHorizLine(x0, x1, y1, color);
+    glcdDrawRect(x, y, w - t, t, color);
+    glcdDrawRect(x, y + t, t, h - t, color);
+    glcdDrawRect(x + t, y + h - t, w - t, t, color);
+    glcdDrawRect(x + w - t, y, t, h - t, color);
 }
 
 void glcdDrawRing(int16_t x0, int16_t y0, int16_t r, uint16_t color)
@@ -272,9 +272,9 @@ void glcdSleep(bool value)
     }
 }
 
-void glcdDrawRectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color)
+void glcdDrawRect(int16_t x, int16_t y, int16_t w, int16_t h, color_t color)
 {
-    ili9341DrawRectangle(x0, y0, x1, y1, color);
+    ili9341DrawRectangle(x, y, x + w - 1, y + h - 1, color);
 }
 
 void glcdSetBacklight(bool value)
