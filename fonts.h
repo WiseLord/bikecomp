@@ -11,14 +11,14 @@ typedef struct {
 extern const __flash tFont fontterminus24;
 
 extern const uint8_t lcdChar[];
-extern const uint8_t font_lcd_117[];
-extern const uint8_t font_lcd_99[];
-extern const uint8_t font_lcd_90[];
-extern const uint8_t font_lcd_72[];
-extern const uint8_t font_lcd_63[];
-extern const uint8_t font_lcd_45[];
-extern const uint8_t font_lcd_36[];
-extern const uint8_t font_lcd_27[];
+extern const uint8_t font_7seg_13[];
+extern const uint8_t font_7seg_11[];
+extern const uint8_t font_7seg_10[];
+extern const uint8_t font_7seg_8[];
+extern const uint8_t font_7seg_7[];
+extern const uint8_t font_7seg_5[];
+extern const uint8_t font_7seg_4[];
+extern const uint8_t font_7seg_3[];
 
 typedef enum {
     FONT_HEIGHT = 0,
