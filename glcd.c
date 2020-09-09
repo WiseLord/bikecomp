@@ -5,6 +5,10 @@
 
 GlcdOpts glcdOpts;
 
+#define glcdDrawHorizLine(x0, x1, y, c)     glcdDrawRectangle(x0, y, x1, y, c);
+#define glcdDrawVertLine(x, y0, y1, c)      glcdDrawRectangle(x, y0, x, y1, c);
+#define glcdDrawPixel(x, y, clr)                ili9431DrawPixel(x, y, clr)
+
 void glcdDrawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color)
 {
     int16_t sX, sY, dX, dY, err, err2;
@@ -141,29 +145,16 @@ void glcdWriteChar(uint8_t code)
     oft *= glcdOpts.fp.height;
     oft += glcdOpts.fp.ccnt;
 
-#if GLCD_TYPE == 9341
     ili9341SetWindow(glcdOpts.x, glcdOpts.y, glcdOpts.x + fwd - 1, glcdOpts.y + glcdOpts.fp.height * 8 - 1);
     ili9341WriteChar(glcdOpts.font + oft, fwd, swd);
-#elif GLCD_TYPE == 1306
-    glcdSetXY(_x, _y);
-    ssd1306WriteChar(glcdOpts.font + oft, fwd, swd);
-#else
-#error "Implement _WriteChar in display driver!"
-#endif
 
     glcdSetXY(glcdOpts.x + fwd, glcdOpts.y);
 }
 
 void glcdWriteIcon(const uint8_t *icon, uint16_t color, uint16_t bgColor)
 {
-#if GLCD_TYPE == 9341
     ili9341SetWindow(glcdOpts.x, glcdOpts.y, glcdOpts.x + pgm_read_byte(&icon[0]) - 1, glcdOpts.y + pgm_read_byte(&icon[1]) - 1);
     ili9341WriteIcon(icon, color, bgColor);
-#elif GLCD_TYPE == 1306
-    ssd1306WriteIcon(icon, color, bgColor);
-#else
-#error "Implement _WriteIcon in display driver!"
-#endif
 }
 
 void glcdWriteString(char *string)
@@ -255,4 +246,24 @@ void glcdWriteLcdString(char *string)
     while (*string) {
         glcdWriteLcdChar(*string++);
     }
+}
+
+void glcdInit(GlcdOrientation value)
+{
+    (void)value;
+    ili9341Init();
+}
+
+void glcdSleep(bool value)
+{
+    if (value) {
+        ili9341Sleep();
+    } else {
+        ili9341Wakeup();
+    }
+}
+
+void glcdDrawRectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color)
+{
+    ili9341DrawRectangle(x0, y0, x1, y1, color);
 }

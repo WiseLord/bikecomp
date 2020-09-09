@@ -82,47 +82,47 @@ static const LcdText textParam_5 PROGMEM = {
 
 const char speedLabel[] PROGMEM = "Current speed";
 static const ParamData speedParam PROGMEM = {
-    LCD_COLOR_AQUA, speedLabel,
+    COLOR_AQUA, speedLabel,
 };
 
 const char trackLabel[] PROGMEM = "Track length";
 static const ParamData trackParam PROGMEM = {
-    LCD_COLOR_YELLOW, trackLabel,
+    COLOR_YELLOW, trackLabel,
 };
 
 const char trackTimeLabel[] PROGMEM = "Track time";
 static const ParamData trackTimeParam PROGMEM = {
-    LCD_COLOR_GREEN, trackTimeLabel,
+    COLOR_GREEN, trackTimeLabel,
 };
 
 const char speedAvgLabel[] PROGMEM = "Avg. speed";
 static const ParamData speedAvgParam PROGMEM = {
-    LCD_COLOR_OLIVE, speedAvgLabel,
+    COLOR_OLIVE, speedAvgLabel,
 };
 
 const char cadenceLabel[] PROGMEM = "Cadence";
 static const ParamData cadenceParam PROGMEM = {
-    LCD_COLOR_CHARTREUSE, cadenceLabel,
+    COLOR_CHARTREUSE, cadenceLabel,
 };
 
 const char distanceLabel[] PROGMEM = "Total distance";
 static const ParamData distanceParam PROGMEM = {
-    LCD_COLOR_LIGHT_CORAL, distanceLabel,
+    COLOR_LIGHT_CORAL, distanceLabel,
 };
 
 const char autoOffLabel[] PROGMEM = "Auto off timeout";
 static const ParamData autoOffParam PROGMEM = {
-    LCD_COLOR_AQUA, autoOffLabel,
+    COLOR_AQUA, autoOffLabel,
 };
 
 const char wheelLabel[] PROGMEM = "Wheel length";
 static const ParamData wheelParam PROGMEM = {
-    LCD_COLOR_AQUA, wheelLabel,
+    COLOR_AQUA, wheelLabel,
 };
 
 const char colorModeLabel[] PROGMEM = "Color mode";
 static const ParamData colorModeParam PROGMEM = {
-    LCD_COLOR_AQUA, colorModeLabel,
+    COLOR_AQUA, colorModeLabel,
 };
 
 static char strbuf[STR_BUFSIZE + 1];
@@ -196,19 +196,19 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
     }
 
     uint16_t paramColor = param.color;
-    uint16_t labelColor = LCD_COLOR_GRAY;
-    uint16_t bgColor = LCD_COLOR_BLACK;
+    uint16_t labelColor = COLOR_GRAY;
+    uint16_t bgColor = COLOR_BLACK;
 
     switch (colorMode) {
     case COLOR_MODE_WHITE_ON_BLACK:
-        paramColor = LCD_COLOR_WHITE;
-        labelColor = LCD_COLOR_WHITE;
-        bgColor = LCD_COLOR_BLACK;
+        paramColor = COLOR_WHITE;
+        labelColor = COLOR_WHITE;
+        bgColor = COLOR_BLACK;
         break;
     case COLOR_MODE_BLACK_ON_WHITE:
-        paramColor = LCD_COLOR_BLACK;
-        labelColor = LCD_COLOR_BLACK;
-        bgColor = LCD_COLOR_WHITE;
+        paramColor = COLOR_BLACK;
+        labelColor = COLOR_BLACK;
+        bgColor = COLOR_WHITE;
         break;
     default:
         break;
@@ -217,8 +217,9 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
     // Clear section area if required and draw constant text labels
     if (clear == CLEAR_ALL) {
         glcdDrawRectangle(area.left, area.top, area.right, area.bottom, bgColor);
-        if (area.top)
-            glcdDrawHorizLine(area.left + 2, area.right - 2, area.top + 3, labelColor);
+        if (area.top) {
+            glcdDrawRectangle(area.left + 2, area.top + 3, area.right - 2, area.top + 3, labelColor);
+        }
         glcdLoadFont(font_ks0066_ru_24, labelColor, bgColor);
         glcdSetXY(area.labX, area.top + area.labY);
         glcdWriteString("> ");

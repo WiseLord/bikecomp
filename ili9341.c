@@ -175,19 +175,19 @@ static void ili9341Rotate(GlcdOrientation orientation)
     ili9341SendCmd(ILI9341_MADCTL);
 
     switch (orientation) {
-    case LCD_Orientation_Portrait_1:
+    case GLCD_PORTRATE:
         ili9341WriteData(0x78);
         glcdOpts.width = ILI9341_WIDTH;
         glcdOpts.height = ILI9341_HEIGHT;
         glcdOpts.orientation = orientation;
         break;
-    case LCD_Orientation_Portrait_2:
+    case GLCD_PORTRATE_ROT:
         ili9341WriteData(0xA8);
         glcdOpts.width = ILI9341_WIDTH;
         glcdOpts.height = ILI9341_HEIGHT;
         glcdOpts.orientation = orientation;
         break;
-    case LCD_Orientation_Landscape_1:
+    case GLCD_LANDSCAPE:
         ili9341WriteData(0x08);
         glcdOpts.width = ILI9341_HEIGHT;
         glcdOpts.height = ILI9341_WIDTH;
@@ -226,7 +226,7 @@ void ili9341Init(void)
 #ifdef SIM_MODE
     ili9341Rotate(LCD_Orientation_Portrait_2);
 #else
-    ili9341Rotate(LCD_Orientation_Portrait_1);
+    ili9341Rotate(GLCD_PORTRATE);
 #endif
 }
 

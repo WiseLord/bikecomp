@@ -3,7 +3,6 @@
 #include <avr/sleep.h>
 #include <util/delay.h>
 
-#include "ili9341.h"
 #include "adc.h"
 #include "glcd.h"
 #include "fonts.h"
@@ -13,7 +12,7 @@
 
 void hwInit()
 {
-    glcdInit();
+    glcdInit(GLCD_PORTRATE);
     inputInit();
     adcInit();
     measureInit();
@@ -36,7 +35,7 @@ void hwInit()
 void sleep(void)
 {
     // Prepare sleep
-    glcdSleep();
+    glcdSleep(true);
     ADCSRA &= ~(1 << ADEN);     // Disable ADC
     TIMSK0 &= ~(1 << OCIE0A);   // Input timer compare disable
     TIMSK1 &= ~(1 << TOIE1);    // Measure timer overflow disable
@@ -51,7 +50,7 @@ void sleep(void)
     TIMSK1 |= (1 << TOIE1);     // Measure timer overflow enable
     ADCSRA |= (1 << ADEN);      // Enable ADC
 
-    glcdInit();
+    glcdInit(GLCD_PORTRATE);
     screenShowMain(CLEAR_ALL);
 }
 
