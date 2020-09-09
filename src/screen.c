@@ -270,7 +270,7 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
             oldMore = more;
             glcdSetXY(text.x + fTh + 1, area.top + text.y + fTh + 3);
 // TODO     glcdWriteIcon(icon_up, more ? labelColor : bgColor, bgColor);
-            glcdSetFont(&fontterminus24);
+            glcdSetFont(&fontterminus24b);
             glcdSetFontColor(more ? labelColor : bgColor);
             glcdSetFontBgColor(bgColor);
             glcdWriteUChar('m');
@@ -290,7 +290,7 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
                 iconColor = labelColor;
             glcdSetXY(area.labX, area.top + area.labY + 40);
 // TODO       glcdWriteIcon(icon_pointer, iconColor, bgColor);
-            glcdSetFont(&fontterminus24);
+            glcdSetFont(&fontterminus24b);
             glcdSetFontColor(iconColor);
             glcdSetFontBgColor(bgColor);
             glcdWriteUChar('>');

@@ -1,10 +1,3 @@
-*.d
-*.elf
-*.hex
-*.o
-*.lss
-build-*
-*.creator.user*
-*.workspace
+*.user
 *.cflags
 *.cxxflags
