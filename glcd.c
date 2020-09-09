@@ -176,16 +176,14 @@ void glcdWriteString(const char *string)
     }
 }
 
-void glcdLoadLcdFont(const uint8_t *font, uint16_t color, uint16_t bgColor)
+void font7segLoad(const uint8_t *font)
 {
     glcdOpts.font = font + FONT_LCD_HEADER_END;
 
     memcpy_P(&glcdOpts.fp, font, FONT_LCD_HEADER_END);
-    glcdOpts.fp.color = color;
-    glcdOpts.fp.bgColor = bgColor;
 }
 
-void glcdSkipLcdChar(uint8_t code)
+void font7segSkipChar(uint8_t code)
 {
     if ((code >= '0' && code <= '9') ||
             (code == ' ') || (code == '-') ||
@@ -197,7 +195,7 @@ void glcdSkipLcdChar(uint8_t code)
     }
 }
 
-void glcdWriteLcdChar(uint8_t code)
+void font7segWriteChar(uint8_t code)
 {
     uint8_t dirMask = 0b01001001; // 1 - vertical, 0 - horisontal segment
     uint16_t segColor;
@@ -253,7 +251,7 @@ void glcdWriteLcdChar(uint8_t code)
 void glcdWriteLcdString(char *string)
 {
     while (*string) {
-        glcdWriteLcdChar(*string++);
+        font7segWriteChar(*string++);
     }
 }
 

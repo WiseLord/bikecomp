@@ -84,9 +84,9 @@ void glcdDrawRect(int16_t x, int16_t y, int16_t w, int16_t h, color_t color);
 
 void glcdDrawFrame(int16_t x, int16_t y, int16_t w, int16_t h, int16_t t, color_t color);
 
-void glcdLoadLcdFont(const uint8_t *font, uint16_t color, uint16_t bgColor);
-void glcdSkipLcdChar(uint8_t code);
-void glcdWriteLcdChar(uint8_t code);
+void font7segLoad(const uint8_t *font);
+void font7segSkipChar(uint8_t code);
+void font7segWriteChar(uint8_t code);
 
 
 #endif // GLCD_H

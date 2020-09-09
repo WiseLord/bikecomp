@@ -255,7 +255,9 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
     }
 
     // Draw more/less than average icon
-    glcdLoadLcdFont(area.fontMain, paramColor, bgColor);
+    font7segLoad(area.fontMain);
+    glcdSetFontColor(paramColor);
+    glcdSetFontBgColor(bgColor);
 
     if (section == SECTION_MAIN_TOP) {
         int32_t avgSpeed = measureGetValue(PARAM_SPEED_AVG) * 36 / 10 / 100;
@@ -298,20 +300,24 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
     // Redraw param value with selected LCD font
     char *valStr = mkNumString(val, text.len, text.dot, text.lead);
 
-    glcdLoadLcdFont(area.fontMain, paramColor, bgColor);
+    font7segLoad(area.fontMain);
+    glcdSetFontColor(paramColor);
+    glcdSetFontBgColor(bgColor);
     glcdSetXY(text.x, area.top + text.y);
 
     for (uint8_t i = 0; i < text.len; i++) {
         if (text.dot && i == text.len - text.dot - 1) {
-            glcdLoadLcdFont(area.fontDeci, paramColor, bgColor);
+            font7segLoad(area.fontDeci);
+            glcdSetFontColor(paramColor);
+            glcdSetFontBgColor(bgColor);
             glcdSetY(area.top + text.y + pgm_read_byte(&area.fontMain[1]) - pgm_read_byte(
                          &area.fontDeci[1]));
         }
         if (clear & CLEAR_LCDDATA || (valStr[i] != posStr[i])) {
             posStr[i] = valStr[i];
-            glcdWriteLcdChar(posStr[i]);
+            font7segWriteChar(posStr[i]);
         } else {
-            glcdSkipLcdChar(posStr[i]);
+            font7segSkipChar(posStr[i]);
         }
     }
 }
@@ -320,7 +326,7 @@ static void updateTime(const ParamData *paramPgm, const LcdTimeText *lcdTimeText
                        Section section, ClearMode clear)
 {
     updateParam(paramPgm, &lcdTimeTextPgm->hour, val / 3600, section, clear);
-    glcdWriteLcdChar(':');
+    font7segWriteChar(':');
     val %= 3600;
     val = val / 60 * 100 + val % 60;
     updateParam(paramPgm, &lcdTimeTextPgm->minSec, val, section, CLEAR_LCDDATA);

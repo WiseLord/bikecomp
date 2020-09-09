@@ -11,6 +11,8 @@ screen.h
 Makefile
 arduinopromini.h
 font-ks0066-ru-24.c
+font7seg.c
+font7seg.h
 fonts-lcd.c
 fonts.h
 glcd.c
