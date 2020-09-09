@@ -7,9 +7,9 @@
 #include "ili9341.h"
 
 #include "fonts.h"
-#include "icons.h"
 
 typedef uint16_t color_t;
+typedef uint8_t UChar;
 
 //Colors
 #define RGB_TO_565(x)                   (((x >> 8) & 0xF800) | ((x >> 5) & 0x7E0) | ((x >> 3) & 0x1F))
@@ -70,16 +70,19 @@ void glcdSetFont(const __flash tFont *font);
 void glcdSetFontColor(color_t color);
 void glcdSetFontBgColor(color_t color);
 
+void glcdSetXY(uint16_t x, uint16_t y);
+void glcdSetY(uint16_t y);
+
+
+void glcdWriteChar(UChar code);
+void glcdWriteString(const char *string);
 
 
 void glcdSleep(bool value);
 
 void glcdDrawFrame(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
 
-void glcdSetXY(uint16_t x, uint16_t y);
-void glcdSetY(uint16_t y);
 
-void glcdWriteString(char *string);
 
 void glcdWriteIcon(const uint8_t *icon, uint16_t color, uint16_t bgColor);
 

@@ -267,9 +267,16 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
         if (more != oldMore) {
             oldMore = more;
             glcdSetXY(text.x + fTh + 1, area.top + text.y + fTh + 3);
-            glcdWriteIcon(icon_up, more ? labelColor : bgColor, bgColor);
+// TODO     glcdWriteIcon(icon_up, more ? labelColor : bgColor, bgColor);
+            glcdSetFont(&fontterminus24);
+            glcdSetFontColor(more ? labelColor : bgColor);
+            glcdSetFontBgColor(bgColor);
+            glcdWriteChar('m');
             glcdSetXY(text.x + fTh + 1, area.top + text.y + fTh * 5 + 3);
-            glcdWriteIcon(icon_down, more ? bgColor : labelColor, bgColor);
+// TODO     glcdWriteIcon(icon_down, more ? bgColor : labelColor, bgColor);
+            glcdSetFontColor(more ? bgColor : labelColor);
+            glcdSetFontBgColor(bgColor);
+            glcdWriteChar('l');
         }
     }
 
@@ -280,7 +287,11 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
             if (section - SECTION_SETUP_TOP == paramSetup - PARAM_SETUP_AUTO_OFF)
                 iconColor = labelColor;
             glcdSetXY(area.labX, area.top + area.labY + 40);
-            glcdWriteIcon(icon_pointer, iconColor, bgColor);
+// TODO       glcdWriteIcon(icon_pointer, iconColor, bgColor);
+            glcdSetFont(&fontterminus24);
+            glcdSetFontColor(iconColor);
+            glcdSetFontBgColor(bgColor);
+            glcdWriteChar('>');
         }
     }
 

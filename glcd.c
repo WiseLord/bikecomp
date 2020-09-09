@@ -133,7 +133,7 @@ void glcdSetFontBgColor(color_t color)
     glcdOpts.fp.bgColor = color;
 }
 
-void glcdWriteChar(uint8_t code)
+void glcdWriteChar(UChar code)
 {
     uint8_t i;
 
@@ -166,7 +166,7 @@ void glcdWriteIcon(const uint8_t *icon, uint16_t color, uint16_t bgColor)
     ili9341WriteIcon(icon, color, bgColor);
 }
 
-void glcdWriteString(char *string)
+void glcdWriteString(const char *string)
 {
     if (*string)
         glcdWriteChar(*string++);
