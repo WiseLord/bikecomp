@@ -12,8 +12,6 @@ screen.h
 .astylerc
 Makefile
 arduinopromini.h
-font-digits-32.c
-font-ks0066-ru-08.c
 font-ks0066-ru-24.c
 fonts-lcd.c
 fonts.h

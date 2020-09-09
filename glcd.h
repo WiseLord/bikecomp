@@ -9,6 +9,8 @@
 #include "fonts.h"
 #include "icons.h"
 
+typedef uint16_t color_t;
+
 //Colors
 #define RGB_TO_565(x)                   (((x >> 8) & 0xF800) | ((x >> 5) & 0x7E0) | ((x >> 3) & 0x1F))
 #define COLOR_BLACK                     RGB_TO_565(0x000000)
@@ -64,6 +66,11 @@ void glcdInit(GlcdOrientation value);
 
 void glcdSetBacklight(bool value);
 
+void glcdSetFont(const __flash tFont *font);
+void glcdSetFontColor(color_t color);
+void glcdSetFontBgColor(color_t color);
+
+
 
 void glcdSleep(bool value);
 
@@ -72,7 +79,6 @@ void glcdDrawFrame(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t 
 void glcdSetXY(uint16_t x, uint16_t y);
 void glcdSetY(uint16_t y);
 
-void glcdLoadFont(const uint8_t *font, uint16_t color, uint16_t bgColor);
 void glcdWriteString(char *string);
 
 void glcdWriteIcon(const uint8_t *icon, uint16_t color, uint16_t bgColor);

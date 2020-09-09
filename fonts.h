@@ -3,9 +3,12 @@
 
 #include <stdint.h>
 
-extern const uint8_t font_ks0066_ru_08[];
-extern const uint8_t font_ks0066_ru_24[];
-extern const uint8_t font_digits_32[];
+typedef struct {
+     const __flash uint8_t *font_array;
+} tFont;
+
+//extern const uint8_t font_ks0066_ru_24[];
+extern const __flash tFont fontterminus24;
 
 extern const uint8_t lcdChar[];
 extern const uint8_t font_lcd_117[];

@@ -1,6 +1,8 @@
 #include <avr/pgmspace.h>
 
-const uint8_t font_ks0066_ru_24[] PROGMEM = {
+#include "fonts.h"
+
+static const __flash uint8_t font_ks0066_ru_24[] = {
 
     0x03,   // font height in bytes
     0x7F,   // position of symbol-space between letters
@@ -655,3 +657,5 @@ const uint8_t font_ks0066_ru_24[] PROGMEM = {
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
     0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F // 223  fillrect
 };
+
+const tFont __flash fontterminus24 = { font_ks0066_ru_24 };

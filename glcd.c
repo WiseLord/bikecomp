@@ -115,13 +115,22 @@ void glcdSetY(uint16_t y)
     glcdOpts.y = y;
 }
 
-void glcdLoadFont(const uint8_t *font, uint16_t color, uint16_t bgColor)
+void glcdSetFont(const __flash tFont *font)
 {
-    glcdOpts.font = font + FONT_HEADER_END;
+    glcdOpts.font = font->font_array + FONT_HEADER_END;
 
-    memcpy_P(&glcdOpts.fp, font, FONT_HEADER_END);
+    memcpy_P(&glcdOpts.fp, font->font_array, FONT_HEADER_END);
+}
+
+void glcdSetFontColor(color_t color)
+{
     glcdOpts.fp.color = color;
-    glcdOpts.fp.bgColor = bgColor;
+
+}
+
+void glcdSetFontBgColor(color_t color)
+{
+    glcdOpts.fp.bgColor = color;
 }
 
 void glcdWriteChar(uint8_t code)

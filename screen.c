@@ -220,7 +220,10 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
         if (area.top) {
             glcdDrawRectangle(area.left + 2, area.top + 3, area.right - 2, area.top + 3, labelColor);
         }
-        glcdLoadFont(font_ks0066_ru_24, labelColor, bgColor);
+        glcdSetFont(&fontterminus24);
+        glcdSetFontColor(labelColor);
+        glcdSetFontBgColor(bgColor);
+
         glcdSetXY(area.labX, area.top + area.labY);
         glcdWriteString("> ");
         strcpy_P(strbuf, param.label);
