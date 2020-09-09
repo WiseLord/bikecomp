@@ -1,12 +1,131 @@
-#include <avr/pgmspace.h>
-#include "fonts.h"
+#include "font7seg.h"
 
-const uint8_t lcdChar[] PROGMEM = {
+#include "display/glcd.h"
+#include "string.h"
+
+#define BIT_A       (1<<0)
+#define BIT_B       (1<<1)
+#define BIT_C       (1<<2)
+#define BIT_D       (1<<3)
+#define BIT_E       (1<<4)
+#define BIT_F       (1<<5)
+#define BIT_G       (1<<6)
+#define BIT_P       (1<<7)
+
+#define CH_0        (BIT_A | BIT_B | BIT_C | BIT_D | BIT_E | BIT_F)
+#define CH_1        (BIT_B | BIT_C)
+#define CH_2        (BIT_A | BIT_B | BIT_D | BIT_E | BIT_G)
+#define CH_3        (BIT_A | BIT_B | BIT_C | BIT_D | BIT_G)
+#define CH_4        (BIT_B | BIT_C | BIT_F | BIT_G)
+#define CH_5        (BIT_A | BIT_C | BIT_D | BIT_F | BIT_G)
+#define CH_6        (BIT_A | BIT_C | BIT_D | BIT_E | BIT_F | BIT_G)
+#define CH_7        (BIT_A | BIT_B | BIT_C)
+#define CH_8        (BIT_A | BIT_B | BIT_C | BIT_D | BIT_E | BIT_F | BIT_G)
+#define CH_9        (BIT_A | BIT_B | BIT_C | BIT_D | BIT_F | BIT_G)
+#define CH_A        (BIT_A | BIT_B | BIT_C | BIT_E | BIT_F | BIT_G)
+#define CH_B        (BIT_C | BIT_D | BIT_E | BIT_F | BIT_G)
+#define CH_C        (BIT_A | BIT_D | BIT_E | BIT_F)
+#define CH_D        (BIT_B | BIT_C | BIT_D | BIT_E | BIT_G)
+#define CH_E        (BIT_A | BIT_D | BIT_E | BIT_F | BIT_G)
+#define CH_F        (BIT_A | BIT_E | BIT_F | BIT_G)
+#define CH_EMPTY    (0)
+#define CH_MINUS    (BIT_G)
+
+static const __flash tFont7seg *font7seg;
+
+static const __flash uint8_t lcdChar[] = {
     CH_0, CH_1, CH_2, CH_3, CH_4,
     CH_5, CH_6, CH_7, CH_8, CH_9,
     CH_A, CH_B, CH_C, CH_D, CH_E, CH_F,
     CH_MINUS, CH_EMPTY
 };
+
+void font7segLoad(const __flash tFont7seg *font)
+{
+    font7seg = font;
+}
+
+void font7segSkipChar(char code)
+{
+    Glcd *glcd = glcdGet();
+
+    if ((code >= '0' && code <= '9') ||
+        (code == ' ') || (code == '-') ||
+        (code >= 'A' && code <= 'F') ||
+        (code >= 'a' && code <= 'f')) {
+        glcdSetXY(glcd->x + font7seg->width + font7seg->thickness, glcd->y);
+    } else if (code == '.' || code == ':') {
+        glcdSetXY(glcd->x + 2 * font7seg->thickness, glcd->y);
+    }
+}
+
+void font7segWriteChar(char code)
+{
+    uint8_t dirMask = 0b01001001; // 1 - vertical, 0 - horisontal segment
+    uint16_t segColor;
+
+    Glcd *glcd = glcdGet();
+
+    if (code >= '0' && code <= '9') {
+        code = lcdChar[code - '0'];
+    } else if (code == ' ') {
+        code = lcdChar[17];
+    } else if (code == '-') {
+        code = lcdChar[16];
+    } else if (code == '.' || code == ':') {
+        const __flash uint8_t *digStart = &font7seg->data[7 * (font7seg->thickness * 2 + 1)];
+        uint8_t startLine = *digStart++;
+        uint8_t point1, point2;
+        for (uint8_t line = 0; line < font7seg->thickness; line++) {
+            point1 = *digStart++;
+            point2 = *digStart++;
+            int16_t y;
+            if (code == '.') {
+                y = glcd->y + startLine + line;
+                glcdDrawLine(glcd->x + point1, y, glcd->x + point2, y, glcd->fontFg);
+            } else {
+                y = glcd->y + startLine - 2 * font7seg->thickness + line;
+                glcdDrawLine(glcd->x + point1, y, glcd->x + point2, y, glcd->fontFg);
+                y = glcd->y + 2 * font7seg->thickness + line;
+                glcdDrawLine(glcd->x + point1, y, glcd->x + point2, y, glcd->fontFg);
+            }
+        }
+        glcdSetXY(glcd->x + 2 * font7seg->thickness, glcd->y);
+        return;
+    } else if (code >= 'A' && code <= 'F') {
+        code = lcdChar[code - 'A' + 10];
+    } else if (code >= 'a' && code <= 'f') {
+        code = lcdChar[code - 'a' + 10];
+    } else {
+        return;
+    }
+
+    for (uint8_t seg = 0; seg < 7; seg++) {
+        segColor = code & (1 << seg) ? glcd->fontFg : glcd->fontBg;
+        const __flash uint8_t *digStart = &font7seg->data[seg * (font7seg->thickness * 2 + 1)];
+        uint8_t startLine = *digStart++;
+        uint8_t point1, point2;
+        for (uint8_t line = 0; line < font7seg->thickness; line++) {
+            point1 = *digStart++;
+            point2 = *digStart++;
+            if (dirMask & (1 << seg)) {
+                int16_t y = glcd->y + startLine + line;
+                glcdDrawLine(glcd->x + point1, y, glcd->x + point2, y, segColor);
+            } else {
+                int16_t x = glcd->x + startLine + line;
+                glcdDrawLine(x, glcd->y + point1, x, glcd->y + point2, segColor);
+            }
+        }
+    }
+    glcdSetXY(glcd->x + font7seg->width + font7seg->thickness, glcd->y);
+}
+
+void font7segWriteString(const char *string)
+{
+    while (*string) {
+        font7segWriteChar(*string++);
+    }
+}
 
 // Font format:
 // width, height, thickness,
@@ -27,8 +146,7 @@ const uint8_t lcdChar[] PROGMEM = {
 // Yp - Y position of top horisontal line of dot point
 // pairs of Xp1..XpN to draw "thickness" horisontal lines starting from Yp
 
-const uint8_t font_7seg_13[] PROGMEM = {
-    117, 65, 13,
+const __flash uint8_t font_7seg_13_data[] = {
     0,      // A
     4, 55, 3, 55, 2, 54, 1, 54, 0, 53, 0, 53, 0, 52, 2, 52, 4, 51, 6, 51, 8, 50, 10, 50, 12, 49,
     52,     // B
@@ -46,9 +164,9 @@ const uint8_t font_7seg_13[] PROGMEM = {
     104,    // dot
     3, 9, 2, 10, 1, 11, 0, 12, 0, 12, 0, 12, 0, 12, 0, 12, 0, 12, 0, 12, 1, 11, 2, 10, 3, 9,
 };
+const __flash tFont7seg font_7seg_13 = {font_7seg_13_data, 65, 117, 13};
 
-const uint8_t font_7seg_11[] PROGMEM = {
-    99, 55, 11,  // width, height and thickness
+const __flash uint8_t font_7seg_11_data[] = {
     0,      // A
     3, 46, 2, 46, 1, 45, 0, 45, 0, 44, 0, 44, 2, 43, 4, 43, 6, 42, 8, 42, 10, 41,
     44,     // B
@@ -66,9 +184,9 @@ const uint8_t font_7seg_11[] PROGMEM = {
     88,     // dot
     2, 8, 1, 9, 0, 10, 0, 10, 0, 10, 0, 10, 0, 10, 0, 10, 0, 10, 1, 9, 2, 8,
 };
+const __flash tFont7seg font_7seg_11 = {font_7seg_11_data, 55, 99, 11};
 
-const uint8_t font_7seg_10[] PROGMEM = {
-    90, 50, 10, // width, height and thickness
+const __flash uint8_t font_7seg_10_data[] = {
     0,      // A
     3, 42, 2, 41, 1, 41, 0, 40, 0, 40, 1, 39, 3, 39, 5, 38, 7, 38, 9, 37,
     40,     // B
@@ -86,9 +204,9 @@ const uint8_t font_7seg_10[] PROGMEM = {
     80,     // dot
     2, 7, 1, 8, 0, 9, 0, 9, 0, 9, 0, 9, 0, 9, 0, 9, 1, 8, 2, 7,
 };
+const __flash tFont7seg font_7seg_10 = {font_7seg_10_data,  50, 90, 10};
 
-const uint8_t font_7seg_8[] PROGMEM = {
-    72, 40, 8,  // width, height and thickness
+const __flash uint8_t font_7seg_8_data[] = {
     0,      // A
     3, 33, 2, 32, 1, 32, 0, 31, 1, 31, 3, 30, 5, 30, 7, 29,
     32,     // B
@@ -106,9 +224,9 @@ const uint8_t font_7seg_8[] PROGMEM = {
     64,     // dot
     2, 5, 1, 6, 0, 7, 0, 7, 0, 7, 0, 7, 1, 6, 2, 5,
 };
+const __flash tFont7seg font_7seg_8 = {font_7seg_8_data, 40, 72, 8};
 
-const uint8_t font_7seg_7[] PROGMEM = {
-    63, 35, 7,
+const __flash uint8_t font_7seg_7_data[] = {
     0,      // A
     3, 28, 2, 28, 1, 27, 0, 27, 1, 26, 3, 26, 5, 26,
     28,     // B
@@ -126,9 +244,29 @@ const uint8_t font_7seg_7[] PROGMEM = {
     56,      // dot
     1, 5, 0, 6, 0, 6, 0, 6, 0, 6, 0, 6, 1, 5,
 };
+const __flash tFont7seg font_7seg_7 = {font_7seg_7_data, 35, 63, 7};
 
-const uint8_t font_7seg_5[] PROGMEM = {
-    45, 25, 5,
+const __flash uint8_t font_7seg_6_data[] = {
+    0,      // A
+    2, 25, 1, 24, 0, 24, 2, 23, 4, 23, 6, 22,
+    24,     // B
+    6, 23, 4, 24, 2, 25, 0, 26, 1, 25, 2, 24,
+    24,     // C
+    31, 47, 30, 49, 29, 51, 28, 53, 28, 52, 29, 51,
+    48,     // D
+    6, 22, 4, 23, 2, 23, 0, 24, 1, 24, 2, 25,
+    0,      // E
+    29, 49, 28, 48, 27, 48, 28, 47, 29, 47, 30, 46,
+    0,      // F
+    4, 24, 5, 25, 5, 25, 6, 24, 6, 23, 7, 22,
+    24,      // G
+    6, 22, 5, 23, 4, 24, 5, 25, 6, 24, 7, 23,
+    48,      // dot
+    1, 4, 0, 5, 0, 5, 0, 5, 0, 5, 1, 4,
+};
+const __flash tFont7seg font_7seg_6 = {font_7seg_6_data, 30, 54, 6};
+
+const __flash uint8_t font_7seg_5_data[] = {
     0,      // A
     2, 20, 1, 20, 0, 19, 2, 19, 4, 18,
     20,     // B
@@ -146,9 +284,9 @@ const uint8_t font_7seg_5[] PROGMEM = {
     40,     // dot
     1, 3, 0, 4, 0, 4, 0, 4, 1, 3,
 };
+const __flash tFont7seg font_7seg_5 = {font_7seg_5_data, 25, 45, 5};
 
-const uint8_t font_7seg_4[] PROGMEM = {
-    36, 20, 4,
+const __flash uint8_t font_7seg_4_data[] = {
     0,      // A
     2, 15, 1, 15, 0, 14, 2, 14,
     16,     // B
@@ -166,9 +304,9 @@ const uint8_t font_7seg_4[] PROGMEM = {
     32,     // dot
     1, 2, 0, 3, 0, 3, 1, 2
 };
+const __flash tFont7seg font_7seg_4 = {font_7seg_4_data, 20, 36, 4};
 
-const uint8_t font_7seg_3[] PROGMEM = {
-    27, 15, 3,
+const __flash uint8_t font_7seg_3_data[] = {
     0,      // A
     1, 13, 2, 12, 3, 11,
     12,     // B
@@ -186,3 +324,4 @@ const uint8_t font_7seg_3[] PROGMEM = {
     24,     // dot
     0, 3, 0, 3, 0, 3,
 };
+const __flash tFont7seg font_7seg_3 = {font_7seg_3_data, 15, 27, 3};

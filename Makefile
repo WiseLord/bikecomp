@@ -1,12 +1,27 @@
 # Output file name
 TARG     = bikecomp
 
+DISPLAY = ILI9341
+DISPVAR = SPI
+
 # MCU name and frequency
 MCU      = atmega328p
 F_CPU    = 16000000
 
 # Source files
 SRCS     = $(wildcard *.c)
+
+SRCS += display/glcd.c
+SRCS += display/dispdrv.c
+SRCS += display/gc320x240/ili9341.c
+
+SRCS += $(wildcard display/fonts/font*.c)
+
+DEFINES += -D_$(DISPLAY)
+DEFINES += -D_DISP_$(DISPVAR)
+
+DEFINES += -D_DISP_RST_ENABLED
+DEFINES += -D_DISP_BCKL_ENABLED
 
 # Build directory
 BUILDDIR = build
@@ -18,8 +33,8 @@ DEPS     = -MMD -MP -MT $(BUILDDIR)/$(*F).o -MF $(BUILDDIR)/$(*D)/$(*F).d
 CFLAGS   = $(DEBUG) -lm $(OPTIMIZE) $(DEPS) -mmcu=$(MCU) -DF_CPU=$(F_CPU)
 LDFLAGS  = $(DEBUG) -mmcu=$(MCU) -Wl,-gc-sections -mrelax
 
-# Uncomment to build for Proteus simulation
-#DEFINES += -DSIM_MODE
+CFLAGS += -Idisplay/fonts
+CFLAGS += -I.
 
 # AVR toolchain and flasher
 CC       = avr-gcc

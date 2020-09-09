@@ -4,15 +4,15 @@
 #include <util/delay.h>
 
 #include "adc.h"
-#include "glcd.h"
-#include "fonts.h"
+#include "display/glcd.h"
 #include "screen.h"
 #include "measure.h"
 #include "input.h"
+#include "pins.h"
 
 void hwInit()
 {
-    glcdInit(GLCD_PORTRATE);
+    glcdInit(GLCD_PORTRATE_ROT);
     glcdSetBacklight(true);
 
     inputInit();
@@ -53,7 +53,7 @@ void sleep(void)
     TIMSK1 |= (1 << TOIE1);     // Measure timer overflow enable
     ADCSRA |= (1 << ADEN);      // Enable ADC
 
-    glcdInit(GLCD_PORTRATE);
+    glcdInit(GLCD_PORTRATE_ROT);
     glcdSetBacklight(true);
     screenShowMain(CLEAR_ALL);
 }

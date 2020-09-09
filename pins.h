@@ -15,24 +15,6 @@
 #define SET(x)              PORT(x) |= x ## _LINE
 #define CLR(x)              PORT(x) &= ~x ## _LINE
 
-// LCD non-SPI pins
-#define ILI9341_RST         ARDUINO_A2
-#define ILI9341_RST_LINE    ARDUINO_A2_LINE
-#define ILI9341_DC          ARDUINO_A1
-#define ILI9341_DC_LINE     ARDUINO_A1_LINE
-#define ILI9341_LED         ARDUINO_A0
-#define ILI9341_LED_LINE    ARDUINO_A0_LINE
-
-// LCD SPI pins
-#define ILI9341_SDI         ARDUINO_MOSI
-#define ILI9341_SDI_LINE    ARDUINO_MOSI_LINE
-#define ILI9341_SCK         ARDUINO_SCLK
-#define ILI9341_SCK_LINE    ARDUINO_SCLK_LINE
-#define ILI9341_SDO         ARDUINO_MISO
-#define ILI9341_SDO_LINE    ARDUINO_MISO_LINE
-#define ILI9341_CS          ARDUINO_SS
-#define ILI9341_CS_LINE     ARDUINO_SS_LINE
-
 // Buttons
 #define BUTTON_1            ARDUINO_D4
 #define BUTTON_1_LINE       ARDUINO_D4_LINE

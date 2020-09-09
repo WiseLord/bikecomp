@@ -3,6 +3,8 @@
 
 #include <inttypes.h>
 
+#include "font7seg.h"
+
 #define PARAM_STRBUF    7
 
 typedef enum {
@@ -34,8 +36,8 @@ typedef struct {
     uint16_t labX;
     uint16_t labY;
     // LCD fonts
-    const uint8_t *fontMain;
-    const uint8_t *fontDeci;
+    const __flash tFont7seg *fontMain;
+    const __flash tFont7seg *fontDeci;
 } ParamArea;
 
 typedef struct {

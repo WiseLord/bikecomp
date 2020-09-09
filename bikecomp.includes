@@ -2,3 +2,15 @@
 /usr/avr/include
 screen
 .
+display/gc176x132
+display/hw
+display/gc400x240
+display/fonts
+display/gc220x176
+display/gc480x320
+display
+display/gc130x130
+display/gc160x128
+display/gc320x240
+display/fonts/src
+display/gg256x64

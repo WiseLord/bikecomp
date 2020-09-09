@@ -7,7 +7,7 @@
 
 #include "adc.h"
 #include "eeprom.h"
-#include "glcd.h"
+#include "display/glcd.h"
 #include "measure.h"
 
 #define STR_BUFSIZE                     20
@@ -29,33 +29,33 @@ static ColorMode colorMode = COLOR_MODE_FULL_COLOR;
 static const ParamArea areaMainTop PROGMEM = {
     0, 0, 239, 119,
     2, 0,
-    font_7seg_10, font_7seg_7,
+    &font_7seg_10, &font_7seg_7,
 };
 static const ParamArea areaMainMid PROGMEM = {
     0, 120, 239, 219,
     2, 7,
-    font_7seg_7, font_7seg_4,
+    &font_7seg_7, &font_7seg_4,
 };
 static const ParamArea areaMainBtm PROGMEM = {
     0, 220, 239, 319,
     2, 7,
-    font_7seg_7, font_7seg_4,
+    &font_7seg_7, &font_7seg_4,
 };
 
 static const ParamArea areaSetupTop PROGMEM = {
     0, 0, 239, 101,
     2, 0,
-    font_7seg_8, font_7seg_5,
+    &font_7seg_8, &font_7seg_5,
 };
 static const ParamArea areaSetupMid PROGMEM = {
     0, 102, 239, 210,
     2, 7,
-    font_7seg_8, font_7seg_5,
+    &font_7seg_8, &font_7seg_5,
 };
 static const ParamArea areaSetupBtm PROGMEM = {
     0, 211, 239, 319,
     2, 7,
-    font_7seg_8, font_7seg_5,
+    &font_7seg_8, &font_7seg_5,
 };
 
 static const LcdText textMainTop_5_1 PROGMEM = {
@@ -220,7 +220,7 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
         if (area.top) {
             glcdDrawRect(area.left + 2, area.top + 3, area.right - 2 - (area.left + 2) + 1, area.top + 3 - (area.top + 3) + 1, labelColor);
         }
-        glcdSetFont(&fontterminus24);
+        glcdSetFont(&fontterminus24b);
         glcdSetFontColor(labelColor);
         glcdSetFontBgColor(bgColor);
 
@@ -273,12 +273,12 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
             glcdSetFont(&fontterminus24);
             glcdSetFontColor(more ? labelColor : bgColor);
             glcdSetFontBgColor(bgColor);
-            glcdWriteChar('m');
+            glcdWriteUChar('m');
             glcdSetXY(text.x + fTh + 1, area.top + text.y + fTh * 5 + 3);
 // TODO     glcdWriteIcon(icon_down, more ? bgColor : labelColor, bgColor);
             glcdSetFontColor(more ? bgColor : labelColor);
             glcdSetFontBgColor(bgColor);
-            glcdWriteChar('l');
+            glcdWriteUChar('l');
         }
     }
 
@@ -293,7 +293,7 @@ static void updateParam(const ParamData *paramPgm, const LcdText *lcdTextPgm, in
             glcdSetFont(&fontterminus24);
             glcdSetFontColor(iconColor);
             glcdSetFontBgColor(bgColor);
-            glcdWriteChar('>');
+            glcdWriteUChar('>');
         }
     }
 
