@@ -76,41 +76,57 @@ ISR (TIMER1_OVF_vect)                                   // 16M/PSK = 15625 count
         sleepTimer--;
 }
 
-ISR(INT0_vect)
+static void wheelHandler()
 {
-    if (wheelAntiBounce)
+    if (wheelAntiBounce) {
         return;
+    }
 
     wheelAntiBounce = ANTI_BOUNCE;
     wheelTurns++;
-    if (inMove)
+    if (inMove) {
         wheelCntBuf = wheelCnt + TCNT1;
+    }
     pedalCnt += TCNT1;
     TCNT1 = 0;
 
     wheelCnt = 0;
-    inMove = 1;
-    sleepTimer = SLEEP_TIMER * (autoOff + 1);
 }
 
-ISR(INT1_vect)
+static void pedalHandler()
 {
-    if (pedalAntiBounce)
+    if (pedalAntiBounce) {
         return;
+    }
 
     pedalAntiBounce = ANTI_BOUNCE;
     pedalTurns++;
-    if (inMove)
+    if (inMove) {
         pedalCntBuf = pedalCnt + TCNT1;
+    }
     wheelCnt += TCNT1;
     TCNT1 = 0;
 
     pedalCnt = 0;
+}
+
+ISR(PCINT0_vect)
+{
+    // Wheel sensor triggered
+    if (!(PIN(SENSOR_WHEEL) & SENSOR_WHEEL_LINE)) {
+        wheelHandler();
+    }
+    // Pedal sensor triggered
+    if (!(PIN(SENSOR_PEDAL) & SENSOR_PEDAL_LINE)) {
+        pedalHandler();
+    }
+
     inMove = 1;
     sleepTimer = SLEEP_TIMER * (autoOff + 1);
 }
 
-ISR (PCINT2_vect) {
+ISR(PCINT2_vect)
+{
     sleepTimer = SLEEP_TIMER * (autoOff + 1);
 }
 

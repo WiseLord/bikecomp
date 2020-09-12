@@ -27,8 +27,10 @@ void hwInit()
     // Interrupts
     TIMSK0 |= (1 << OCIE0A);    // Input timer compare
     TIMSK1 |= (1 << TOIE1);     // Measure timer overflow
-    EIMSK |= (1 << INT0);       // Wheel sensor
-    EIMSK |= (1 << INT1);       // Pedal sensor
+
+    PCMSK0 |= (SENSOR_WHEEL_LINE | SENSOR_PEDAL_LINE);
+    PCICR |= (1 << PCIE0);      // Wheel and pedal sensor interupts enable
+
     sei();
 
     return;
@@ -42,13 +44,13 @@ void sleep(void)
     ADCSRA &= ~(1 << ADEN);     // Disable ADC
     TIMSK0 &= ~(1 << OCIE0A);   // Input timer compare disable
     TIMSK1 &= ~(1 << TOIE1);    // Measure timer overflow disable
-    PCICR |= (1<<PCIE2);        // Buttons interrupt enable
+    PCICR |= (1 << PCIE2);      // Buttons interrupt enable
 
     // Sleep
     sleep_mode();
 
     // Wakeup
-    PCICR &= ~(1<<PCIE2);       // Buttons interrupt disable
+    PCICR &= ~(1 << PCIE2);     // Buttons interrupt disable
     TIMSK0 |= (1 << OCIE0A);    // Input timer compare enable
     TIMSK1 |= (1 << TOIE1);     // Measure timer overflow enable
     ADCSRA |= (1 << ADEN);      // Enable ADC
