@@ -36,7 +36,7 @@ extern "C" {
 #define DISP_DATA_LO_Port       C
 #define DISP_DATA_LO_Pin        0xFF
 #else
-#define DISP_DATA_Port          C
+#define DISP_DATA_Port          D
 #define DISP_DATA_Pin           0xFF
 #endif
 

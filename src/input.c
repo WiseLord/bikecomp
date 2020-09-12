@@ -3,6 +3,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "adc.h"
+#include "display/glcd.h"
 #include "measure.h"
 #include "pins.h"
 
@@ -31,11 +32,13 @@ ISR(TIMER0_COMPA_vect, ISR_NOBLOCK)        // TIME_STEP_FREQ = 125 Hz
 
     uint8_t btnNow = BTN_STATE_0;
 
-    if (~PIN(BUTTON_1) & BUTTON_1_LINE)
+    uint8_t busData = ~glcdGetBus();
+
+    if (busData & BUTTON_1_LINE)
         btnNow |= BTN_0;
-    if (~PIN(BUTTON_2) & BUTTON_2_LINE)
+    if (busData & BUTTON_2_LINE)
         btnNow |= BTN_1;
-    if (~PIN(BUTTON_3) & BUTTON_3_LINE)
+    if (busData & BUTTON_3_LINE)
         btnNow |= BTN_2;
 
     // If button event has happened, place it to command buffer
