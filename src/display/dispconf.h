@@ -57,7 +57,7 @@ extern "C" {
 
 #ifdef _DISP_READ_ENABLED
 #define DISP_RD_Port            B
-#define DISP_RD_Pin             4
+#define DISP_RD_Pin             5
 #endif
 
 #ifdef _DISP_RST_ENABLED

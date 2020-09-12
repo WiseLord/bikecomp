@@ -1,28 +1,32 @@
 # Output file name
 TARG     = bikecomp
 
-DISPLAY = ILI9341
-DISPVAR = SPI
+DISPLAY = S6D0129
+DISPVAR = 8BIT
 
 # MCU name and frequency
 MCU      = atmega328p
 F_CPU    = 16000000
+
+# Lowercase argument
+lc = $(shell echo $1 | tr '[:upper:]' '[:lower:]')
 
 # Source files
 SRCS     = $(wildcard *.c)
 
 SRCS += gui/icons.c
 
+SRCS += $(wildcard display/fonts/font*.c)
+
 SRCS += display/glcd.c
 SRCS += display/dispdrv.c
-SRCS += display/gc320x240/ili9341.c
-
-SRCS += $(wildcard display/fonts/font*.c)
+SRCS += display/gc320x240/$(call lc,$(DISPLAY)).c
 
 DEFINES += -D_$(DISPLAY)
 DEFINES += -D_DISP_$(DISPVAR)
 
 DEFINES += -D_DISP_RST_ENABLED
+DEFINES += -D_DISP_READ_ENABLED
 DEFINES += -D_DISP_BCKL_ENABLED
 
 # Build directory
