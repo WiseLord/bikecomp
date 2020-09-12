@@ -3,6 +3,13 @@
 
 #include <inttypes.h>
 
+#define BTN1_Port               D
+#define BTN1_Pin                4
+#define BTN2_Port               D
+#define BTN2_Pin                5
+#define BTN3_Port               D
+#define BTN3_Pin                6
+
 #define BTN_STATE_0             0x00
 #define BTN_0                   (1 << 0)
 #define BTN_1                   (1 << 1)

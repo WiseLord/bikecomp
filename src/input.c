@@ -4,21 +4,21 @@
 #include <avr/interrupt.h>
 #include "adc.h"
 #include "display/glcd.h"
+#include "display/hw/avr.h"
 #include "measure.h"
-#include "pins.h"
 
 static volatile uint8_t btnCmd = 0;         // Command buffer
 
 void inputInit(void)
 {
     // Buttons as inputs
-    IN(BUTTON_1);
-    IN(BUTTON_2);
-    IN(BUTTON_3);
+    IN(BTN1);
+    IN(BTN2);
+    IN(BTN3);
     // Enable pull-up resistors
-    SET(BUTTON_1);
-    SET(BUTTON_2);
-    SET(BUTTON_3);
+    SET(BTN1);
+    SET(BTN2);
+    SET(BTN3);
 
     TCCR0A = (1 << WGM01);                  // CTC mode
     TCCR0B = (1 << CS02) | (1 << CS00);     // PSK = 1024
@@ -34,11 +34,11 @@ ISR(TIMER0_COMPA_vect, ISR_NOBLOCK)        // TIME_STEP_FREQ = 125 Hz
 
     uint8_t busData = ~glcdGetBus();
 
-    if (busData & BUTTON_1_LINE)
+    if (busData & (1<<BTN1_Pin))
         btnNow |= BTN_0;
-    if (busData & BUTTON_2_LINE)
+    if (busData & (1<<BTN2_Pin))
         btnNow |= BTN_1;
-    if (busData & BUTTON_3_LINE)
+    if (busData & (1<<BTN3_Pin))
         btnNow |= BTN_2;
 
     // If button event has happened, place it to command buffer
@@ -62,29 +62,6 @@ ISR(TIMER0_COMPA_vect, ISR_NOBLOCK)        // TIME_STEP_FREQ = 125 Hz
     static uint8_t batteryTimer = 0;
     if (batteryTimer++ == 0) {
         adcStart(); // Measure batter level every ~2 seconds
-    }
-
-    return;
-    // TODO: Temporary set sensor as output for sw interrupts
-    OUT(SENSOR_WHEEL);
-    OUT(SENSOR_PEDAL);
-    static uint16_t max = 5 * 256;
-    if (++max > 60 * 256)
-        max = 5 * 256;
-
-    static uint8_t w = 0;
-    if (++w >= max / 256) {
-        CLR(SENSOR_WHEEL);
-        w = 0;
-    } else {
-        SET(SENSOR_WHEEL);
-    }
-    static uint8_t p = 0;
-    if (++p >= max / 128) {
-        CLR(SENSOR_PEDAL);
-        p = 0;
-    } else {
-        SET(SENSOR_PEDAL);
     }
 }
 

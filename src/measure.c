@@ -2,8 +2,8 @@
 
 #include <avr/interrupt.h>
 #include <avr/eeprom.h>
+#include "display/hw/avr.h"
 #include "eeprom.h"
-#include "pins.h"
 
 static volatile int32_t wheelTurns = 0;
 static volatile int32_t wheelCnt = 0;
@@ -51,11 +51,11 @@ void measureInit(void)
         autoOff = AUTO_OFF_30;
 
     // Sensor lines as inputs
-    IN(SENSOR_WHEEL);
-    IN(SENSOR_PEDAL);
+    IN(SENS_WHEEL);
+    IN(SENS_PEDAL);
     // Enable pull-up resistors
-    SET(SENSOR_WHEEL);
-    SET(SENSOR_PEDAL);
+    SET(SENS_WHEEL);
+    SET(SENS_PEDAL);
     // INT0 on falling edge (wheel sensor)
     EICRA |= (1 << ISC01) | (0 << ISC00);
     // INT1 on falling edge (pedal sensor)
@@ -113,11 +113,11 @@ static void pedalHandler()
 ISR(PCINT0_vect)
 {
     // Wheel sensor triggered
-    if (!(PIN(SENSOR_WHEEL) & SENSOR_WHEEL_LINE)) {
+    if (!(READ(SENS_WHEEL))) {
         wheelHandler();
     }
     // Pedal sensor triggered
-    if (!(PIN(SENSOR_PEDAL) & SENSOR_PEDAL_LINE)) {
+    if (!(READ(SENS_PEDAL))) {
         pedalHandler();
     }
 

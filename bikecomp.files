@@ -2,7 +2,6 @@ src/.astylerc
 src/Makefile
 src/adc.c
 src/adc.h
-src/arduinopromini.h
 src/display/colors.h
 src/display/dispconf.h
 src/display/dispdrv.c
@@ -92,6 +91,5 @@ src/input.h
 src/main.c
 src/measure.c
 src/measure.h
-src/pins.h
 src/screen.c
 src/screen.h

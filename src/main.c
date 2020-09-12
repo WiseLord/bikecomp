@@ -8,7 +8,6 @@
 #include "screen.h"
 #include "measure.h"
 #include "input.h"
-#include "pins.h"
 
 void hwInit()
 {
@@ -22,13 +21,13 @@ void hwInit()
 
     // Setup sleep mode
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-    PCMSK2 |= (BUTTON_1_LINE | BUTTON_2_LINE | BUTTON_3_LINE);
+    PCMSK2 |= ((1<<BTN1_Pin) | (1<<BTN2_Pin) | (1<<BTN3_Pin));
 
     // Interrupts
     TIMSK0 |= (1 << OCIE0A);    // Input timer compare
     TIMSK1 |= (1 << TOIE1);     // Measure timer overflow
 
-    PCMSK0 |= (SENSOR_WHEEL_LINE | SENSOR_PEDAL_LINE);
+    PCMSK0 |= ((1<<SENS_WHEEL_Pin) | (1<<SENS_PEDAL_Pin));
     PCICR |= (1 << PCIE0);      // Wheel and pedal sensor interupts enable
 
     sei();

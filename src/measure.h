@@ -3,6 +3,11 @@
 
 #include <inttypes.h>
 
+#define SENS_WHEEL_Port   B
+#define SENS_WHEEL_Pin    0
+#define SENS_PEDAL_Port   B
+#define SENS_PEDAL_Pin    1
+
 #define WHEEL_MIN_LENGTH    500
 #define WHEEL_AVG_LENGTH    2055
 #define WHEEL_MAX_LENGTH    3000
