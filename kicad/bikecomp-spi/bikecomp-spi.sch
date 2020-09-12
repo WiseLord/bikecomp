@@ -271,12 +271,12 @@ Wire Wire Line
 Text Label 5100 3650 2    50   ~ 0
 DISP_RST
 Wire Wire Line
-	4650 4450 5700 4450
+	4650 2550 5700 2550
 Wire Wire Line
-	4650 4550 5700 4550
-Text Label 5700 4450 2    50   ~ 0
+	4650 2650 5700 2650
+Text Label 5700 2550 2    50   ~ 0
 SENSOR_WHEEL
-Text Label 5700 4550 2    50   ~ 0
+Text Label 5700 2650 2    50   ~ 0
 SENSOR_PEDAL
 $Comp
 L Connector_Generic:Conn_01x14 J?
@@ -363,8 +363,6 @@ Wire Wire Line
 Connection ~ 6300 2450
 Wire Wire Line
 	7050 2550 7150 2550
-NoConn ~ 4650 2550
-NoConn ~ 4650 2650
 NoConn ~ 4650 2950
 NoConn ~ 4650 3750
 NoConn ~ 4650 4250
@@ -378,4 +376,6 @@ Text Label 4950 3850 2    50   ~ 0
 SDA
 Text Label 4950 3950 2    50   ~ 0
 SCL
+NoConn ~ 4650 4450
+NoConn ~ 4650 4550
 $EndSCHEMATC
